@@ -2,16 +2,16 @@
 #include <iostream>  // for cout
 #include <iomanip>
 #include "settings.h"
+using namespace std;
 
-
-void Settings::loadFromFile(std::string filename) {
+void Settings::loadFromFile(string filename) {
     // open file
-    std::ifstream file(filename, std::ios::in);
+    ifstream file(filename, ios::in);
 
     // check if file is open
     if (!file.is_open())
     {
-        std::cout << "Could not open parameter file \"" << filename << "\"." << std::endl;
+        cout << "Could not open parameter file \"" << filename << "\"." << endl;
         return;
     }
 
@@ -19,7 +19,7 @@ void Settings::loadFromFile(std::string filename) {
     for (int lineNo = 0;; lineNo++)
     {
         // read line
-        std::string line;
+        string line;
         getline(file, line);
 
         // at the end of the file break for loop
@@ -27,46 +27,46 @@ void Settings::loadFromFile(std::string filename) {
             break;
 
         // print line
-        std::cout << "line " << lineNo << ": " << line << std::endl;
+        cout << "line " << lineNo << ": " << line << endl;
 
         // remove whitespace at beginning of line (if there is any)
-        if (line.find_first_of(" \t") != std::string::npos)
+        if (line.find_first_of(" \t") != string::npos)
         {
             line = line.substr(line.find_first_not_of(" \t"));
         }
-        std::cout << "parsed line " << lineNo << ": " << line << std::endl;
+        cout << "parsed line " << lineNo << ": " << line << endl;
         // if first character is a '#', skip line (line[0] == '#')
         if (line[0] == '#')
             continue;
         // if line does not contain a '=' sign, skip line
-        if (line.find('=') == std::string::npos)
+        if (line.find('=') == string::npos)
             continue;
         // parse parameter name
-        std::string parameterName = line.substr(0, line.find('='));
-        std::cout << "parameterName in line " << lineNo << ": " << parameterName << std::endl;
+        string parameterName = line.substr(0, line.find('='));
+        cout << "parameterName in line " << lineNo << ": " << parameterName << endl;
         // remove trailing spaces from parameterName
-        if (parameterName.find_first_of(" \t") != std::string::npos)
+        if (parameterName.find_first_of(" \t") != string::npos)
         {
             parameterName.erase(parameterName.find_first_of(" \t"));
         }
         // parse value
-        std::string value = line.substr(line.find('=') + 1);
+        string value = line.substr(line.find('=') + 1);
         // remove whitespace at beginning of value
-        if (value.find_first_of(" \t") != std::string::npos)
+        if (value.find_first_of(" \t") != string::npos)
         {
             value = value.substr(value.find_first_not_of(" \t"));
         }
         // remove comments at end of value
-        if (value.find_first_of('#') != std::string::npos)
+        if (value.find_first_of('#') != string::npos)
         {
             value = value.substr(0, value.find_first_of('#'));
         }
         // remove whitespace at end of value
-        if (value.find_first_of(" \t") != std::string::npos)
+        if (value.find_first_of(" \t") != string::npos)
         {
             value = value.substr(0, value.find_first_of(" \t"));
         }
-        std::cout << "value in line " << lineNo << ": " << value << "|" << std::endl;
+        cout << "value in line " << lineNo << ": " << value << "|" << endl;
 
         // parse actual value and set corresponding parameter
         if (parameterName == "nCellsX") {
@@ -101,7 +101,7 @@ void Settings::loadFromFile(std::string filename) {
             g[1] = atof(value.c_str());
         }
         else if (parameterName == "useDonorCell") {
-            std::istringstream(value.c_str()) >> std::boolalpha >> useDonorCell;
+            istringstream(value.c_str()) >> boolalpha >> useDonorCell;
         }
         else if (parameterName == "alpha") {
             alpha = atof(value.c_str());
@@ -147,13 +147,13 @@ void Settings::loadFromFile(std::string filename) {
 
 void Settings::printSettings()
 {
-    std::cout << "Settings: " << std::endl
-              << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x " << nCells[1] << std::endl
-              << "  endTime: " << endTime << " s, re: " << re << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << std::endl
+    cout << "Settings: " << endl
+              << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x " << nCells[1] << endl
+              << "  endTime: " << endTime << " s, re: " << re << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
               << "  dirichletBC: bottom: (" << dirichletBcBottom[0] << "," << dirichletBcBottom[1]  << ")"
               << ", top: ("  << dirichletBcTop[0] << "," << dirichletBcTop[1]  << ")"
               << ", left: ("  << dirichletBcLeft[0] << "," << dirichletBcLeft[1] << ")"
-              << ", right: ("  << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << std::endl
-              << "  useDonorCell: " << std::boolalpha << useDonorCell << ", alpha: " << alpha << std::endl
-              << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon << ", maximumNumberOfIterations: " << maximumNumberOfIterations << std::endl;
+              << ", right: ("  << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << endl
+              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << endl
+              << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon << ", maximumNumberOfIterations: " << maximumNumberOfIterations << endl;
 }
