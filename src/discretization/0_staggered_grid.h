@@ -96,9 +96,8 @@ public:
 protected:
     FieldVariable f_;
     FieldVariable g_;
-    // TODO: const doesn't work here
-    /*const*/ std::array<double, 2> meshWidth_;
-    /*const*/ std::array<int, 2> nCells_;
+    const std::array<double, 2> meshWidth_;
+    const std::array<int, 2> nCells_;
     FieldVariable p_;
     FieldVariable rhs_;
     FieldVariable u_;
