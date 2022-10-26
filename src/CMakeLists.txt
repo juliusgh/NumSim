@@ -8,7 +8,14 @@ project(numsim)
 add_executable(${PROJECT_NAME}
    main.cpp
    output_writer/write_paraview_output.cpp
-        Array2D.cpp Array2D.h FieldVariable.cpp FieldVariable.h Discretization.cpp Discretization.h StaggeredGrid.cpp StaggeredGrid.h)
+   settings.cpp settings.h
+   storage/array2d.cpp storage/array2d.h
+   storage/fieldvariable.cpp storage/fieldvariable.h
+   discretization/0_staggered_grid.h
+   discretization/1_discretization.h
+   discretization/donorcell.h
+   discretization/centraldifferences.h
+)
 
 # Add the project directory to include directories, to be able to include all project header files from anywhere
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
