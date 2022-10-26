@@ -11,7 +11,7 @@ add_executable(${PROJECT_NAME}
    settings.cpp settings.h
    storage/array2d.cpp storage/array2d.h
    storage/fieldvariable.cpp storage/fieldvariable.h
-   discretization/0_staggered_grid.h
+   discretization/0_staggered_grid.cpp discretization/0_staggered_grid.h
    discretization/1_discretization.h
    discretization/donorcell.h
    discretization/centraldifferences.h
