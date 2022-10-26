@@ -26,15 +26,38 @@ void Settings::loadFromFile(string filename) {
         if (file.eof())
             break;
 
+        /*string parameterName;
+        string value;
+        // skip line if it starts with "#" or does not include "=" or line is empty
+        if (line[0] != '#' && line.find("=") && line.length()!=0) {
+            std::string info = line;
+            // remove comments from the line
+            info.erase(line.find("#"),std::string::npos);
+
+            parameterName = info.substr(0,info.find("="));
+            if (parameterName.find_first_of(" \t") != std::string::npos)
+            {
+                parameterName.erase(parameterName.find_first_of(" \t"));
+            }
+
+            value = info.substr(info.find("=")+1,std::string::npos);
+            value.erase(0,value.find_first_not_of(" \t"));
+            if (value.find_first_of(" \t") != std::string::npos)
+            {
+                value.erase(value.find_first_of(" \t"));
+            }
+
+            std::cout << "Parameter \""<< parameterName << "\" has the value: \"" << value << "\""<< std::endl;
+        }*/
+
         // print line
-        cout << "line " << lineNo << ": " << line << endl;
+        //cout << "line " << lineNo << ": " << line << endl;
 
         // remove whitespace at beginning of line (if there is any)
         if (line.find_first_of(" \t") != string::npos)
         {
             line = line.substr(line.find_first_not_of(" \t"));
         }
-        cout << "parsed line " << lineNo << ": " << line << endl;
         // if first character is a '#', skip line (line[0] == '#')
         if (line[0] == '#')
             continue;
@@ -43,7 +66,6 @@ void Settings::loadFromFile(string filename) {
             continue;
         // parse parameter name
         string parameterName = line.substr(0, line.find('='));
-        cout << "parameterName in line " << lineNo << ": " << parameterName << endl;
         // remove trailing spaces from parameterName
         if (parameterName.find_first_of(" \t") != string::npos)
         {
@@ -66,7 +88,6 @@ void Settings::loadFromFile(string filename) {
         {
             value = value.substr(0, value.find_first_of(" \t"));
         }
-        cout << "value in line " << lineNo << ": " << value << "|" << endl;
 
         // parse actual value and set corresponding parameter
         if (parameterName == "nCellsX") {
