@@ -2,18 +2,16 @@
 #include <cassert>
 
 //! constructor
-// TODO: initialization of f, g and rhs is probably not correct yet
-// TODO: is origin initialization correct?
 StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
                              std::array<double, 2> meshWidth) :
     nCells_(nCells),
     meshWidth_(meshWidth),
-    f_(nCells, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    g_(nCells, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    p_({nCells[0] + 1, nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+    f_({nCells[0] + 1, nCells[1]}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+    g_({nCells[0], nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
+    p_({nCells[0] + 2, nCells[1] + 2}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
     rhs_(nCells, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    u_({nCells[0] + 1, nCells[1]}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    v_({nCells[0], nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth)
+    u_({nCells[0] + 1, nCells[1] + 2}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+    v_({nCells[0] + 2, nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth)
 {
     
 };
@@ -47,49 +45,31 @@ double StaggeredGrid::dy() const
 };
 
 /*
- * TODO: what are F and G?
- */
-
-//! evaluate value of F in an element (i,j)
-double StaggeredGrid::f(int i, int j) const
-{
-    // TODO: implement
-    return f_(i, j);
-};
-
-//! evaluate value of G in an element (i,j)
-double StaggeredGrid::g(int i, int j) const
-{
-    // TODO: implement
-    return g_(i, j);
-};
-
-/*
  * pressure variable p
  */
 
 //! first valid index for p in x direction
 int StaggeredGrid::pIBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for p in x direction
 int StaggeredGrid::pIEnd() const
 {
-    return nCells_[0];
+    return nCells_[0] + 1;
 };
 
 //! first valid index for p in y direction
 int StaggeredGrid::pJBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for p in y direction
 int StaggeredGrid::pJEnd() const
 {
-    return nCells_[1];
+    return nCells_[1] + 1;
 };
 
 //! get reference to field variable p
@@ -103,25 +83,13 @@ double StaggeredGrid::p(int i, int j) const
 {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    return p_(i - 1, j - 1);
+    return p_(i, j);
 };
 
 //! evaluate field variable p in an element (i,j)
 double &StaggeredGrid::p(int i, int j)
 {
     return StaggeredGrid::p(i, j);
-};
-
-/*
- * right hand side rhs
- */
-
-//! access value of rhs in element (i,j)
-double &StaggeredGrid::rhs(int i, int j)
-{
-    // TODO: implement
-    double rhs = 0.0;
-    return rhs;
 };
 
 /*
@@ -143,13 +111,13 @@ int StaggeredGrid::uIEnd() const
 //! first valid index for u in y direction
 int StaggeredGrid::uJBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for u in y direction
 int StaggeredGrid::uJEnd() const
 {
-    return nCells_[1];
+    return nCells_[1] + 1;
 };
 
 //! get a reference to field variable u
@@ -163,7 +131,7 @@ double StaggeredGrid::u(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return u_(i, j - 1);
+    return u_(i, j);
 };
 
 //! access value of u in element (i,j)
@@ -179,13 +147,13 @@ double &StaggeredGrid::u(int i, int j)
 //! first valid index for v in x direction
 int StaggeredGrid::vIBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for v in x direction
 int StaggeredGrid::vIEnd() const
 {
-    return nCells_[0];
+    return nCells_[0] + 1;
 };
 
 //! first valid index for v in y direction
@@ -211,11 +179,71 @@ double StaggeredGrid::v(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return v_(i - 1, j);
+    return v_(i, j);
 };
 
 //! access value of v in element (i,j)
 double &StaggeredGrid::v(int i, int j)
 {
     return StaggeredGrid::v(i, j);
+};
+
+/*
+ * right hand side rhs
+ */
+
+//! first valid index for rhs in x direction
+int StaggeredGrid::rhsIBegin() const
+{
+    return 1;
+};
+
+//! one after last valid index for rhs in x direction
+int StaggeredGrid::rhsIEnd() const
+{
+    return nCells_[0];
+};
+
+//! first valid index for rhs in y direction
+int StaggeredGrid::rhsJBegin() const
+{
+    return 1;
+};
+
+//! one after last valid index for rhs in y direction
+int StaggeredGrid::rhsJEnd() const
+{
+    return nCells_[1];
+};
+
+//! access value of rhs in element (i,j)
+double &StaggeredGrid::rhs(int i, int j)
+{
+    assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
+    assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    return rhs_(i, j);
+};
+
+/*
+ * preliminary velocity F
+ */
+
+//! access value of F in element (i,j)
+double &StaggeredGrid::f(int i, int j)
+{
+    assert((uIBegin() <= i) && (i <= uIEnd()));
+    assert((uJBegin() <= j) && (j <= uJEnd()));
+    return f_(i, j);
+};
+
+/*
+ * preliminary velocity G
+ */
+
+//! access value of G in element (i,j)
+double &StaggeredGrid::g(int i, int j)
+{
+    assert((vIBegin() <= i) && (i <= vIEnd()));
+    assert((vJBegin() <= j) && (j <= vJEnd()));
+    return g_(i, j);
 };
