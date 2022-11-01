@@ -39,6 +39,18 @@ if (VTK_FOUND)
   target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES}) # add the libraries for the linker
 endif(VTK_FOUND)
 
+# Locate GTest
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# Link runTests with what we want to test and the GTest and pthread library
+add_executable(runTests
+        tests.cpp
+        storage/fieldvariable.cpp storage/fieldvariable.h
+        storage/array2d.cpp storage/array2d.h)
+target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
+target_include_directories(runTests PUBLIC ${PROJECT_SOURCE_DIR})
+
 # install numsim executable in build directory
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/../build)
 
