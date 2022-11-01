@@ -14,12 +14,18 @@ public:
     
     //! get mesh width in y-direction
     double dy() const;
-    
+
     //! evaluate value of F in an element (i,j)
     double f(int i, int j) const;
-    
+
+    //! evaluate value of F in an element (i,j)
+    double & f(int i, int j);
+
     //! evaluate value of G in an element (i,j)
     double g(int i, int j) const;
+
+    //! evaluate value of G in an element (i,j)
+    double & g(int i, int j);
 
     //! get the mesh width
     const std::array<double, 2> meshWidth() const;
@@ -47,9 +53,6 @@ public:
     
     //! one after last valid index for p in y direction
     int pJEnd() const;
-    
-    //! access value of rhs in element (i,j)
-    double & rhs(int i, int j);
     
     //! get a reference to field variable u
     const FieldVariable & u() const;
@@ -80,18 +83,36 @@ public:
     
     //! access value of v in element (i,j)
     double & v(int i, int j);
-    
+
     //! first valid index for v in x direction
     int vIBegin() const;
-    
+
     //! one after last valid index for v in x direction
     int vIEnd() const;
-    
+
     //! first valid index for v in y direction
     int vJBegin() const;
-    
+
     //! one after last valid index for v in y direction
     int vJEnd() const;
+
+    //! first valid index for rhs in x direction
+    int rhsIBegin() const;
+
+    //! one after last valid index for rhs in x direction
+    int rhsIEnd() const;
+
+    //! first valid index for rhs in y direction
+    int rhsJBegin() const;
+
+    //! one after last valid index for rhs in y direction
+    int rhsJEnd() const;
+
+    //! access value of rhs in element (i,j)
+    double rhs(int i, int j) const;
+
+    //! access value of rhs in element (i,j)
+    double & rhs(int i, int j);
 
 protected:
     FieldVariable f_;

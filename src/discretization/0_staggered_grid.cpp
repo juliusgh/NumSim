@@ -217,11 +217,17 @@ int StaggeredGrid::rhsJEnd() const
 };
 
 //! access value of rhs in element (i,j)
-double &StaggeredGrid::rhs(int i, int j)
+double StaggeredGrid::rhs(int i, int j) const
 {
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
     return rhs_(i, j);
+};
+
+//! access value of rhs in element (i,j)
+double &StaggeredGrid::rhs(int i, int j)
+{
+    return StaggeredGrid::rhs(i, j);
 };
 
 /*
@@ -229,11 +235,17 @@ double &StaggeredGrid::rhs(int i, int j)
  */
 
 //! access value of F in element (i,j)
-double &StaggeredGrid::f(int i, int j)
+double StaggeredGrid::f(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
     return f_(i, j);
+};
+
+//! access value of F in element (i,j)
+double &StaggeredGrid::f(int i, int j)
+{
+    return StaggeredGrid::f(i, j);
 };
 
 /*
@@ -241,9 +253,15 @@ double &StaggeredGrid::f(int i, int j)
  */
 
 //! access value of G in element (i,j)
-double &StaggeredGrid::g(int i, int j)
+double StaggeredGrid::g(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
     return g_(i, j);
+};
+
+//! access value of G in element (i,j)
+double &StaggeredGrid::g(int i, int j)
+{
+    return StaggeredGrid::g(i, j);
 };
