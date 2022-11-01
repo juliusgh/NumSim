@@ -37,3 +37,7 @@ build/*
 
 # Output files
 *.vti
+
+# CLion
+*.idea
+cmake-build-debug
