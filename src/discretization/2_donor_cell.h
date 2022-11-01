@@ -12,11 +12,13 @@ public:
   //! compute the 1st derivative ∂ u^2 / ∂x
   virtual double computeDu2Dx(int i, int j) const;
 
-  //! compute the 1st derivative ∂ v^2 / ∂x
+  //! compute the 1st derivative ∂ v^2 / ∂y
   virtual double computeDv2Dy(int i, int j) const;
 
   //! compute the 1st derivative ∂ (uv) / ∂x
   virtual double computeDuvDx(int i, int j) const;
 
-//...
+  //! compute the 1st derivative ∂ (uv) / ∂y
+  virtual double computeDuvDy(int i, int j) const;
+  
 };

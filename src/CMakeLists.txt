@@ -6,15 +6,20 @@ project(numsim)
 # Specify the name of the executable (${PROJECT_NAME} which is equal to what was set in the project() command).
 # Also specify the source files.
 add_executable(${PROJECT_NAME}
-   main.cpp
-   output_writer/write_paraview_output.cpp
-   settings.cpp settings.h
-   storage/array2d.cpp storage/array2d.h
-   storage/fieldvariable.cpp storage/fieldvariable.h
-   discretization/0_staggered_grid.cpp discretization/0_staggered_grid.h
-   discretization/1_discretization.h
-   discretization/donorcell.h
-   discretization/centraldifferences.h
+        main.cpp
+        output_writer/output_writer.h
+        output_writer/output_writer_paraview.cpp output_writer/output_writer_paraview.h
+        output_writer/output_writer_text.cpp output_writer/output_writer_text.h
+        settings.cpp settings.h
+        storage/array2d.cpp storage/array2d.h
+        storage/fieldvariable.cpp storage/fieldvariable.h
+        discretization/0_staggered_grid.cpp discretization/0_staggered_grid.h
+        discretization/1_discretization.h
+        discretization/2_central_differences.cpp discretization/2_central_differences.h
+        discretization/2_donor_cell.cpp discretization/2_donor_cell.h
+        pressure_solver/pressure_solver.cpp pressure_solver/pressure_solver.h
+        pressure_solver/gauss_seidel.cpp pressure_solver/gauss_seidel.h
+        pressure_solver/sor.cpp pressure_solver/sor.h
 )
 
 # Add the project directory to include directories, to be able to include all project header files from anywhere
