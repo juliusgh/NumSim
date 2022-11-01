@@ -31,11 +31,11 @@ int main(int argc, char *argv[])
     // display all settings on console
     settings.printSettings();
 
-    // write 5 output files
+    /*// write 5 output files
     for (int i = 0; i < 5; i++)
     {
         writeParaviewOutput(i);
-    }
+    }*/
 
     return EXIT_SUCCESS;
 }

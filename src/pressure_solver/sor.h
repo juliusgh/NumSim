@@ -10,10 +10,7 @@ class SOR : PressureSolver
 {
 public:
     //! constructor
-    SOR(std::shared_ptr<Discretization> discretization,
-        double epsilon,
-        int maximumNumberOfIterations,
-        double omega);
+    using PressureSolver::PressureSolver;
 
     //! solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
     void solve();

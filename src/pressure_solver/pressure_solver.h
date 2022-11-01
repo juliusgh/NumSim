@@ -1,6 +1,7 @@
 #pragma once
 
 #include "discretization/1_discretization.h"
+#include <memory>
 
 /** Interface for the pressure solver. It computes the pressure field variable such that the continuity equation is fulfilled.
  */

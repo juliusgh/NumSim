@@ -1,6 +1,6 @@
 #pragma once
 
-#include "outputw_writer/output_writer.h"
+#include "output_writer/output_writer.h"
 
 class OutputWriterText : OutputWriter {
 public:

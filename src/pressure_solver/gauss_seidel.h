@@ -10,9 +10,7 @@ class GaussSeidel : PressureSolver
 {
 public:
     //! constructor
-    GaussSeidel(std::shared_ptr<Discretization> discretization,
-                double epsilon,
-                int maximumNumberOfIterations);
+    using PressureSolver::PressureSolver;
 
     //! solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
     void solve();

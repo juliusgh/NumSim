@@ -1,13 +1,7 @@
 #include "output_writer/output_writer_text.h"
 #include <cassert>
+#include <memory>
 
-//! constructor
-OutputWriterText::OutputWriterText(std::shared_ptr<Discretization> discretization) :
-        discretization_(discretization)
-{
-
-};
-
-OutputWriterText::writeFile(double currentTime) {
+void OutputWriterText::writeFile(double currentTime) {
 
 };
