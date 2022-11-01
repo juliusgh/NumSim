@@ -1,5 +1,6 @@
 #include "discretization/0_staggered_grid.h"
 #include <cassert>
+#include <iostream>
 
 //! constructor
 StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
@@ -83,7 +84,8 @@ double StaggeredGrid::p(int i, int j) const
 {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    return p_(i, j);
+    std::cout << "p(" << i << "," << j << ")" << std::endl;
+    return p_(i - pIBegin(), j - pJBegin());
 };
 
 //! evaluate field variable p in an element (i,j)
@@ -131,7 +133,7 @@ double StaggeredGrid::u(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return u_(i, j);
+    return u_(i - uIBegin(), j - uJBegin());
 };
 
 //! access value of u in element (i,j)
@@ -179,7 +181,7 @@ double StaggeredGrid::v(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return v_(i, j);
+    return v_(i - vIBegin(), j - vJBegin());
 };
 
 //! access value of v in element (i,j)
@@ -221,7 +223,8 @@ double StaggeredGrid::rhs(int i, int j) const
 {
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    return rhs_(i, j);
+    std::cout << "rhs(" << i << "," << j << ")" << std::endl;
+    return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
 //! access value of rhs in element (i,j)
