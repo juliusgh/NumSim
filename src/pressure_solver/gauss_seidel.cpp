@@ -37,6 +37,5 @@ void GaussSeidel::solve() {
                 residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
             }
         }
-        std::cout << "Iteration " << iteration << ", res_nom2 = " << residual_norm2 << std::endl;
     } while (iteration < maximumNumberOfIterations_ && residual_norm2 / N > pow(epsilon_, 2));
 };
