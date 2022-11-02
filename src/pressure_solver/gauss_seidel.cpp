@@ -38,4 +38,5 @@ void GaussSeidel::solve() {
             }
         }
     } while (iteration < maximumNumberOfIterations_ && residual_norm2 / N > pow(epsilon_, 2));
+    setBoundaryValues();
 };

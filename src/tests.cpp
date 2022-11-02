@@ -31,8 +31,8 @@ TEST(SORTest, Test1) {
             pRef(i, j) = 10 * i + j;
         }
     }
-    std::cout << "p = ..." << std::endl;
-    pRef.print();
+    //std::cout << "p = ..." << std::endl;
+    //pRef.print();
 
     for (int i = d->rhsIBegin(); i <= d->rhsIEnd(); i++) {
         for (int j = d->rhsJBegin(); j <= d->rhsJEnd(); j++) {
@@ -52,10 +52,31 @@ TEST(SORTest, Test1) {
     //std::cout << "p = ..." << std::endl;
     //d->p().print();
 
-    for (int i = d->pIBegin(); i <= d->pIEnd(); i++) {
-        for (int j = d->pJBegin(); j <= d->pJEnd(); j++) {
+    // check interior of the domain
+    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
+        for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
             ASSERT_LE(abs(d->p(i, j) - pRef(i, j)), epsilon);
         }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pIBegin() + 1, j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd(), j), d->p(d->pIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pJBegin() + 1));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pJEnd() - 1));
     }
 }
 
@@ -92,10 +113,31 @@ TEST(GaussSeidelTest, Test1) {
     //std::cout << "p = ..." << std::endl;
     //d->p().print();
 
-    for (int i = d->pIBegin(); i <= d->pIEnd(); i++) {
-        for (int j = d->pJBegin(); j <= d->pJEnd(); j++) {
+    // check interior of the domain
+    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
+        for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
             ASSERT_LE(abs(d->p(i, j) - pRef(i, j)), epsilon);
         }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pIBegin() + 1, j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd(), j), d->p(d->pIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pJBegin() + 1));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pJEnd() - 1));
     }
 }
 
