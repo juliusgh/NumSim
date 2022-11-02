@@ -1,12 +1,44 @@
 #include "output_writer/output_writer_paraview.h"
 #include "settings.h"
+#include "discretization/2_central_differences.h"
+#include "pressure_solver/sor.h"
 #include <iostream>
+#include <cmath>
 #include <cstdlib>
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    auto d = new CentralDifferences(nCells, meshWidth);
+    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
+    auto rhs = d->rhs();
+    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
+        for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
+            pRef(i, j) = 10 * i + j;
+        }
+    }
+    std::cout << "p = ..." << std::endl;
+    pRef.print();
 
+    for (int i = d->rhsIBegin(); i <= d->rhsIEnd(); i++) {
+        for (int j = d->rhsJBegin(); j <= d->rhsJEnd(); j++) {
+            rhs(i, j) = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
+                        (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
+        }
+    }
+    std::cout << "rhs = ..." << std::endl;
+    rhs.print();
+
+    double epsilon = 0.001;
+    int maximumNumberOfIterations = 100;
+    double omega = 0.1;
+    auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
+    sor.solve();
+    return EXIT_SUCCESS;
+    /*
     std::array < int, 2 > size = std::array < int, 2 > {3, 3};
     std::array < double, 2 > origin = std::array < double, 2 > {0.0, 0.0};
     std::array < double, 2 > meshWidth = std::array < double, 2 > {1.0, 1.0};
@@ -50,7 +82,7 @@ int main(int argc, char *argv[]) {
     // display all settings on console
     settings.printSettings();
 
-    /*// write 5 output files
+    // write 5 output files
     for (int i = 0; i < 5; i++)
     {
         writeParaviewOutput(i);
