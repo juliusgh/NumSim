@@ -10,7 +10,7 @@ StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
     f_({nCells[0] + 1, nCells[1]}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     g_({nCells[0], nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
     p_({nCells[0] + 2, nCells[1] + 2}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    rhs_(nCells, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+    rhs_({nCells[0] + 2, nCells[1] + 2}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
     u_({nCells[0] + 1, nCells[1] + 2}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     v_({nCells[0] + 2, nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth)
 {
@@ -84,8 +84,7 @@ double StaggeredGrid::p(int i, int j) const
 {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    std::cout << "p(" << i << "," << j << ")" << std::endl;
-    return p_(i - pIBegin(), j - pJBegin());
+    return p_(i, j);
 };
 
 //! evaluate field variable p in an element (i,j)
@@ -133,7 +132,7 @@ double StaggeredGrid::u(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return u_(i - uIBegin(), j - uJBegin());
+    return u_(i, j);
 };
 
 //! access value of u in element (i,j)
@@ -181,7 +180,7 @@ double StaggeredGrid::v(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return v_(i - vIBegin(), j - vJBegin());
+    return v_(i, j);
 };
 
 //! access value of v in element (i,j)
@@ -223,14 +222,19 @@ double StaggeredGrid::rhs(int i, int j) const
 {
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    std::cout << "rhs(" << i << "," << j << ")" << std::endl;
-    return rhs_(i - rhsIBegin(), j - rhsJBegin());
+    return rhs_(i, j);
 };
 
 //! access value of rhs in element (i,j)
 double &StaggeredGrid::rhs(int i, int j)
 {
     return StaggeredGrid::rhs(i, j);
+};
+
+//! get reference to field variable rhs
+const FieldVariable &StaggeredGrid::rhs() const
+{
+    return rhs_;
 };
 
 /*
@@ -251,6 +255,12 @@ double &StaggeredGrid::f(int i, int j)
     return StaggeredGrid::f(i, j);
 };
 
+//! get reference to field variable F
+const FieldVariable &StaggeredGrid::f() const
+{
+    return f_;
+};
+
 /*
  * preliminary velocity G
  */
@@ -267,4 +277,10 @@ double StaggeredGrid::g(int i, int j) const
 double &StaggeredGrid::g(int i, int j)
 {
     return StaggeredGrid::g(i, j);
+};
+
+//! get reference to field variable G
+const FieldVariable &StaggeredGrid::g() const
+{
+    return g_;
 };

@@ -21,8 +21,14 @@ public:
     //! evaluate value of F in an element (i,j)
     double & f(int i, int j);
 
+    //! get a reference to field variable F
+    const FieldVariable & f() const;
+
     //! evaluate value of G in an element (i,j)
     double g(int i, int j) const;
+
+    //! get a reference to field variable G
+    const FieldVariable & g() const;
 
     //! evaluate value of G in an element (i,j)
     double & g(int i, int j);
@@ -113,6 +119,9 @@ public:
 
     //! access value of rhs in element (i,j)
     double & rhs(int i, int j);
+
+    //! get a reference to field variable u
+    const FieldVariable & rhs() const;
 
 protected:
     FieldVariable f_;
