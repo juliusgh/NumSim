@@ -90,7 +90,9 @@ double StaggeredGrid::p(int i, int j) const
 //! evaluate field variable p in an element (i,j)
 double &StaggeredGrid::p(int i, int j)
 {
-    return StaggeredGrid::p(i, j);
+    assert((pIBegin() <= i) && (i <= pIEnd()));
+    assert((pJBegin() <= j) && (j <= pJEnd()));
+    return p_(i, j);
 };
 
 /*
@@ -138,7 +140,9 @@ double StaggeredGrid::u(int i, int j) const
 //! access value of u in element (i,j)
 double &StaggeredGrid::u(int i, int j)
 {
-    return StaggeredGrid::u(i, j);
+    assert((uIBegin() <= i) && (i <= uIEnd()));
+    assert((uJBegin() <= j) && (j <= uJEnd()));
+    return u_(i, j);
 };
 
 /*
@@ -186,7 +190,9 @@ double StaggeredGrid::v(int i, int j) const
 //! access value of v in element (i,j)
 double &StaggeredGrid::v(int i, int j)
 {
-    return StaggeredGrid::v(i, j);
+    assert((vIBegin() <= i) && (i <= vIEnd()));
+    assert((vJBegin() <= j) && (j <= vJEnd()));
+    return v_(i, j);
 };
 
 /*
@@ -228,7 +234,9 @@ double StaggeredGrid::rhs(int i, int j) const
 //! access value of rhs in element (i,j)
 double &StaggeredGrid::rhs(int i, int j)
 {
-    return StaggeredGrid::rhs(i, j);
+    assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
+    assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    return rhs_(i, j);
 };
 
 //! get reference to field variable rhs
@@ -252,7 +260,9 @@ double StaggeredGrid::f(int i, int j) const
 //! access value of F in element (i,j)
 double &StaggeredGrid::f(int i, int j)
 {
-    return StaggeredGrid::f(i, j);
+    assert((uIBegin() <= i) && (i <= uIEnd()));
+    assert((uJBegin() <= j) && (j <= uJEnd()));
+    return f_(i, j);
 };
 
 //! get reference to field variable F
@@ -276,7 +286,9 @@ double StaggeredGrid::g(int i, int j) const
 //! access value of G in element (i,j)
 double &StaggeredGrid::g(int i, int j)
 {
-    return StaggeredGrid::g(i, j);
+    assert((vIBegin() <= i) && (i <= vIEnd()));
+    assert((vJBegin() <= j) && (j <= vJEnd()));
+    return g_(i, j);
 };
 
 //! get reference to field variable G
