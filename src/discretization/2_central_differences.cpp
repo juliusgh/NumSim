@@ -1,7 +1,7 @@
 #include "discretization/2_central_differences.h"
 
 CentralDifferences::CentralDifferences(std::array<int, 2> nCells, std::array<double, 2> meshWidth) :
-Discretization(nCells, meshWidth)
+    Discretization(nCells, meshWidth)
 {
 
 }
