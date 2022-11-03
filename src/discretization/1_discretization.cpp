@@ -5,43 +5,27 @@ Discretization::Discretization(std::array<int,2> nCells, std::array<double,2> me
 {
 
 };
-
+  //! compute the 2nd derivative ∂^2 u / ∂x^2
 double Discretization::computeD2uDx2(int i, int j) const {
-    return 0.0;//(p_(i+1, j) - p_(i, j)) / Discretization::dx();
+    return (u(i+1, j)-  2 * u(i, j) + u(i-1, j)) / (Discretization::dx() * Discretization::dx());
 };
-
+  //! compute the 2nd derivative ∂^2 u / ∂y^2
 double Discretization::computeD2uDy2(int i, int j) const {
-    return 0.0;//(p_(i+1, j) - p_(i, j)) / Discretization::dx();
+    return (u(i, j-1)-  2 * u(i, j) + u(i, j-1)) / (Discretization::dy() * Discretization::dy());
 };
-
+  //! compute the 2nd derivative ∂^2 v / ∂x^2
 double Discretization::computeD2vDx2(int i, int j) const {
-    return 0.0;//(p_(i+1, j) - p_(i, j)) / Discretization::dx();
+    return (v(i+1, j)-  2 * v(i, j) + v(i-1, j)) / (Discretization::dx() * Discretization::dx());
 };
-
+  //! compute the 2nd derivative ∂^2 v / ∂y^2
 double Discretization::computeD2vDy2(int i, int j) const {
-    return 0.0;//(p_(i+1, j) - p_(i, j)) / Discretization::dx();
+    return (v(i, j-1)-  2 * v(i, j) + v(i, j-1)) / (Discretization::dy() * Discretization::dy());
 };
-
+  //! compute the 1st derivative ∂p / ∂x
 double Discretization::computeDpDx(int i, int j) const {
-    return 0.0;//(p_(i+1, j) - p_(i, j)) / Discretization::dx();
+    return (p(i+1, j) - p(i, j)) / Discretization::dx();
 };
-
+  //! compute the 1st derivative ∂p / ∂y
 double Discretization::computeDpDy(int i, int j) const {
-    return 0.0;//(p_(i, j+1) - p_(i, j)) / Discretization::dy();
-};
-
-double Discretization::computeDu2Dx(int i, int j) const {
-    return 0.0;//(p_(i, j+1) - p_(i, j)) / Discretization::dy();
-};
-
-double Discretization::computeDuvDx(int i, int j) const {
-    return 0.0;//(p_(i, j+1) - p_(i, j)) / Discretization::dy();
-};
-
-double Discretization::computeDuvDy(int i, int j) const {
-    return 0.0;//(p_(i, j+1) - p_(i, j)) / Discretization::dy();
-};
-
-double Discretization::computeDv2Dy(int i, int j) const {
-    return 0.0;//(p_(i, j+1) - p_(i, j)) / Discretization::dy();
+    return (p(i, j+1) - p(i, j)) / Discretization::dy();
 };

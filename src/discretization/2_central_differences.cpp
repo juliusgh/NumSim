@@ -7,21 +7,21 @@ Discretization(nCells, meshWidth)
 }
 
 //! compute the 1st derivative ∂ u^2 / ∂x
-double CentralDifferences::computeDu2Dx(int i, int j) const {
+double CentralDifferences::computeDu2Dx(int i, int j) {
     return 0;
 }
 
 //! compute the 1st derivative ∂ v^2 / ∂y
-double CentralDifferences::computeDv2Dy(int i, int j) const {
+double CentralDifferences::computeDv2Dy(int i, int j) {
     return 0;
 }
 
 //! compute the 1st derivative ∂ (uv) / ∂x
-double CentralDifferences::computeDuvDx(int i, int j) const {
+double CentralDifferences::computeDuvDx(int i, int j) {
     return 0;
 }
 
 //! compute the 1st derivative ∂ (uv) / ∂y
-double CentralDifferences::computeDuvDy(int i, int j) const {
+double CentralDifferences::computeDuvDy(int i, int j) {
     return 0;
 }
