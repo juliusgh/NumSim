@@ -3,6 +3,7 @@
 #include "discretization/2_central_differences.h"
 #include "pressure_solver/sor.h"
 #include "pressure_solver/gauss_seidel.h"
+#include "computation/computation.h"
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
@@ -26,13 +27,8 @@ int main(int argc, char *argv[]) {
     // print message
     cout << "Filename: \"" << filename << "\"" << endl;
 
-
-    Settings settings;
-    // load settings from file
-    settings.loadFromFile(filename);
-
-    // display all settings on console
-    settings.printSettings();
+    auto computation = Computation();
+    computation.initialize(argc, argv);
 
     // write 5 output files
     /*for (int i = 0; i < 5; i++)

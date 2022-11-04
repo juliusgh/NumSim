@@ -1,6 +1,7 @@
 #pragma once
 #include "settings.h"
 #include <memory>
+#include <algorithm>
 #include "discretization/1_discretization.h"
 #include "pressure_solver/gauss_seidel.h"
 #include "pressure_solver/sor.h"
@@ -16,7 +17,7 @@ class Computation {
 public:
     //! initialize the computation object
     //! parse the settings from file that is given as the only command line argument
-    void initialize(int argc, char *argv[]);
+    void initialize(string filename);
 
     //! run the whole simulation until tend
     void runSimulation();
@@ -24,6 +25,9 @@ public:
 private:
     //! set boundary values of u and v to correct values
     void applyBoundaryValues();
+
+    //! set boundary values of F and G to correct values
+    void applyPreliminaryBoundaryValues();
 
     //! compute the preliminary velocities, F and G
     void computePreliminaryVelocities();
