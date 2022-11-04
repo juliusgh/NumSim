@@ -159,6 +159,10 @@ public:
     //! get a reference to field variable u
     const FieldVariable & rhs() const;
 
+    double uMax() const;
+
+    double vMax() const;
+
 protected:
     FieldVariable f_;
     FieldVariable g_;

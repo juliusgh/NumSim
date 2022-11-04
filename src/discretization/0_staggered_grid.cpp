@@ -377,3 +377,28 @@ const FieldVariable &StaggeredGrid::g() const
 {
     return g_;
 };
+
+double StaggeredGrid::uMax() const
+{
+double u_max = 0;
+    for (int i = this->uIBegin() + 1; i < this->uIEnd(); i++) {
+        for (int j = this->uJBegin() + 1; j < this->uJEnd(); j++) {
+            if (abs(this->u(i,j)) > u_max)
+                u_max = abs(this-> u(i,j));
+        }
+    }
+    return u_max;
+};
+
+double StaggeredGrid::vMax() const
+{
+    double v_max = 0;
+    for (int i = this->vIBegin() + 1; i < this->vIEnd(); i++) {
+        for (int j = this->vJBegin() + 1; j < this->vJEnd(); j++) {
+            if (abs(this->v(i,j)) > v_max)
+                v_max = abs(this-> v(i,j));
+
+        }
+    }
+    return v_max;
+};

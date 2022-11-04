@@ -1,4 +1,12 @@
 #pragma once
+#include "settings.h"
+#include <memory>
+#include "discretization/1_discretization.h"
+#include "pressure_solver/gauss_seidel.h"
+#include "pressure_solver/sor.h"
+#include "output_writer/output_writer_paraview.h"
+#include "output_writer/output_writer_text.h"
+
 
 /** This class handles the main simulation.
 * It implements the time stepping scheme, computes all the terms and calls the pressure solver.

@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME}
         pressure_solver/pressure_solver.cpp pressure_solver/pressure_solver.h
         pressure_solver/gauss_seidel.cpp pressure_solver/gauss_seidel.h
         pressure_solver/sor.cpp pressure_solver/sor.h
+        computation/computation.cpp computation/computation.h
 )
 
 # Add the project directory to include directories, to be able to include all project header files from anywhere
@@ -44,6 +45,7 @@ add_executable(runTests
         pressure_solver/pressure_solver.cpp pressure_solver/pressure_solver.h
         pressure_solver/gauss_seidel.cpp pressure_solver/gauss_seidel.h
         pressure_solver/sor.cpp pressure_solver/sor.h
+        computation/computation.cpp computation/computation.h
         )
 
 target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
