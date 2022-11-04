@@ -23,5 +23,5 @@ double CentralDifferences::computeDuvDx(int i, int j) const {
 
 //! compute the 1st derivative ∂ (uv) / ∂y
 double CentralDifferences::computeDuvDy(int i, int j) const {
-    return ((u(i, j+1) + u(i, j)) * (v(i+1, j) + v(i, j)) - (u(i, j) + u(i, j-1)) * (v(i+1, j) + v(i, j-1))) / (4 * Discretization::dy());
+    return ((u(i, j+1) + u(i, j)) * (v(i+1, j) + v(i, j)) - (u(i, j) + u(i, j-1)) * (v(i+1, j-1) + v(i, j-1))) / (4 * Discretization::dy());
 }
