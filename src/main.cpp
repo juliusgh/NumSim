@@ -28,7 +28,10 @@ int main(int argc, char *argv[]) {
     cout << "Filename: \"" << filename << "\"" << endl;
 
     auto computation = Computation();
-    computation.initialize(argc, argv);
+    computation.initialize(filename);
+    computation.runSimulation();
+
+    // TODO: write actual output
 
     // write 5 output files
     /*for (int i = 0; i < 5; i++)
