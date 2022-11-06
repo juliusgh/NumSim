@@ -72,6 +72,29 @@ int StaggeredGrid::pJEnd() const
 {
     return nCells_[1] + 1;
 };
+//! first valid Interior index for p in x direction
+int StaggeredGrid::pInteriorIBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for p in x direction
+int StaggeredGrid::pInteriorIEnd() const
+{
+    return nCells_[0];
+};
+
+//! first valid Interior index for p in y direction
+int StaggeredGrid::pInteriorJBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for p in y direction
+int StaggeredGrid::pInteriorJEnd() const
+{
+    return nCells_[1];
+};
 
 //! get reference to field variable p
 const FieldVariable &StaggeredGrid::p() const
@@ -122,6 +145,29 @@ int StaggeredGrid::uJEnd() const
 {
     return nCells_[1] + 1;
 };
+//! first valid field index for u in x direction
+int StaggeredGrid::uInteriorIBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for u in x direction
+int StaggeredGrid::uInteriorIEnd() const
+{
+    return nCells_[0]-1;
+};
+
+//! first valid Interior index for u in y direction
+int StaggeredGrid::uInteriorJBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for u in y direction
+int StaggeredGrid::uInteriorJEnd() const
+{
+    return nCells_[1];
+};
 
 //! get a reference to field variable u
 const FieldVariable &StaggeredGrid::u() const
@@ -171,6 +217,30 @@ int StaggeredGrid::vJBegin() const
 int StaggeredGrid::vJEnd() const
 {
     return nCells_[1];
+};
+
+//! first valid Interior index for v in x direction
+int StaggeredGrid::vInteriorIBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for v in x direction
+int StaggeredGrid::vInteriorIEnd() const
+{
+    return nCells_[0];
+};
+
+//! first valid Interior index for v in y direction
+int StaggeredGrid::vInteriorJBegin() const
+{
+    return 1;
+};
+
+//! one after last valid Interior index for v in y direction
+int StaggeredGrid::vInteriorJEnd() const
+{
+    return nCells_[1]-1;
 };
 
 //! get a reference to field variable v

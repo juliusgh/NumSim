@@ -59,6 +59,18 @@ public:
     
     //! one after last valid index for p in y direction
     int pJEnd() const;
+
+     //! first valid Interior index for p in x direction
+    int pInteriorIBegin() const;
+    
+    //! one after last valid Interior index for p in x direction
+    int pInteriorIEnd() const;
+    
+    //! first valid Interior index for p in y direction
+    int pInteriorJBegin() const;
+    
+    //! one after last valid Interior index for p in y direction
+    int pInteriorJEnd() const;
     
     //! get a reference to field variable u
     const FieldVariable & u() const;
@@ -81,7 +93,19 @@ public:
     //! one after last valid index for u in y direction
     int uJEnd() const;
     
-    //! get a reference to field variable v
+    //! first valid field index for u in x direction
+    int uInteriorIBegin() const;
+    
+    //! one after last valid Interior index for u in x direction
+    int uInteriorIEnd() const;
+    
+    //! first valid Interior index for u in y direction
+    int uInteriorJBegin() const;
+    
+    //! one after last valid Interior index for u in y direction
+    int uInteriorJEnd() const;
+
+    //! get a reference to Interior variable v
     const FieldVariable & v() const;
     
     //! access value of v in element (i,j)
@@ -101,6 +125,18 @@ public:
 
     //! one after last valid index for v in y direction
     int vJEnd() const;
+
+    //! first valid Interior index for v in x direction
+    int vInteriorIBegin() const;
+
+    //! one after last valid Interior index for v in x direction
+    int vInteriorIEnd() const;
+
+    //! first valid Interior index for v in y direction
+    int vInteriorJBegin() const;
+
+    //! one after last valid Interior index for v in y direction
+    int vInteriorJEnd() const;
 
     //! first valid index for rhs in x direction
     int rhsIBegin() const;
