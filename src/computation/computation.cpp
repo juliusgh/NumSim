@@ -36,14 +36,15 @@ void Computation::initialize(string filename)
         std::cout << "Solver not found!" << std::endl;
     }
 
-    // Initialize output writer
+    // Initialize output writers
     outputWriterText_ = std::make_unique<OutputWriterText>(discretization_);
+    outputWriterParaview_ = std::make_unique<OutputWriterParaview>(discretization_);
 };
 
 //! run the whole simulation until tend
 void Computation::runSimulation() {
     int t_iter = 0;
-    double time = 0;
+    double time = 0.0;
     // TODO: reach last endTime exactly!
     while (time < settings_.endTime){
         t_iter++;
@@ -63,11 +64,12 @@ void Computation::runSimulation() {
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
         outputWriterText_->writeFile(time);
         outputWriterText_->writePressureFile();
+        outputWriterParaview_->writeFile(time);
     }
 };
 
 //! set boundary values of u and v to correct values
-void Computation::applyBoundaryValues(){
+void Computation::applyBoundaryValues() {
     // set boundary values for u at bottom and top side
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
         // set boundary values for u at bottom side
