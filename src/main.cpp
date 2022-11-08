@@ -12,15 +12,20 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     // if the number of given command line arguments is only 1 (= the program name), print out usage information and exit
+    string program = argv[0];
+    string filename = "";
     if (argc == 1) {
-        cout << "usage: " << argv[0] << " <filename>" << endl;
+        //cout << "usage: " << argv[0] << " <filename>" << endl;
+        cout << "enter parameter file path: " << endl;
+        cin >> filename;
 
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
+    }
+    else {
+        // read in the first argument
+        filename = argv[1];
     }
 
-    // read in the first argument
-    string program = argv[0];
-    string filename = argv[1];
 
     cout << "Program: \"" << program << "\"" << endl;
 

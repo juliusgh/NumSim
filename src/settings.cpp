@@ -16,7 +16,7 @@ void Settings::loadFromFile(string filename) {
     }
 
     // loop over lines of file
-    for (int lineNo = 0;; lineNo++)
+    for (int lineNo = 0; ; lineNo++)
     {
         // read line
         string line;

@@ -12,6 +12,9 @@ void Computation::initialize(string filename)
     // print settings
     settings_.printSettings();
 
+    for (int i = 0; i < 2; i++)
+        meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
+
     if (settings_.useDonorCell) {
         discretization_ = std::make_shared<DonorCell>(settings_.nCells, meshWidth_, settings_.alpha);
     }
@@ -38,6 +41,7 @@ void Computation::runSimulation() {
     double time = 0;
     // TODO: reach last endTime exactly!
     while (time <= settings_.endTime){
+        cout << "time " << time << " of " << settings_.endTime << endl;
         t_iter++;
         applyBoundaryValues();
         computeTimeStepWidth();

@@ -60,6 +60,9 @@ public:
     //! one after last valid index for p in y direction
     int pJEnd() const;
 
+    //! get size of FieldVariable p
+    std::array<int, 2> pSize() const;
+
      //! first valid Interior index for p in x direction
     int pInteriorIBegin() const;
     
@@ -92,6 +95,9 @@ public:
     
     //! one after last valid index for u in y direction
     int uJEnd() const;
+
+    //! get size of FieldVariable u
+    std::array<int, 2> uSize() const;
     
     //! first valid field index for u in x direction
     int uInteriorIBegin() const;
@@ -126,6 +132,9 @@ public:
     //! one after last valid index for v in y direction
     int vJEnd() const;
 
+    //! get size of FieldVariable v
+    std::array<int, 2> vSize() const;
+
     //! first valid Interior index for v in x direction
     int vInteriorIBegin() const;
 
@@ -150,6 +159,9 @@ public:
     //! one after last valid index for rhs in y direction
     int rhsJEnd() const;
 
+    //! get size of FieldVariable rhs
+    std::array<int, 2> rhsSize() const;
+
     //! access value of rhs in element (i,j)
     double rhs(int i, int j) const;
 
@@ -159,15 +171,11 @@ public:
     //! get a reference to field variable u
     const FieldVariable & rhs() const;
 
-    double uMax() const;
-
-    double vMax() const;
-
 protected:
-    FieldVariable f_;
-    FieldVariable g_;
     const std::array<double, 2> meshWidth_;
     const std::array<int, 2> nCells_;
+    FieldVariable f_;
+    FieldVariable g_;
     FieldVariable p_;
     FieldVariable rhs_;
     FieldVariable u_;

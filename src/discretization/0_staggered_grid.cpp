@@ -7,12 +7,12 @@ StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
                              std::array<double, 2> meshWidth) :
     nCells_(nCells),
     meshWidth_(meshWidth),
-    f_({nCells[0] + 1, nCells[1]}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
-    g_({nCells[0], nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
-    p_({nCells[0] + 2, nCells[1] + 2}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    rhs_({nCells[0] + 2, nCells[1] + 2}, {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    u_({nCells[0] + 1, nCells[1] + 2}, {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
-    v_({nCells[0] + 2, nCells[1] + 1}, {meshWidth[0] / 2., meshWidth[1]}, meshWidth)
+    f_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+    g_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
+    p_(pSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+    rhs_(rhsSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+    u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+    v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth)
 {
     
 };
@@ -72,6 +72,13 @@ int StaggeredGrid::pJEnd() const
 {
     return nCells_[1] + 1;
 };
+
+//! get size of FieldVariable p
+std::array<int, 2> StaggeredGrid::pSize() const
+{
+    return {pIEnd() - pIBegin() + 1, pJEnd() - pJBegin() + 1};
+}
+
 //! first valid Interior index for p in x direction
 int StaggeredGrid::pInteriorIBegin() const
 {
@@ -145,6 +152,13 @@ int StaggeredGrid::uJEnd() const
 {
     return nCells_[1] + 1;
 };
+
+//! get size of FieldVariable u
+std::array<int, 2> StaggeredGrid::uSize() const
+{
+    return {uIEnd() - uIBegin() + 1, uJEnd() - uJBegin() + 1};
+}
+
 //! first valid field index for u in x direction
 int StaggeredGrid::uInteriorIBegin() const
 {
@@ -226,6 +240,12 @@ int StaggeredGrid::vJEnd() const
     return nCells_[1];
 };
 
+//! get size of FieldVariable v
+std::array<int, 2> StaggeredGrid::vSize() const
+{
+    return {vIEnd() - vIBegin() + 1, vJEnd() - vJBegin() + 1};
+}
+
 //! first valid Interior index for v in x direction
 int StaggeredGrid::vInteriorIBegin() const
 {
@@ -304,6 +324,12 @@ int StaggeredGrid::rhsJEnd() const
     return nCells_[1];
 };
 
+//! get size of FieldVariable rhs
+std::array<int, 2> StaggeredGrid::rhsSize() const
+{
+    return {rhsIEnd() - rhsIBegin() + 1, rhsJEnd() - rhsJBegin() + 1};
+}
+
 //! access value of rhs in element (i,j)
 double StaggeredGrid::rhs(int i, int j) const
 {
@@ -376,29 +402,4 @@ double &StaggeredGrid::g(int i, int j)
 const FieldVariable &StaggeredGrid::g() const
 {
     return g_;
-};
-
-double StaggeredGrid::uMax() const
-{
-double u_max = 0;
-    for (int i = this->uIBegin() + 1; i < this->uIEnd(); i++) {
-        for (int j = this->uJBegin() + 1; j < this->uJEnd(); j++) {
-            if (abs(this->u(i,j)) > u_max)
-                u_max = abs(this-> u(i,j));
-        }
-    }
-    return u_max;
-};
-
-double StaggeredGrid::vMax() const
-{
-    double v_max = 0;
-    for (int i = this->vIBegin() + 1; i < this->vIEnd(); i++) {
-        for (int j = this->vJBegin() + 1; j < this->vJEnd(); j++) {
-            if (abs(this->v(i,j)) > v_max)
-                v_max = abs(this-> v(i,j));
-
-        }
-    }
-    return v_max;
 };
