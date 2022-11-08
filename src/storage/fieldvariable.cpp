@@ -45,3 +45,15 @@ double FieldVariable::interpolateAt(double x, double y) const
     double f = (y1 - y) / (y1 - y0) * f0 + (y - y0) / (y1 - y0) * f1;
     return f;
 }
+
+double FieldVariable::absMax() const
+{
+    double abs_max = 0;
+    for (int i = 0; i < size_[0]; i++) {
+        for (int j = 0; j < size_[1]; j++) {
+            if (fabs((*this)(i,j)) > abs_max)
+                abs_max = fabs((*this)(i,j));
+        }
+    }
+    return abs_max;
+};

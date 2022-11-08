@@ -18,6 +18,8 @@ public:
     //! interpolate at arbitrary position
     double interpolateAt(double x, double y) const;
 
+    double absMax() const;
+
 private:
     std::array<double, 2> meshWidth_;
     std::array<double, 2> origin_;

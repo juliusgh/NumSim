@@ -146,8 +146,10 @@ void Computation::computeRightHandSide() {
 //! compute the time step width dt from maximum velocities
 void Computation::computeTimeStepWidth() {
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
-    double dt_conv_u = discretization_->dx() / discretization_->uMax();
-    double dt_conv_v = discretization_->dy() / discretization_->vMax();
+
+    double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
+    double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
+
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
 };
 
