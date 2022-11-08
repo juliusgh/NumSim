@@ -7,23 +7,26 @@ project(numsim)
 # Also specify the source files.
 add_executable(${PROJECT_NAME}
         main.cpp
-        output_writer/output_writer.cpp output_writer/output_writer.h
-        output_writer/output_writer_text.cpp output_writer/output_writer_text.h
-        settings.cpp settings.h
-        storage/array2d.cpp storage/array2d.h
-        storage/fieldvariable.cpp storage/fieldvariable.h
-        discretization/0_staggered_grid.cpp discretization/0_staggered_grid.h
-        discretization/1_discretization.cpp discretization/1_discretization.h
-        discretization/2_central_differences.cpp discretization/2_central_differences.h
-        discretization/2_donor_cell.cpp discretization/2_donor_cell.h
-        pressure_solver/pressure_solver.cpp pressure_solver/pressure_solver.h
-        pressure_solver/gauss_seidel.cpp pressure_solver/gauss_seidel.h
-        pressure_solver/sor.cpp pressure_solver/sor.h
-        computation/computation.cpp computation/computation.h
-)
+        settings.cpp
 
-# Add the project directory to include directories, to be able to include all project header files from anywhere
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
+        computation/computation.cpp
+
+        storage/array2d.cpp
+        storage/fieldvariable.cpp
+
+        discretization/0_staggered_grid.cpp
+        discretization/1_discretization.cpp
+        discretization/2_central_differences.cpp
+        discretization/2_donor_cell.cpp
+
+        pressure_solver/pressure_solver.cpp
+        pressure_solver/gauss_seidel.cpp
+        pressure_solver/sor.cpp
+
+        output_writer/output_writer.cpp
+        output_writer/output_writer_text.cpp
+        output_writer/output_writer_paraview.cpp
+)
 
 # Locate GTest
 find_package(GTest REQUIRED)
@@ -32,23 +35,32 @@ include_directories(${GTEST_INCLUDE_DIRS})
 # Link runTests with what we want to test and the GTest and pthread library
 add_executable(runTests
         tests.cpp
-        output_writer/output_writer.cpp output_writer/output_writer.h
-        output_writer/output_writer_text.cpp output_writer/output_writer_text.h
-        settings.cpp settings.h
-        storage/array2d.cpp storage/array2d.h
-        storage/fieldvariable.cpp storage/fieldvariable.h
-        discretization/0_staggered_grid.cpp discretization/0_staggered_grid.h
-        discretization/1_discretization.cpp discretization/1_discretization.h
-        discretization/2_central_differences.cpp discretization/2_central_differences.h
-        discretization/2_donor_cell.cpp discretization/2_donor_cell.h
-        pressure_solver/pressure_solver.cpp pressure_solver/pressure_solver.h
-        pressure_solver/gauss_seidel.cpp pressure_solver/gauss_seidel.h
-        pressure_solver/sor.cpp pressure_solver/sor.h
-        computation/computation.cpp computation/computation.h
-        )
+        settings.cpp
+
+        computation/computation.cpp
+
+        storage/array2d.cpp
+        storage/fieldvariable.cpp
+
+        discretization/0_staggered_grid.cpp
+        discretization/1_discretization.cpp
+        discretization/2_central_differences.cpp
+        discretization/2_donor_cell.cpp
+
+        pressure_solver/pressure_solver.cpp
+        pressure_solver/gauss_seidel.cpp
+        pressure_solver/sor.cpp
+
+        output_writer/output_writer.cpp
+        output_writer/output_writer_text.cpp
+        output_writer/output_writer_paraview.cpp
+)
 
 target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
 target_include_directories(runTests PUBLIC ${PROJECT_SOURCE_DIR})
+
+# Add the project directory to include directories, to be able to include all project header files from anywhere
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 
 # Search for the external package "VTK"
 find_package(VTK)
@@ -62,6 +74,7 @@ message("The include directory of VTK: VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
 if (VTK_FOUND)
   include_directories(${VTK_INCLUDE_DIRS})               # add the include directory where the header files are for the compiler
   target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES}) # add the libraries for the linker
+  target_link_libraries(runTests ${VTK_LIBRARIES}) # add the libraries for the linker
 endif(VTK_FOUND)
 
 # install numsim executable in build directory
@@ -70,8 +83,7 @@ install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/../bui
 # Add additonial compile options to enable more warnings
 add_compile_options(-Wall -Wextra)
 
-# Set the version of the C++ standard to use, we use C++14, published in 2014
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
