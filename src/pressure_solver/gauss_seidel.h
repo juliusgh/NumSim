@@ -6,7 +6,7 @@
 /** Standard Gauss-Seidel solver.
  */
 
-class GaussSeidel : PressureSolver {
+class GaussSeidel : public PressureSolver {
 public:
     //! constructor
     GaussSeidel(std::shared_ptr<Discretization> discretization,

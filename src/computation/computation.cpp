@@ -1,4 +1,6 @@
 #include "computation/computation.h"
+#include "discretization/2_donor_cell.h"
+#include "discretization/2_central_differences.h"
 
 //! initialize the computation object
 //! parse the settings from file that is given as the only command line argument
@@ -10,7 +12,24 @@ void Computation::initialize(string filename)
     // print settings
     settings_.printSettings();
 
-    // TODO: initialize solver etc.
+    if (settings_.useDonorCell) {
+        discretization_ = std::make_shared<DonorCell>(settings_.nCells, meshWidth_, settings_.alpha);
+    }
+    else {
+        discretization_ = std::make_shared<CentralDifferences>(settings_.nCells, meshWidth_);
+    }
+
+    if (settings_.pressureSolver == "SOR") {
+        pressureSolver_ = std::make_unique<SOR>(discretization_, settings_.epsilon,
+                                                settings_.maximumNumberOfIterations, settings_.omega);
+    }
+    else if (settings_.pressureSolver == "GaussSeidel") {
+        pressureSolver_ = std::make_unique<GaussSeidel>(discretization_, settings_.epsilon,
+                                                settings_.maximumNumberOfIterations);
+
+    } else {
+        std::cout << "Solver not found!" << std::endl;
+    }
 };
 
 //! run the whole simulation until tend
@@ -128,9 +147,7 @@ void Computation::computePreliminaryVelocities(){
 
 //! solve the Poisson equation for the pressure
 void Computation::computePressure() {
-    auto sor = SOR(discretization_, settings_.epsilon,
-                   settings_.maximumNumberOfIterations, settings_.omega);
-    sor.solve();
+    pressureSolver_->solve();
 };
 
 //! compute the right hand side of the Poisson equation for the pressure

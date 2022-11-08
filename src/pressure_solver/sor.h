@@ -5,7 +5,7 @@
 /** Successive over-relaxation solver.
  */
 
-class SOR : PressureSolver {
+class SOR : public PressureSolver {
 public:
     //! constructor
     SOR(std::shared_ptr <Discretization> discretization,

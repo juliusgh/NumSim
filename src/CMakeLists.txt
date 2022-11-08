@@ -8,7 +8,6 @@ project(numsim)
 add_executable(${PROJECT_NAME}
         main.cpp
         output_writer/output_writer.cpp output_writer/output_writer.h
-        output_writer/output_writer_paraview.cpp output_writer/output_writer_paraview.h
         output_writer/output_writer_text.cpp output_writer/output_writer_text.h
         settings.cpp settings.h
         storage/array2d.cpp storage/array2d.h

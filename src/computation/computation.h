@@ -5,7 +5,7 @@
 #include "discretization/1_discretization.h"
 #include "pressure_solver/gauss_seidel.h"
 #include "pressure_solver/sor.h"
-#include "output_writer/output_writer_paraview.h"
+//#include "output_writer/output_writer_paraview.h"
 #include "output_writer/output_writer_text.h"
 
 
@@ -46,7 +46,7 @@ private:
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;
     std::unique_ptr<PressureSolver> pressureSolver_;
-    std::unique_ptr<OutputWriterParaview> outputWriterParaview_;
+    //std::unique_ptr<OutputWriterParaview> outputWriterParaview_;
     std::unique_ptr<OutputWriterText> outputWriterText_;
     std::array<double, 2> meshWidth_;
     double dt_;
