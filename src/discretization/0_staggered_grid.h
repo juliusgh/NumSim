@@ -159,6 +159,18 @@ public:
     //! one after last valid index for rhs in y direction
     int rhsJEnd() const;
 
+    //! first valid Interior index for v in x direction
+    int rhsInteriorIBegin() const;
+
+    //! one after last valid Interior index for v in x direction
+    int rhsInteriorIEnd() const;
+
+    //! first valid Interior index for v in y direction
+    int rhsInteriorJBegin() const;
+
+    //! one after last valid Interior index for v in y direction
+    int rhsInteriorJEnd() const;
+
     //! get size of FieldVariable rhs
     std::array<int, 2> rhsSize() const;
 

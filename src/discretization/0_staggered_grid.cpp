@@ -58,7 +58,7 @@ int StaggeredGrid::pIBegin() const
 //! one after last valid index for p in x direction
 int StaggeredGrid::pIEnd() const
 {
-    return nCells_[0] + 1;
+    return nCells_[0] + 2;
 };
 
 //! first valid index for p in y direction
@@ -70,37 +70,37 @@ int StaggeredGrid::pJBegin() const
 //! one after last valid index for p in y direction
 int StaggeredGrid::pJEnd() const
 {
-    return nCells_[1] + 1;
+    return nCells_[1] + 2;
 };
 
 //! get size of FieldVariable p
 std::array<int, 2> StaggeredGrid::pSize() const
 {
-    return {pIEnd() - pIBegin() + 1, pJEnd() - pJBegin() + 1};
+    return {pIEnd() - pIBegin(), pJEnd() - pJBegin()};
 }
 
 //! first valid Interior index for p in x direction
 int StaggeredGrid::pInteriorIBegin() const
 {
-    return pIBegin()+1;
+    return pIBegin() + 1;
 };
 
 //! one after last valid Interior index for p in x direction
 int StaggeredGrid::pInteriorIEnd() const
 {
-    return pIEnd()-1;
+    return pIEnd() - 1;
 };
 
 //! first valid Interior index for p in y direction
 int StaggeredGrid::pInteriorJBegin() const
 {
-    return pJBegin()+1;
+    return pJBegin() + 1;
 };
 
 //! one after last valid Interior index for p in y direction
 int StaggeredGrid::pInteriorJEnd() const
 {
-    return pJEnd()-1;
+    return pJEnd() - 1;
 };
 
 //! get reference to field variable p
@@ -114,7 +114,7 @@ double StaggeredGrid::p(int i, int j) const
 {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    return p_(i, j);
+    return p_(i - pIBegin(), j - pJBegin());
 };
 
 //! evaluate field variable p in an element (i,j)
@@ -122,7 +122,7 @@ double &StaggeredGrid::p(int i, int j)
 {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    return p_(i, j);
+    return p_(i - pIBegin(), j - pJBegin());
 };
 
 /*
@@ -138,7 +138,7 @@ int StaggeredGrid::uIBegin() const
 //! one after last valid index for u in x direction
 int StaggeredGrid::uIEnd() const
 {
-    return nCells_[0];
+    return nCells_[0] + 1;
 };
 
 //! first valid index for u in y direction
@@ -150,27 +150,27 @@ int StaggeredGrid::uJBegin() const
 //! one after last valid index for u in y direction
 int StaggeredGrid::uJEnd() const
 {
-    return nCells_[1] + 1;
+    return nCells_[1] + 2;
 };
 
 //! get size of FieldVariable u
 std::array<int, 2> StaggeredGrid::uSize() const
 {
-    return {uIEnd() - uIBegin() + 1, uJEnd() - uJBegin() + 1};
+    return {uIEnd() - uIBegin(), uJEnd() - uJBegin()};
 }
 
 //! first valid field index for u in x direction
 int StaggeredGrid::uInteriorIBegin() const
 {
 
-    return uIBegin()+1;
+    return uIBegin() + 1;
 };
 
 //! one after last valid Interior index for u in x direction
 int StaggeredGrid::uInteriorIEnd() const
 {
 
-    return uIEnd()-1;
+    return uIEnd() - 1;
 
 };
 
@@ -178,7 +178,7 @@ int StaggeredGrid::uInteriorIEnd() const
 int StaggeredGrid::uInteriorJBegin() const
 {
 
-    return uJBegin()+1;
+    return uJBegin() + 1;
 
 };
 
@@ -186,7 +186,7 @@ int StaggeredGrid::uInteriorJBegin() const
 int StaggeredGrid::uInteriorJEnd() const
 {
 
-    return uJEnd()-1;
+    return uJEnd() - 1;
 
 };
 
@@ -201,7 +201,7 @@ double StaggeredGrid::u(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return u_(i, j);
+    return u_(i - uIBegin(), j - uJBegin());
 };
 
 //! access value of u in element (i,j)
@@ -209,7 +209,7 @@ double &StaggeredGrid::u(int i, int j)
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return u_(i, j);
+    return u_(i - uIBegin(), j - uJBegin());
 };
 
 /*
@@ -225,7 +225,7 @@ int StaggeredGrid::vIBegin() const
 //! one after last valid index for v in x direction
 int StaggeredGrid::vIEnd() const
 {
-    return nCells_[0] + 1;
+    return nCells_[0] + 2;
 };
 
 //! first valid index for v in y direction
@@ -237,40 +237,40 @@ int StaggeredGrid::vJBegin() const
 //! one after last valid index for v in y direction
 int StaggeredGrid::vJEnd() const
 {
-    return nCells_[1];
+    return nCells_[1] + 1;
 };
 
 //! get size of FieldVariable v
 std::array<int, 2> StaggeredGrid::vSize() const
 {
-    return {vIEnd() - vIBegin() + 1, vJEnd() - vJBegin() + 1};
+    return {vIEnd() - vIBegin(), vJEnd() - vJBegin()};
 }
 
 //! first valid Interior index for v in x direction
 int StaggeredGrid::vInteriorIBegin() const
 {
-    return vIBegin()+1;
+    return vIBegin() + 1;
 
 };
 
 //! one after last valid Interior index for v in x direction
 int StaggeredGrid::vInteriorIEnd() const
 {
-    return vIEnd()-1;
+    return vIEnd() - 1;
 
 };
 
 //! first valid Interior index for v in y direction
 int StaggeredGrid::vInteriorJBegin() const
 {
-    return vJBegin()+1;
+    return vJBegin() + 1;
 
 };
 
 //! one after last valid Interior index for v in y direction
 int StaggeredGrid::vInteriorJEnd() const
 {
-    return vJEnd()-1;
+    return vJEnd() - 1;
 
 };
 
@@ -285,7 +285,7 @@ double StaggeredGrid::v(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return v_(i, j);
+    return v_(i - vIBegin(), j - vJBegin());
 };
 
 //! access value of v in element (i,j)
@@ -293,7 +293,7 @@ double &StaggeredGrid::v(int i, int j)
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return v_(i, j);
+    return v_(i - vIBegin(), j - vJBegin());
 };
 
 /*
@@ -303,39 +303,70 @@ double &StaggeredGrid::v(int i, int j)
 //! first valid index for rhs in x direction
 int StaggeredGrid::rhsIBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for rhs in x direction
 int StaggeredGrid::rhsIEnd() const
 {
-    return nCells_[0];
+    return nCells_[0] + 2;
 };
 
 //! first valid index for rhs in y direction
 int StaggeredGrid::rhsJBegin() const
 {
-    return 1;
+    return 0;
 };
 
 //! one after last valid index for rhs in y direction
 int StaggeredGrid::rhsJEnd() const
 {
-    return nCells_[1];
+    return nCells_[1] + 2;
 };
 
 //! get size of FieldVariable rhs
 std::array<int, 2> StaggeredGrid::rhsSize() const
 {
-    return {rhsIEnd() - rhsIBegin() + 1, rhsJEnd() - rhsJBegin() + 1};
+    return {rhsIEnd() - rhsIBegin(), rhsJEnd() - rhsJBegin()};
 }
+
+//! first valid field index for u in x direction
+int StaggeredGrid::rhsInteriorIBegin() const
+{
+
+    return rhsIBegin() + 1;
+};
+
+//! one after last valid Interior index for u in x direction
+int StaggeredGrid::rhsInteriorIEnd() const
+{
+
+    return rhsIEnd() - 1;
+
+};
+
+//! first valid Interior index for u in y direction
+int StaggeredGrid::rhsInteriorJBegin() const
+{
+
+    return rhsJBegin() + 1;
+
+};
+
+//! one after last valid Interior index for u in y direction
+int StaggeredGrid::rhsInteriorJEnd() const
+{
+
+    return rhsJEnd() - 1;
+
+};
 
 //! access value of rhs in element (i,j)
 double StaggeredGrid::rhs(int i, int j) const
 {
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    return rhs_(i, j);
+    return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
 //! access value of rhs in element (i,j)
@@ -343,7 +374,7 @@ double &StaggeredGrid::rhs(int i, int j)
 {
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    return rhs_(i, j);
+    return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
 //! get reference to field variable rhs
@@ -361,7 +392,7 @@ double StaggeredGrid::f(int i, int j) const
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return f_(i, j);
+    return f_(i - uIBegin(), j - uJBegin());
 };
 
 //! access value of F in element (i,j)
@@ -369,7 +400,7 @@ double &StaggeredGrid::f(int i, int j)
 {
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    return f_(i, j);
+    return f_(i - uIBegin(), j - uJBegin());
 };
 
 //! get reference to field variable F
@@ -387,7 +418,7 @@ double StaggeredGrid::g(int i, int j) const
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return g_(i, j);
+    return g_(i - vIBegin(), j - vJBegin());
 };
 
 //! access value of G in element (i,j)
@@ -395,7 +426,7 @@ double &StaggeredGrid::g(int i, int j)
 {
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    return g_(i, j);
+    return g_(i - vIBegin(), j - vJBegin());
 };
 
 //! get reference to field variable G

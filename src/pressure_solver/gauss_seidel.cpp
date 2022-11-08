@@ -20,8 +20,8 @@ void GaussSeidel::solve() {
     do {
         iteration++;
 
-        for (int i = discretization_->pIBegin() + 1; i < discretization_->pIEnd(); i++) {
-            for (int j = discretization_->pJBegin() + 1; j < discretization_->pJEnd(); j++) {
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / pow(dx, 2);
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / pow(dy, 2);
                 discretization_->p(i, j) = pow(dx, 2) * pow(dy, 2) / (2 * (pow(dx, 2) + pow(dy, 2))) *
@@ -30,8 +30,8 @@ void GaussSeidel::solve() {
         }
         // stopping criterion
         residual_norm2 = 0.0;
-        for (int i = discretization_->pIBegin() + 1; i < discretization_->pIEnd(); i++) {
-            for (int j = discretization_->pJBegin() + 1; j < discretization_->pJEnd(); j++) {
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
                 double pxx = (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / pow(dx, 2);
                 double pyy = (discretization_->p(i, j + 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j - 1)) / pow(dy, 2);
                 residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
