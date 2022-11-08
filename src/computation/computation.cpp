@@ -45,7 +45,7 @@ void Computation::runSimulation() {
     int t_iter = 0;
     double time = 0;
     // TODO: reach last endTime exactly!
-    while (time <= settings_.endTime){
+    while (time < settings_.endTime){
         t_iter++;
         applyBoundaryValues();
         computeTimeStepWidth();
@@ -54,6 +54,9 @@ void Computation::runSimulation() {
         computeRightHandSide();
         computePressure();
         computeVelocities();
+        if (time + dt_ > settings_.endTime) {
+            dt_ = settings_.endTime - time;
+        }
         time += dt_;
         //output
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
@@ -72,7 +75,7 @@ void Computation::applyBoundaryValues(){
                 2 * settings_.dirichletBcBottom[0] - discretization_->u(i, discretization_->uJBegin() + 1);
         // set boundary values for u at top side
         discretization_->u(i, discretization_->uJEnd() - 1) =
-                2 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uJEnd() - 1);
+                2 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uJEnd() - 2);
     }
 
     // set boundary values for v at left and right side
@@ -82,7 +85,7 @@ void Computation::applyBoundaryValues(){
                 2 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
         // set boundary values for v at right side
         discretization_->v(discretization_->vIEnd() - 1, j) =
-                2 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vIEnd() - 1, j);
+                2 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vIEnd() - 2, j);
     }
 
     // set boundary values for v at bottom and top side
