@@ -141,7 +141,188 @@ TEST(GaussSeidelTest, Test1) {
     }
 }
 
+TEST(DiscretizationTest, FirstOrder)
+{
+    auto nCells = std::array<int, 2>{4, 4};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
 
+    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+
+    // Assign values for p by p(x,y)=x*y
+    for (int i = discr.pIBegin(); i <= discr.pIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.pJBegin(); j <= discr.pJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.p(i, j) = x * y;
+        }
+    }
+
+    // Check derivatives for p
+    for (int i = discr.pInteriorIBegin(); i <= discr.pInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.pInteriorJBegin(); j <= discr.pInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeDpDx(i, j), y);
+            EXPECT_DOUBLE_EQ(discr.computeDpDy(i, j), x);
+        }
+    }
+}
+
+TEST(DiscretizationTest, SecondOrder)
+{
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+
+    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+
+    // Assign values for v by v(x,y)=x*x*y
+    for (int i = discr.vIBegin(); i <= discr.vIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vJBegin(); j <= discr.vJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.v(i, j) = x * x * y;
+        }
+    }
+    // Assign values for u by u(x,y)=x*y*y
+    for (int i = discr.uIBegin(); i <= discr.uIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uJBegin(); j <= discr.uJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.u(i, j) = x * y * y;
+        }
+    }
+
+    // Check second order derivatives for u
+    for (int i = discr.uInteriorIBegin(); i <= discr.uInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uInteriorJBegin(); j <= discr.uInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeD2uDx2(i, j), 0);
+            EXPECT_DOUBLE_EQ(discr.computeD2uDy2(i, j), 2 * x);
+        }
+    }
+    // Check second order derivatives for v
+    for (int i = discr.vInteriorIBegin(); i <= discr.vInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vInteriorJBegin(); j <= discr.vInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeD2vDx2(i, j), 2 * y);
+            EXPECT_DOUBLE_EQ(discr.computeD2vDy2(i, j), 0);
+        }
+    }
+}
+
+TEST(DiscretizationTest, FirstOrderSquared)
+{
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+
+    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+
+    // Assign values for v by v(x,y)=x*y
+    for (int i = discr.vIBegin(); i <= discr.vIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vJBegin(); j <= discr.vJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.v(i, j) = x * y;
+        }
+    }
+    // Assign values for u by u(x,y)=x*y
+    for (int i = discr.uIBegin(); i <= discr.uIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uJBegin(); j <= discr.uJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.u(i, j) = x * y;
+        }
+    }
+
+    // Check  derivatives for u^2
+    for (int i = discr.uInteriorIBegin(); i <= discr.uInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uInteriorJBegin(); j <= discr.uInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeDu2Dx(i, j), 2 * x * y * y);
+        }
+    }
+    // Check derivatives for v^2
+    for (int i = discr.vInteriorIBegin(); i <= discr.vInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vInteriorJBegin(); j <= discr.vInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeDv2Dy(i, j), 2 * y * x * x);
+        }
+    }
+}
+
+TEST(DiscretizationTest, FirstOrderMixed)
+{
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+
+    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+
+    // Assign values for v by v(x,y)=x*y
+    for (int i = discr.vIBegin(); i <= discr.vIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vJBegin(); j <= discr.vJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.v(i, j) = 1;
+        }
+    }
+    // Assign values for u by u(x,y)=x*y
+    for (int i = discr.uIBegin(); i <= discr.uIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uJBegin(); j <= discr.uJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            discr.u(i, j) = 1;
+        }
+    }
+
+    // Check  derivatives for u*v
+    for (int i = discr.uInteriorIBegin(); i <= discr.uInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.uInteriorJBegin(); j <= discr.uInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeDuvDy(i, j), 0);
+        }
+    }
+    // Check derivatives for u*v
+    for (int i = discr.vInteriorIBegin(); i <= discr.vInteriorIEnd(); i++)
+    {
+        const double x = i * meshWidth[0];
+        for (int j = discr.vInteriorJBegin(); j <= discr.vInteriorJEnd(); j++)
+        {
+            const double y = j * meshWidth[1];
+            EXPECT_DOUBLE_EQ(discr.computeDuvDx(i, j), 0);
+        }
+    }
+}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

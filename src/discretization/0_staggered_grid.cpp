@@ -75,25 +75,25 @@ int StaggeredGrid::pJEnd() const
 //! first valid Interior index for p in x direction
 int StaggeredGrid::pInteriorIBegin() const
 {
-    return 1;
+    return pIBegin()+1;
 };
 
 //! one after last valid Interior index for p in x direction
 int StaggeredGrid::pInteriorIEnd() const
 {
-    return nCells_[0];
+    return pIEnd()-1;
 };
 
 //! first valid Interior index for p in y direction
 int StaggeredGrid::pInteriorJBegin() const
 {
-    return 1;
+    return pJBegin()+1;
 };
 
 //! one after last valid Interior index for p in y direction
 int StaggeredGrid::pInteriorJEnd() const
 {
-    return nCells_[1];
+    return pJEnd()-1;
 };
 
 //! get reference to field variable p
@@ -148,25 +148,32 @@ int StaggeredGrid::uJEnd() const
 //! first valid field index for u in x direction
 int StaggeredGrid::uInteriorIBegin() const
 {
-    return 1;
+
+    return uIBegin()+1;
 };
 
 //! one after last valid Interior index for u in x direction
 int StaggeredGrid::uInteriorIEnd() const
 {
-    return nCells_[0]-1;
+
+    return uIEnd()-1;
+
 };
 
 //! first valid Interior index for u in y direction
 int StaggeredGrid::uInteriorJBegin() const
 {
-    return 1;
+
+    return uJBegin()+1;
+
 };
 
 //! one after last valid Interior index for u in y direction
 int StaggeredGrid::uInteriorJEnd() const
 {
-    return nCells_[1];
+
+    return uJEnd()-1;
+
 };
 
 //! get a reference to field variable u
@@ -222,25 +229,29 @@ int StaggeredGrid::vJEnd() const
 //! first valid Interior index for v in x direction
 int StaggeredGrid::vInteriorIBegin() const
 {
-    return 1;
+    return vIBegin()+1;
+
 };
 
 //! one after last valid Interior index for v in x direction
 int StaggeredGrid::vInteriorIEnd() const
 {
-    return nCells_[0];
+    return vIEnd()-1;
+
 };
 
 //! first valid Interior index for v in y direction
 int StaggeredGrid::vInteriorJBegin() const
 {
-    return 1;
+    return vJBegin()+1;
+
 };
 
 //! one after last valid Interior index for v in y direction
 int StaggeredGrid::vInteriorJEnd() const
 {
-    return nCells_[1]-1;
+    return vJEnd()-1;
+
 };
 
 //! get a reference to field variable v
