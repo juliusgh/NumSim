@@ -40,5 +40,7 @@ void SOR::solve() {
             }
         }
     } while (iteration < maximumNumberOfIterations_ && residual_norm2 / N > pow(epsilon_, 2));
+    residual_norm2_ = residual_norm2;
+    iterations_ = iteration;
     setBoundaryValues();
 };

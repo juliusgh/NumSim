@@ -41,7 +41,6 @@ void Computation::runSimulation() {
     double time = 0;
     // TODO: reach last endTime exactly!
     while (time <= settings_.endTime){
-        cout << "time " << time << " of " << settings_.endTime << endl;
         t_iter++;
         applyBoundaryValues();
         computeTimeStepWidth();
@@ -51,6 +50,9 @@ void Computation::runSimulation() {
         computePressure();
         computeVelocities();
         //output
+        cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
+            ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
+
         time += dt_;
     }
 };
@@ -164,6 +166,7 @@ void Computation::computeRightHandSide() {
         }
     }
 };
+
 //! compute the time step width dt from maximum velocities
 void Computation::computeTimeStepWidth() {
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );

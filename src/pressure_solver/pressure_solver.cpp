@@ -27,3 +27,11 @@ void PressureSolver::setBoundaryValues() {
         discretization_->p(i, discretization_->pJEnd()) = discretization_->p(i, discretization_->pJEnd() - 1);
     }
 };
+
+double PressureSolver::residualNorm() const {
+    return residual_norm2_;
+}
+
+int PressureSolver::iterations() const {
+    return iterations_;
+}
