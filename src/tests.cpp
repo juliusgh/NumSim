@@ -143,8 +143,8 @@ TEST(FieldVariableTest, ValueCheck) {
 
 TEST(DiscretizationTest, FirstOrder)
 {
-    auto nCells = std::array<int, 2>{4, 4};
-    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto nCells = std::array<int, 2>{100, 100};
+    auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
     CentralDifferences discr = CentralDifferences(nCells, meshWidth);
 
@@ -156,6 +156,7 @@ TEST(DiscretizationTest, FirstOrder)
         {
             const double y = j * meshWidth[1];
             discr.p(i, j) = x * y;
+        
         }
     }
 
@@ -166,16 +167,16 @@ TEST(DiscretizationTest, FirstOrder)
         for (int j = discr.pInteriorJBegin(); j < discr.pInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeDpDx(i, j), y);
-            EXPECT_DOUBLE_EQ(discr.computeDpDy(i, j), x);
+            EXPECT_NEAR(discr.computeDpDx(i, j), y, 0.0000001);
+            EXPECT_NEAR(discr.computeDpDy(i, j), x, 0.0000001);
         }
     }
 }
 
 TEST(DiscretizationTest, SecondOrder)
 {
-    auto nCells = std::array<int, 2>{3, 3};
-    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+    auto nCells = std::array<int, 2>{100, 100};
+    auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
     CentralDifferences discr = CentralDifferences(nCells, meshWidth);
 
@@ -207,8 +208,8 @@ TEST(DiscretizationTest, SecondOrder)
         for (int j = discr.uInteriorJBegin(); j < discr.uInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeD2uDx2(i, j), 0);
-            EXPECT_DOUBLE_EQ(discr.computeD2uDy2(i, j), 2 * x);
+            EXPECT_NEAR(discr.computeD2uDx2(i, j), 0, 0.0000001);
+            EXPECT_NEAR(discr.computeD2uDy2(i, j), 2 * x, 0.0000001);
         }
     }
     // Check second order derivatives for v
@@ -218,16 +219,16 @@ TEST(DiscretizationTest, SecondOrder)
         for (int j = discr.vInteriorJBegin(); j < discr.vInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeD2vDx2(i, j), 2 * y);
-            EXPECT_DOUBLE_EQ(discr.computeD2vDy2(i, j), 0);
+            EXPECT_NEAR(discr.computeD2vDx2(i, j), 2 * y, 0.0000001);
+            EXPECT_NEAR(discr.computeD2vDy2(i, j), 0, 0.0000001);
         }
     }
 }
 
 TEST(DiscretizationTest, FirstOrderSquared)
 {
-    auto nCells = std::array<int, 2>{3, 3};
-    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+    auto nCells = std::array<int, 2>{100, 100};
+    auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
     CentralDifferences discr = CentralDifferences(nCells, meshWidth);
 
@@ -259,7 +260,7 @@ TEST(DiscretizationTest, FirstOrderSquared)
         for (int j = discr.uInteriorJBegin(); j < discr.uInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeDu2Dx(i, j), 2 * x * y * y);
+            EXPECT_NEAR(discr.computeDu2Dx(i, j), 2 * x * y * y, 0.0000001);
         }
     }
     // Check derivatives for v^2
@@ -269,15 +270,15 @@ TEST(DiscretizationTest, FirstOrderSquared)
         for (int j = discr.vInteriorJBegin(); j < discr.vInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeDv2Dy(i, j), 2 * y * x * x);
+            EXPECT_NEAR(discr.computeDv2Dy(i, j), 2 * y * x * x, 0.0000001);
         }
     }
 }
 
 TEST(DiscretizationTest, FirstOrderMixed)
 {
-    auto nCells = std::array<int, 2>{3, 3};
-    auto meshWidth = std::array<double, 2>{2.0, 1.0};
+    auto nCells = std::array<int, 2>{100, 100};
+    auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
     CentralDifferences discr = CentralDifferences(nCells, meshWidth);
 
@@ -309,7 +310,7 @@ TEST(DiscretizationTest, FirstOrderMixed)
         for (int j = discr.uInteriorJBegin(); j < discr.uInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeDuvDy(i, j), 0);
+            EXPECT_NEAR(discr.computeDuvDy(i, j), 0, 0.0000001);
         }
     }
     // Check derivatives for u*v
@@ -319,7 +320,7 @@ TEST(DiscretizationTest, FirstOrderMixed)
         for (int j = discr.vInteriorJBegin(); j < discr.vInteriorJEnd(); j++)
         {
             const double y = j * meshWidth[1];
-            EXPECT_DOUBLE_EQ(discr.computeDuvDx(i, j), 0);
+            EXPECT_NEAR(discr.computeDuvDx(i, j), 0, 0.0000001);
         }
     }
 }
