@@ -36,7 +36,7 @@ build/*
 !build/.gitkeep
 
 # Output files
-*.vti
+build/out/
 
 # CLion
 *.idea
