@@ -10,7 +10,7 @@ PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
 }
 
 void PressureSolver::setBoundaryValues() {
-    for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
 
         // copy values to left boundary
         discretization_->p(discretization_->pIBegin(), j) = discretization_->p(discretization_->pInteriorIBegin(), j);
@@ -18,7 +18,7 @@ void PressureSolver::setBoundaryValues() {
         // copy values to right boundary
         discretization_->p(discretization_->pIEnd() - 1, j) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
     }
-    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
 
         // copy values to bottom boundary
         discretization_->p(i, discretization_->pJBegin()) = discretization_->p(i, discretization_->pInteriorJBegin());
