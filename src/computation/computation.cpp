@@ -1,6 +1,4 @@
 #include "computation/computation.h"
-#include "discretization/2_donor_cell.h"
-#include "discretization/2_central_differences.h"
 
 //! initialize the computation object
 //! parse the settings from file that is given as the only command line argument
@@ -61,7 +59,7 @@ void Computation::runSimulation() {
         time += dt_;
         //output
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-            ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
+            ", res. " << /*pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() <<*/ endl;
         outputWriterText_->writeFile(time);
         outputWriterText_->writePressureFile();
         outputWriterParaview_->writeFile(time);
@@ -80,16 +78,6 @@ void Computation::applyBoundaryValues() {
                 2 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uJEnd() - 2);
     }
 
-    // set boundary values for v at left and right side
-    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
-        // set boundary values for v at left side
-        discretization_->v(discretization_->vIBegin(), j) =
-                2 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
-        // set boundary values for v at right side
-        discretization_->v(discretization_->vIEnd() - 1, j) =
-                2 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vIEnd() - 2, j);
-    }
-
     // set boundary values for v at bottom and top side
     for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
         // set boundary values for v at bottom side
@@ -104,6 +92,16 @@ void Computation::applyBoundaryValues() {
         discretization_->u(discretization_->uIBegin(), j) = settings_.dirichletBcLeft[0];
         // set boundary values for u at right side
         discretization_->u(discretization_->uIEnd() - 1, j) = settings_.dirichletBcRight[0];
+    }
+
+    // set boundary values for v at left and right side
+    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
+        // set boundary values for v at left side
+        discretization_->v(discretization_->vIBegin(), j) =
+                2 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
+        // set boundary values for v at right side
+        discretization_->v(discretization_->vIEnd() - 1, j) =
+                2 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vIEnd() - 2, j);
     }
 };
 
