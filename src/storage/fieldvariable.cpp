@@ -28,10 +28,11 @@ double FieldVariable::interpolateAt(double x, double y) const
     int i = (x - origin_[0]) / meshWidth_[0];
     int j = (y - origin_[1]) / meshWidth_[1];
 
-    if (i == -1)
-        i = 0;
-    if (j == -1)
-        j = 0;
+    //std::cout << "i:" << i << ", j:" << j << std::endl;
+    if (i == size_[0] - 1)
+        i--;
+    if (j == size_[1] - 1)
+        j--;
 
     // determine interpolation points
     double x0 = origin_[0] + i * meshWidth_[0];
