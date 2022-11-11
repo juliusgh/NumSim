@@ -20,126 +20,136 @@ TEST(FieldVariableTest, ValueCheck) {
     ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));
 }
 
-//TEST(SORTest, Test1) {
-//    auto nCells = std::array<int, 2>{5, 10};
-//    auto meshWidth = std::array<double, 2>{0.1, 0.05};
-//    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
-//    auto d = new CentralDifferences(nCells, meshWidth);
-//    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
-//    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
-//        for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
-//            pRef(i, j) = 10 * i + j;
-//        }
-//    }
-//    //std::cout << "p = ..." << std::endl;
-//    //pRef.print();
-//
-//    for (int i = d->rhsIBegin(); i < d->rhsIEnd(); i++) {
-//        for (int j = d->rhsJBegin(); j < d->rhsJEnd(); j++) {
-//            d->rhs(i, j) = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
-//                           (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
-//        }
-//    }
-//    //std::cout << "rhs = ..." << std::endl;
-//    //d->rhs().print();
-//
-//    double epsilon = 0.001;
-//    int maximumNumberOfIterations = 1000;
-//    double omega = 2 / (1 + sin(3.1 * meshWidth[0]));
-//    auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
-//    sor.solve();
-//
-//    //std::cout << "p = ..." << std::endl;
-//    //d->p().print();
-//
-//    // check interior of the domain
-//    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
-//        for (int j = d->pInteriorJBegin() + 1; j < d->pInteriorJEnd(); j++) {
-//            ASSERT_LE(abs(d->p(i, j) - pRef(i, j)), epsilon);
-//        }
-//    }
-//
-//    // check boundary of the domain
-//    for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-//
-//        // check left boundary
-//        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
-//
-//        // check right boundary
-//        ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
-//    }
-//
-//    // check boundary of the domain
-//    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
-//
-//        // check left boundary
-//        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pInteriorJBegin()));
-//
-//        // check right boundary
-//        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pInteriorJEnd() - 1));
-//    }
-//}
-//
-//
-//TEST(GaussSeidelTest, Test1) {
-//    auto nCells = std::array<int, 2>{5, 10};
-//    auto meshWidth = std::array<double, 2>{0.1, 0.05};
-//    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
-//    auto d = new CentralDifferences(nCells, meshWidth);
-//    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
-//    for (int i = d->pIBegin() + 1; i < d->pIEnd(); i++) {
-//        for (int j = d->pJBegin() + 1; j < d->pJEnd(); j++) {
-//            pRef(i, j) = 10 * i + j;
-//        }
-//    }
-//    //std::cout << "p = ..." << std::endl;
-//    //pRef.print();
-//
-//    for (int i = d->rhsIBegin(); i < d->rhsIEnd(); i++) {
-//        for (int j = d->rhsJBegin(); j < d->rhsJEnd(); j++) {
-//            d->rhs(i, j) = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
-//                           (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
-//        }
-//    }
-//    //std::cout << "rhs = ..." << std::endl;
-//    //d->rhs().print();
-//
-//    double epsilon = 0.001;
-//    int maximumNumberOfIterations = 1000;
-//
-//    auto gs = GaussSeidel(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations);
-//    gs.solve();
-//
-//    //std::cout << "p = ..." << std::endl;
-//    //d->p().print();
-//
-//    // check interior of the domain
-//    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
-//        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-//            ASSERT_LE(abs(d->p(i, j) - pRef(i, j)), epsilon);
-//        }
-//    }
-//
-//    // check boundary of the domain
-//    for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-//
-//        // check left boundary
-//        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
-//
-//        // check right boundary
-//        ASSERT_EQ(d->p(d->pIEnd(), j), d->p(d->pInteriorIEnd() - 1, j));
-//    }
-//
-//    // check boundary of the domain
-//    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
-//
-//        // check left boundary
-//        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pInteriorJBegin()));
-//
-//        // check right boundary
-//        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pInteriorJEnd() - 1));
-//    }
-//}
+TEST(SORTest, Test1) {
+    auto nCells = std::array<int, 2>{5, 10};
+    auto meshWidth = std::array<double, 2>{0.1, 0.05};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    auto d = new CentralDifferences(nCells, meshWidth);
+    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
+    for (int i = d->pIBegin(); i < d->pIEnd(); i++) {
+        for (int j = d->pJBegin(); j < d->pJEnd(); j++) {
+            pRef(i, j) = 10 * i + j ;
+        }
+    }
+    //std::cout << "p = ..." << std::endl;
+    //pRef.print();
+
+    std::cout << "p = ..." << std::endl;
+    d->p().print();
+
+    std::cout << "pref = ..." << std::endl;
+    pRef.print();
+
+    for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
+        for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
+            double rhs = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
+                  (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
+            // std::cout << rhs << std::endl;
+            d->rhs(i, j) = rhs;
+        }
+    }
+    std::cout << "rhs = ..." << std::endl;
+    d->rhs().print();
+
+    double epsilon = 0.001;
+    int maximumNumberOfIterations = 1000;
+    double omega = 2 / (1 + sin(3.1 * meshWidth[0]));
+    auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
+    sor.solve();
+    std::cout << "Iterations "  << sor.iterations() << std::endl;
+    std::cout << "Norm "  << sor.residualNorm() << std::endl;
+
+    //std::cout << "p = ..." << std::endl;
+    //d->p().print();
+
+    // check interior of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            ASSERT_LE(fabs(d->p(i, j) - pRef(i, j)), epsilon);
+        }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pInteriorJBegin()));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pInteriorJEnd() - 1));
+    }
+}
+
+
+TEST(GaussSeidelTest, Test1) {
+    auto nCells = std::array<int, 2>{5, 10};
+    auto meshWidth = std::array<double, 2>{0.1, 0.05};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    auto d = new CentralDifferences(nCells, meshWidth);
+    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
+    for (int i = d->pIBegin(); i < d->pIEnd(); i++) {
+        for (int j = d->pJBegin(); j < d->pJEnd(); j++) {
+            pRef(i, j) = 10 * i + j;
+        }
+    }
+    //std::cout << "p = ..." << std::endl;
+    //pRef.print();
+
+    for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
+        for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
+            d->rhs(i, j) = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
+                           (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
+        }
+    }
+    //std::cout << "rhs = ..." << std::endl;
+    //d->rhs().print();
+
+    double epsilon = 0.001;
+    int maximumNumberOfIterations = 1000;
+
+    auto gs = GaussSeidel(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations);
+    gs.solve();
+
+    //std::cout << "p = ..." << std::endl;
+    //d->p().print();
+
+    // check interior of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            ASSERT_LE(abs(d->p(i, j) - pRef(i, j)), epsilon);
+        }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pJBegin(); j < d->pJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd(), j), d->p(d->pInteriorIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pIBegin(); i < d->pIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin() ), d->p(i, d->pInteriorJBegin()));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd()), d->p(i, d->pInteriorJEnd() - 1));
+    }
+}
 
 TEST(DiscretizationTest, FirstOrder)
 {
