@@ -21,9 +21,9 @@ TEST(FieldVariableTest, ValueCheck) {
 }
 
 TEST(FieldVariableTest, InterpolationCheck) {
-    auto size = std::array<int, 2>{5+2, 6+2};
+    auto size = std::array<int, 2>{6+2, 5+2};
     auto meshWidth = std::array<double, 2>{1.0, 1.0};
-    auto origin = std::array<double, 2>{meshWidth[0] / 2., meshWidth[1]};
+    auto origin = std::array<double, 2>{meshWidth[0]-meshWidth[0]/2., meshWidth[1]};
 
     FieldVariable v = FieldVariable(size, origin, meshWidth);
     for (int i = 1; i < size[0] - 1; i++) {
@@ -32,40 +32,16 @@ TEST(FieldVariableTest, InterpolationCheck) {
         }
     }
     v.print();
-
-    FieldVariable v_interp = FieldVariable({size[0] - 1, size[1] - 1}, origin, meshWidth);
-    // for (int i = 0; i < size[0] - 1; i++) {
-    //     for (int j = 0; j < size[1] - 1; j++) {
-    //         double x = meshWidth[0] * i;
-    //         double y = meshWidth[0] * j;
-    //         v_interp(i, j) = v.interpolateAt(x, y);
-    //     }
-    // }
     
-    double i=0;
-    double j=0;
-    double x = meshWidth[0] * i;
-    double y = meshWidth[0] * j;
-    v_interp(i, j) = v.interpolateAt(x, y);
-
-    i=1;
-    j=1;
-    x = meshWidth[0] * i;
-    y = meshWidth[0] * j;
-    v_interp(i, j) = v.interpolateAt(x, y);
-
-    i=1.5;
-    j=1.5;
-    x = meshWidth[0] * i;
-    y = meshWidth[0] * j;
-    v_interp(i, j) = v.interpolateAt(x, y);
-
-    i=2;
-    j=2.5;
-    x = meshWidth[0] * i;
-    y = meshWidth[0] * j;
-    v_interp(i, j) = v.interpolateAt(x, y);
-
+    FieldVariable v_interp = FieldVariable({size[0] - 1, size[1] - 1}, origin, meshWidth);
+    for (int i = 0; i < size[0] - 1; i++) {
+        for (int j = 0; j < size[1] - 1; j++) {
+            double x = meshWidth[0] * i;
+            double y = meshWidth[1] * j;
+            v_interp(i, j) = v.interpolateAt(x, y);
+        }
+    }
+    v_interp.print();
 }
 
 TEST(SORTest, Test1) {

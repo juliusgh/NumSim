@@ -36,8 +36,6 @@ double FieldVariable::interpolateAt(double x, double y) const
         j--;
 
 
-    std::cout << " results in field "<< i << "," << j;
-
     double q00 = (*this)(i, j);
     double q01 = (*this)(i, j + 1);
     double q10 = (*this)(i + 1, j);
@@ -50,20 +48,15 @@ double FieldVariable::interpolateAt(double x, double y) const
     double x1 = x0 + meshWidth_[0];
     double y0 = origin_[1] + j * meshWidth_[1];
     double y1 = y0 + meshWidth_[1];
-    
-
-    std::cout << " interpolation points: " << x0 << "," <<  x1 <<  "," << y0 <<  "," << y1;
-    std::cout << " interpolation values: " << q00 << "," <<  q01 <<  "," << q10 <<  "," << q11;
 
     x -= meshWidth_[0];
     y -= meshWidth_[1];
 
     // bilinear interpolation
-    double f0 = (x1 - x) / (x1 - x0) * q00 + (x - x0) / (x1 - x0) * q01;
-    double f1 = (x1 - x) / (x1 - x0) * q10 + (x - x0) / (x1 - x0) * q11;
+    double f0 = (x1 - x) / (x1 - x0) * q00 + (x - x0) / (x1 - x0) * q10;
+    double f1 = (x1 - x) / (x1 - x0) * q01 + (x - x0) / (x1 - x0) * q11;
     double f = (y1 - y) / (y1 - y0) * f0 + (y - y0) / (y1 - y0) * f1;
-
-    std::cout << " interpolated value: " << f << std::endl;
+    
     return f;
 }
 
