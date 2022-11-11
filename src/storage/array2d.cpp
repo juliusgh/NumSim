@@ -39,8 +39,8 @@ double Array2D::operator()(int i, int j) const {
 
 void Array2D::print() const {
     std::cout << std::endl << "----------" << std::endl;
-    for (int i = size_[0] - 1; i >= 0; i--) {
-        for (int j = 0; j < size_[1]; j++) {
+    for (int j = size_[1] - 1; j >= 0; j--) {
+        for (int i = 0; i < size_[0]; i++) {
             std::cout << (*this)(i, j) << " | ";
         }
         std::cout << std::endl << "----------" << std::endl;
