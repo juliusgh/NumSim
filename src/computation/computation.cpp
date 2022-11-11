@@ -91,7 +91,7 @@ void Computation::applyBoundaryValues() {
     }
 
     // set boundary values for v at bottom and top side
-    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd() - 1; i++) {
+    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
         // set boundary values for v at bottom side
         discretization_->v(i, discretization_->vJBegin()) = settings_.dirichletBcBottom[1];
         // set boundary values for v at top side

@@ -20,6 +20,35 @@ TEST(FieldVariableTest, ValueCheck) {
     ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));
 }
 
+TEST(FieldVariableTest, OutputWriterCheckV) {
+    auto size = std::array<int, 2>{3 + 2, 4 + 2};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2., meshWidth[1]};
+
+    FieldVariable v = FieldVariable(size, origin, meshWidth);
+    for (int i = 1; i < size[0] - 1; i++) {
+        for (int j = 1; j < size[1] - 1; j++) {
+            v(i, j) = i * 10 + j;
+        }
+    }
+    v.print();
+
+    FieldVariable v_interp = FieldVariable({size[0] - 1, size[1] - 1}, origin, meshWidth);
+    for (int i = 0; i < size[0] - 1; i++) {
+        for (int j = 0; j < size[1] - 1; j++) {
+            double x = meshWidth[0] * i;
+            double y = meshWidth[0] * j;
+            v_interp(i, j) = v.interpolateAt(x, y);
+        }
+    }
+    v_interp.print();
+
+    /*ASSERT_EQ(0.0, v.interpolateAt(0.0, 0.0));
+    ASSERT_EQ(1.0, fv.interpolateAt(1.0, 1.0));
+    ASSERT_EQ(0.25, fv.interpolateAt(0.5, 0.5));
+    ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));*/
+}
+
 TEST(SORTest, Test1) {
     auto nCells = std::array<int, 2>{5, 10};
     auto meshWidth = std::array<double, 2>{0.1, 0.05};
