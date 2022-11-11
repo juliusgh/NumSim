@@ -21,8 +21,6 @@ double FieldVariable::interpolateAt(double x, double y) const
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
 
-    std::cout << x << "," << y;
-
     x += meshWidth_[0];
     y += meshWidth_[1];
 
@@ -56,7 +54,7 @@ double FieldVariable::interpolateAt(double x, double y) const
     double f0 = (x1 - x) / (x1 - x0) * q00 + (x - x0) / (x1 - x0) * q10;
     double f1 = (x1 - x) / (x1 - x0) * q01 + (x - x0) / (x1 - x0) * q11;
     double f = (y1 - y) / (y1 - y0) * f0 + (y - y0) / (y1 - y0) * f1;
-    
+
     return f;
 }
 
