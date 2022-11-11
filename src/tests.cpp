@@ -34,20 +34,38 @@ TEST(FieldVariableTest, InterpolationCheck) {
     v.print();
 
     FieldVariable v_interp = FieldVariable({size[0] - 1, size[1] - 1}, origin, meshWidth);
-    for (int i = 0; i < size[0] - 1; i++) {
-        for (int j = 0; j < size[1] - 1; j++) {
-            double x = meshWidth[0] * i;
-            double y = meshWidth[0] * j;
-            v_interp(i, j) = v.interpolateAt(x, y);
-        }
-    }
-    // double i=2;
-    // double j=2.5;
-    // double x = meshWidth[0] * i;
-    // double y = meshWidth[0] * j;
-    // v_interp(i, j) = v.interpolateAt(x, y);
+    // for (int i = 0; i < size[0] - 1; i++) {
+    //     for (int j = 0; j < size[1] - 1; j++) {
+    //         double x = meshWidth[0] * i;
+    //         double y = meshWidth[0] * j;
+    //         v_interp(i, j) = v.interpolateAt(x, y);
+    //     }
+    // }
+    
+    double i=0;
+    double j=0;
+    double x = meshWidth[0] * i;
+    double y = meshWidth[0] * j;
+    v_interp(i, j) = v.interpolateAt(x, y);
 
-    v_interp.print();
+    i=1;
+    j=1;
+    x = meshWidth[0] * i;
+    y = meshWidth[0] * j;
+    v_interp(i, j) = v.interpolateAt(x, y);
+
+    i=1.5;
+    j=1.5;
+    x = meshWidth[0] * i;
+    y = meshWidth[0] * j;
+    v_interp(i, j) = v.interpolateAt(x, y);
+
+    i=2;
+    j=2.5;
+    x = meshWidth[0] * i;
+    y = meshWidth[0] * j;
+    v_interp(i, j) = v.interpolateAt(x, y);
+
 }
 
 TEST(SORTest, Test1) {
