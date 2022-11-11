@@ -21,6 +21,8 @@ double FieldVariable::interpolateAt(double x, double y) const
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
 
+    std::cout << x << "," << y;
+
     x += meshWidth_[0];
     y += meshWidth_[1];
 
@@ -34,15 +36,27 @@ double FieldVariable::interpolateAt(double x, double y) const
     if (j == size_[1] - 1)
         j--;
 
-    // determine interpolation points
-    double x0 = origin_[0] + i * meshWidth_[0];
-    double x1 = x0 + meshWidth_[0];
-    double y0 = origin_[1] + j * meshWidth_[1];
-    double y1 = y0 + meshWidth_[1];
+    std::cout << " results in field "<< i << "," << j;
+
     double q00 = (*this)(i, j);
     double q01 = (*this)(i, j + 1);
     double q10 = (*this)(i + 1, j);
     double q11 = (*this)(i + 1, j + 1);
+
+    // determine interpolation points
+    i--;
+    j--;
+    double x0 = origin_[0] + i * meshWidth_[0];
+    double x1 = x0 + meshWidth_[0];
+    double y0 = origin_[1] + j * meshWidth_[1];
+    double y1 = y0 + meshWidth_[1];
+
+    std::cout << " interpolation points: " << x0 << "," <<  x1 <<  "," << y0 <<  "," << y1;
+
+    std::cout << " interpolation values: " << q00 << "," <<  q01 <<  "," << q10 <<  "," << q11<< std::endl;
+
+    x -= meshWidth_[0];
+    y -= meshWidth_[1];
 
     // bilinear interpolation
     double f0 = (x1 - x) / (x1 - x0) * q00 + (x - x0) / (x1 - x0) * q10;

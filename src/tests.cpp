@@ -20,8 +20,8 @@ TEST(FieldVariableTest, ValueCheck) {
     ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));
 }
 
-TEST(FieldVariableTest, OutputWriterCheckV) {
-    auto size = std::array<int, 2>{3 + 2, 4 + 2};
+TEST(FieldVariableTest, InterpolationCheck) {
+    auto size = std::array<int, 2>{5+2, 6+2};
     auto meshWidth = std::array<double, 2>{1.0, 1.0};
     auto origin = std::array<double, 2>{meshWidth[0] / 2., meshWidth[1]};
 
@@ -41,12 +41,13 @@ TEST(FieldVariableTest, OutputWriterCheckV) {
             v_interp(i, j) = v.interpolateAt(x, y);
         }
     }
-    v_interp.print();
+    // double i=2;
+    // double j=2.5;
+    // double x = meshWidth[0] * i;
+    // double y = meshWidth[0] * j;
+    // v_interp(i, j) = v.interpolateAt(x, y);
 
-    /*ASSERT_EQ(0.0, v.interpolateAt(0.0, 0.0));
-    ASSERT_EQ(1.0, fv.interpolateAt(1.0, 1.0));
-    ASSERT_EQ(0.25, fv.interpolateAt(0.5, 0.5));
-    ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));*/
+    v_interp.print();
 }
 
 TEST(SORTest, Test1) {
@@ -63,11 +64,11 @@ TEST(SORTest, Test1) {
     //std::cout << "p = ..." << std::endl;
     //pRef.print();
 
-    std::cout << "p = ..." << std::endl;
-    d->p().print();
+    // std::cout << "p = ..." << std::endl;
+    // d->p().print();
 
-    std::cout << "pref = ..." << std::endl;
-    pRef.print();
+    // std::cout << "pref = ..." << std::endl;
+    // pRef.print();
 
     for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
         for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
@@ -77,8 +78,8 @@ TEST(SORTest, Test1) {
             d->rhs(i, j) = rhs;
         }
     }
-    std::cout << "rhs = ..." << std::endl;
-    d->rhs().print();
+    // std::cout << "rhs = ..." << std::endl;
+    // d->rhs().print();
 
     double epsilon = 0.001;
     int maximumNumberOfIterations = 1000;
