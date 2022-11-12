@@ -21,12 +21,10 @@ double FieldVariable::interpolateAt(double x, double y) const
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
 
-    x += meshWidth_[0];
-    y += meshWidth_[1];
 
     // determine i and j indices
-    int i = (x - origin_[0]) / meshWidth_[0];
-    int j = (y - origin_[1]) / meshWidth_[1];
+    int i = (x + meshWidth_[0]  - origin_[0]) / meshWidth_[0];
+    int j = (y + meshWidth_[1] - origin_[1]) / meshWidth_[1];
 
     if (i == size_[0] - 1)
         i--;
@@ -47,8 +45,6 @@ double FieldVariable::interpolateAt(double x, double y) const
     double y0 = origin_[1] + j * meshWidth_[1];
     double y1 = y0 + meshWidth_[1];
 
-    x -= meshWidth_[0];
-    y -= meshWidth_[1];
 
     // bilinear interpolation
     double f0 = (x1 - x) / (x1 - x0) * q00 + (x - x0) / (x1 - x0) * q10;
