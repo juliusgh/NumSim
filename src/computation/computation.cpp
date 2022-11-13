@@ -45,20 +45,20 @@ void Computation::initialize(string filename)
 void Computation::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
-    // TODO: reach last endTime exactly!
     while (time < settings_.endTime){
         t_iter++;
         applyBoundaryValues();
-        computeTimeStepWidth();
         applyPreliminaryBoundaryValues();
-        computePreliminaryVelocities();
-        computeRightHandSide();
-        computePressure();
-        computeVelocities();
+        computeTimeStepWidth();
+        // Reach endTime exactly:
         if (time + dt_ > settings_.endTime) {
             dt_ = settings_.endTime - time;
         }
         time += dt_;
+        computePreliminaryVelocities();
+        computeRightHandSide();
+        computePressure();
+        computeVelocities();
         //output
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
@@ -70,17 +70,17 @@ void Computation::runSimulation() {
 
 //! set boundary values of u and v to correct values
 void Computation::applyBoundaryValues() {
-    // set boundary values for u at bottom and top side
+    // set boundary values for u at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
         // set boundary values for u at bottom side
         discretization_->u(i, discretization_->uJBegin()) =
-                2 * settings_.dirichletBcBottom[0] - discretization_->u(i, discretization_->uJBegin() + 1);
+                2.0 * settings_.dirichletBcBottom[0] - discretization_->u(i, discretization_->uInteriorJBegin());
         // set boundary values for u at top side
         discretization_->u(i, discretization_->uJEnd() - 1) =
-                2 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uJEnd() - 2);
+                2.0 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uInteriorJEnd() - 1);
     }
 
-    // set boundary values for v at bottom and top side
+    // set boundary values for v at bottom and top side (lower priority)
     for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
         // set boundary values for v at bottom side
         discretization_->v(i, discretization_->vJBegin()) = settings_.dirichletBcBottom[1];
@@ -88,7 +88,7 @@ void Computation::applyBoundaryValues() {
         discretization_->v(i, discretization_->vJEnd() - 1) = settings_.dirichletBcTop[1];
     }
 
-    // set boundary values for u at left and right side
+    // set boundary values for u at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
         // set boundary values for u at left side
         discretization_->u(discretization_->uIBegin(), j) = settings_.dirichletBcLeft[0];
@@ -96,21 +96,20 @@ void Computation::applyBoundaryValues() {
         discretization_->u(discretization_->uIEnd() - 1, j) = settings_.dirichletBcRight[0];
     }
 
-    // set boundary values for v at left and right side
+    // set boundary values for v at left and right side (higher priority)
     for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
         // set boundary values for v at left side
         discretization_->v(discretization_->vIBegin(), j) =
-                2 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
+                2.0 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
         // set boundary values for v at right side
         discretization_->v(discretization_->vIEnd() - 1, j) =
-                2 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vIEnd() - 2, j);
+                2.0 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vInteriorIEnd() - 1, j);
     }
 };
 
 //! set boundary values of F and G to correct values
-// TODO: verify is this correct
 void Computation::applyPreliminaryBoundaryValues(){
-    // set boundary values for F at bottom and top side
+    // set boundary values for F at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
         // set boundary values for F at bottom side
         discretization_->f(i, discretization_->uJBegin()) = discretization_->u(i, discretization_->uJBegin());
@@ -118,7 +117,7 @@ void Computation::applyPreliminaryBoundaryValues(){
         discretization_->f(i, discretization_->uJEnd() - 1) = discretization_->u(i, discretization_->uJEnd() - 1);
     }
 
-    // set boundary values for G at bottom and top side
+    // set boundary values for G at bottom and top side (lower priority)
     for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
         // set boundary values for v at bottom side
         discretization_->g(i, discretization_->vJBegin()) = discretization_->v(i, discretization_->vJBegin());
@@ -126,7 +125,7 @@ void Computation::applyPreliminaryBoundaryValues(){
         discretization_->g(i, discretization_->vJEnd() - 1) = discretization_->v(i, discretization_->vJEnd() - 1);
     }
 
-    // set boundary values for F at left and right side
+    // set boundary values for F at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
         // set boundary values for F at left side
         discretization_->f(discretization_->uIBegin(), j) = discretization_->u(discretization_->uIBegin(), j);
@@ -134,7 +133,7 @@ void Computation::applyPreliminaryBoundaryValues(){
         discretization_->f(discretization_->uIEnd() - 1, j) = discretization_->u(discretization_->uIEnd() - 1, j);
     }
 
-    // set boundary values for G at left and right side
+    // set boundary values for G at left and right side (higher priority)
     for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
         // set boundary values for G at left side
         discretization_->g(discretization_->vIBegin(), j) = discretization_->v(discretization_->vIBegin(), j);
