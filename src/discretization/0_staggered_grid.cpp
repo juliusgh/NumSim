@@ -52,25 +52,25 @@ double StaggeredGrid::dy() const
 //! first valid index for p in x direction
 int StaggeredGrid::pIBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for p in x direction
 int StaggeredGrid::pIEnd() const
 {
-    return nCells_[0] + 2;
+    return nCells_[0] + 1;
 };
 
 //! first valid index for p in y direction
 int StaggeredGrid::pJBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for p in y direction
 int StaggeredGrid::pJEnd() const
 {
-    return nCells_[1] + 2;
+    return nCells_[1] + 1;
 };
 
 //! get size of FieldVariable p
@@ -132,25 +132,25 @@ double &StaggeredGrid::p(int i, int j)
 //! first valid index for u in x direction
 int StaggeredGrid::uIBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for u in x direction
 int StaggeredGrid::uIEnd() const
 {
-    return nCells_[0] + 1;
+    return nCells_[0];
 };
 
 //! first valid index for u in y direction
 int StaggeredGrid::uJBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for u in y direction
 int StaggeredGrid::uJEnd() const
 {
-    return nCells_[1] + 2;
+    return nCells_[1] + 1;
 };
 
 //! get size of FieldVariable u
@@ -219,25 +219,25 @@ double &StaggeredGrid::u(int i, int j)
 //! first valid index for v in x direction
 int StaggeredGrid::vIBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for v in x direction
 int StaggeredGrid::vIEnd() const
 {
-    return nCells_[0] + 2;
+    return nCells_[0] + 1;
 };
 
 //! first valid index for v in y direction
 int StaggeredGrid::vJBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for v in y direction
 int StaggeredGrid::vJEnd() const
 {
-    return nCells_[1] + 1;
+    return nCells_[1];
 };
 
 //! get size of FieldVariable v
@@ -303,25 +303,25 @@ double &StaggeredGrid::v(int i, int j)
 //! first valid index for rhs in x direction
 int StaggeredGrid::rhsIBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for rhs in x direction
 int StaggeredGrid::rhsIEnd() const
 {
-    return nCells_[0] + 2;
+    return nCells_[0] + 1;
 };
 
 //! first valid index for rhs in y direction
 int StaggeredGrid::rhsJBegin() const
 {
-    return 0;
+    return -1;
 };
 
 //! one after last valid index for rhs in y direction
 int StaggeredGrid::rhsJEnd() const
 {
-    return nCells_[1] + 2;
+    return nCells_[1] + 1;
 };
 
 //! get size of FieldVariable rhs
