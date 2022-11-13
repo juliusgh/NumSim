@@ -1,8 +1,5 @@
 //#include "output_writer/output_writer_paraview.h"
 #include "settings.h"
-#include "discretization/2_central_differences.h"
-#include "pressure_solver/sor.h"
-#include "pressure_solver/gauss_seidel.h"
 #include "computation/computation.h"
 #include <iostream>
 #include <cmath>

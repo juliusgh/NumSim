@@ -19,9 +19,9 @@ add_executable(${PROJECT_NAME}
         discretization/2_central_differences.cpp
         discretization/2_donor_cell.cpp
 
-        pressure_solver/pressure_solver.cpp
-        pressure_solver/gauss_seidel.cpp
-        pressure_solver/sor.cpp
+        pressure_solver/0_pressure_solver.cpp
+        pressure_solver/1_gauss_seidel.cpp
+        pressure_solver/1_sor.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp
@@ -47,9 +47,9 @@ add_executable(runTests
         discretization/2_central_differences.cpp
         discretization/2_donor_cell.cpp
 
-        pressure_solver/pressure_solver.cpp
-        pressure_solver/gauss_seidel.cpp
-        pressure_solver/sor.cpp
+        pressure_solver/0_pressure_solver.cpp
+        pressure_solver/1_gauss_seidel.cpp
+        pressure_solver/1_sor.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp

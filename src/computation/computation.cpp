@@ -1,4 +1,6 @@
 #include "computation/computation.h"
+#include "pressure_solver/1_gauss_seidel.h"
+#include "pressure_solver/1_sor.h"
 
 //! initialize the computation object
 //! parse the settings from file that is given as the only command line argument
@@ -59,7 +61,7 @@ void Computation::runSimulation() {
         time += dt_;
         //output
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-            ", res. " << /*pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() <<*/ endl;
+            ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
         outputWriterText_->writeFile(time);
         outputWriterText_->writePressureFile();
         outputWriterParaview_->writeFile(time);

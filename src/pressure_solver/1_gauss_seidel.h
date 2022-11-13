@@ -1,7 +1,7 @@
 #pragma once
 
 #include "discretization/1_discretization.h"
-#include "pressure_solver/pressure_solver.h"
+#include "pressure_solver/0_pressure_solver.h"
 
 /** Standard Gauss-Seidel solver.
  */

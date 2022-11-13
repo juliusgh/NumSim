@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pressure_solver/pressure_solver.h"
+#include "pressure_solver/0_pressure_solver.h"
 
 /** Successive over-relaxation solver.
  */

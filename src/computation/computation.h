@@ -5,8 +5,7 @@
 #include "discretization/1_discretization.h"
 #include "discretization/2_donor_cell.h"
 #include "discretization/2_central_differences.h"
-#include "pressure_solver/gauss_seidel.h"
-#include "pressure_solver/sor.h"
+#include "pressure_solver/0_pressure_solver.h"
 #include "output_writer/output_writer_paraview.h"
 #include "output_writer/output_writer_text.h"
 

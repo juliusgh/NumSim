@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include "storage/fieldvariable.h"
 #include "discretization/2_central_differences.h"
-#include "pressure_solver/sor.h"
-#include "pressure_solver/gauss_seidel.h"
+#include "pressure_solver/1_sor.h"
+#include "pressure_solver/1_gauss_seidel.h"
 #include <cmath>
 
 TEST(FieldVariableTest, ValueCheck) {
@@ -85,8 +85,8 @@ TEST(SORTest, Test1) {
     double omega = 2 / (1 + sin(3.1 * meshWidth[0]));
     auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
     sor.solve();
-    std::cout << "Iterations "  << sor.iterations() << std::endl;
-    std::cout << "Norm "  << sor.residualNorm() << std::endl;
+    /*std::cout << "Iterations "  << sor.iterations() << std::endl;
+    std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
 
     //std::cout << "p = ..." << std::endl;
     //d->p().print();
@@ -155,8 +155,8 @@ TEST(GaussSeidelTest, Test1) {
     int maximumNumberOfIterations = 1000;
     auto gs = GaussSeidel(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations);
     gs.solve();
-    std::cout << "Iterations "  << gs.iterations() << std::endl;
-    std::cout << "Norm "  << gs.residualNorm() << std::endl;
+    /*std::cout << "Iterations "  << gs.iterations() << std::endl;
+    std::cout << "Norm "  << gs.residualNorm() << std::endl;*/
 
     //std::cout << "p = ..." << std::endl;
     //d->p().print();

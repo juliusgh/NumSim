@@ -1,0 +1,56 @@
+#include "pressure_solver/0_pressure_solver.h"
+
+PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
+                               double epsilon,
+                               int maximumNumberOfIterations) :
+        discretization_(discretization),
+        epsilon_(epsilon),
+        maximumNumberOfIterations_(maximumNumberOfIterations) {
+
+}
+
+void PressureSolver::setBoundaryValues() {
+    // copy values to bottom and top boundary (lower priority)
+    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
+
+        // copy values to bottom boundary
+        discretization_->p(i, discretization_->pJBegin()) = discretization_->p(i, discretization_->pInteriorJBegin());
+
+        // copy values to top boundary
+        discretization_->p(i, discretization_->pJEnd() - 1) = discretization_->p(i, discretization_->pInteriorJEnd() - 1);
+    }
+    // copy values to left and right boundary (higher priority)
+    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
+
+        // copy values to left boundary
+        discretization_->p(discretization_->pIBegin(), j) = discretization_->p(discretization_->pInteriorIBegin(), j);
+
+        // copy values to right boundary
+        discretization_->p(discretization_->pIEnd() - 1, j) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
+    }
+};
+
+void PressureSolver::computeResidualNorm() {
+    double residual_norm2 = 0.0;
+    double dy = discretization_->dy();
+    double dx = discretization_->dx();
+    double dx2 = pow(dx,2);
+    double dy2 = pow(dy,2);
+    int N = discretization_->nCells()[0] * discretization_->nCells()[1];
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            double pxx = (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
+            double pyy = (discretization_->p(i, j + 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j - 1)) / dy2;
+            residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
+        }
+    }
+    residual_norm2_ = residual_norm2 / N;
+};
+
+double PressureSolver::residualNorm() const {
+    return residual_norm2_;
+}
+
+int PressureSolver::iterations() const {
+    return iterations_;
+}
