@@ -14,7 +14,6 @@ std::array<int, 2> Array2D::size() const {
 }
 
 double &Array2D::operator()(int i, int j) {
-    //std::cout << "&Array2d(" << i << ", " << j << ")" << std::endl;
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
@@ -26,7 +25,6 @@ double &Array2D::operator()(int i, int j) {
 }
 
 double Array2D::operator()(int i, int j) const {
-    //std::cout << "Array2d(" << i << ", " << j << ")" << std::endl;
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
