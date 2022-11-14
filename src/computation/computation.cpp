@@ -2,14 +2,17 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
 
-//! initialize the computation object
-//! parse the settings from file that is given as the only command line argument
+/**
+ * Initialize the computation object
+ * 
+ * Parse the settings from the parameter file that is given as the command line argument
+ */
 void Computation::initialize(string filename)
 {
     settings_ = Settings();
-    // load settings from file
+    // Load settings from file
     settings_.loadFromFile(filename);
-    // print settings
+    // Print settings
     settings_.printSettings();
 
     // Initialize discretization
@@ -41,25 +44,54 @@ void Computation::initialize(string filename)
     outputWriterParaview_ = std::make_unique<OutputWriterParaview>(discretization_);
 };
 
-//! run the whole simulation until tend
+/**
+ * Run the whole simulation until tend
+ */
 void Computation::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
     while (time < settings_.endTime){
         t_iter++;
+
+        /*
+        * 1) Apply boundary values (for u, v, F, G)
+        */
         applyBoundaryValues();
         applyPreliminaryBoundaryValues();
+
+        /*
+        * 2) Compute the next time step width
+        */
         computeTimeStepWidth();
-        // Reach endTime exactly:
+        // endTime should be reached exactly:
         if (time + dt_ > settings_.endTime) {
             dt_ = settings_.endTime - time;
         }
         time += dt_;
+
+        /*
+        * 3) Compute preliminary velocities (F, G)
+        */
         computePreliminaryVelocities();
+
+        /*
+        * 4) Compute the right hand side (rhs)
+        */
         computeRightHandSide();
+
+        /*
+        * 5) Compute the pressure (p) by solving the Poisson equation
+        */
         computePressure();
+
+        /*
+        * 6) Update the velocities (u, v)
+        */
         computeVelocities();
-        //output
+
+        /*
+        * 7) Output debug information and simulation results
+        */
 #ifndef NDEBUG
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
@@ -70,7 +102,11 @@ void Computation::runSimulation() {
     }
 };
 
-//! set boundary values of u and v to correct values
+/**
+ * Set the boundary values of the velocities (u, v)
+ * 
+ * Left and right boundaries should overwrite bottom and top boundaries
+ */
 void Computation::applyBoundaryValues() {
     // set boundary values for u at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -109,7 +145,11 @@ void Computation::applyBoundaryValues() {
     }
 };
 
-//! set boundary values of F and G to correct values
+/**
+ * Set the boundary values of the preliminary velocities (u, v)
+ * 
+ * Left and right boundaries should overwrite bottom and top boundaries
+ */
 void Computation::applyPreliminaryBoundaryValues(){
     // set boundary values for F at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -144,9 +184,11 @@ void Computation::applyPreliminaryBoundaryValues(){
     }
 };
 
-//! compute the preliminary velocities, F and G
+/**
+ * Compute the preliminary velocities (F, G) using finite differences
+ */ 
 void Computation::computePreliminaryVelocities(){
-    // compute F and G in the interior of the domain
+    // Compute F in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
             double lap_u = discretization_->computeD2uDx2(i,j) + discretization_->computeD2uDy2(i,j);
@@ -154,6 +196,8 @@ void Computation::computePreliminaryVelocities(){
             discretization_->f(i,j) = discretization_->u(i,j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
         }
     }
+
+    // Compute G in the interior of the domain
     for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             double lap_v = discretization_->computeD2vDx2(i,j) + discretization_->computeD2vDy2(i,j);
@@ -163,13 +207,18 @@ void Computation::computePreliminaryVelocities(){
     }
 };
 
-//! solve the Poisson equation for the pressure
+/**
+ * Compute the pressure p by solving the Poisson equation
+ */
 void Computation::computePressure() {
     pressureSolver_->solve();
 };
 
-//! compute the right hand side of the Poisson equation for the pressure
+/**
+ * Compute the right hand side rhs of the pressure Poisson equation 
+ */
 void Computation::computeRightHandSide() {
+    // Compute rhs in the interior of the domain using finite differences
     for (int i = discretization_->rhsInteriorIBegin(); i < discretization_->rhsInteriorIEnd(); i++) {
         for (int j = discretization_->rhsInteriorJBegin(); j < discretization_->rhsInteriorJEnd(); j++) {
             double fx = (discretization_->f(i, j) - discretization_->f(i - 1, j)) / discretization_->dx();
@@ -179,23 +228,35 @@ void Computation::computeRightHandSide() {
     }
 };
 
-//! compute the time step width dt from maximum velocities
+/**
+ * Compute the time step width dt based on the maximum velocities
+ */
 void Computation::computeTimeStepWidth() {
+    // Compute maximal time step width regarding the diffusion
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
 
+    // Compute maximal time step width regarding the convection u
     double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
+    
+    // Compute maximal time step width regarding the convection v
     double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
 
+    // Set the appropriate time step width by using a security factor tau
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
 };
 
-//! compute the new velocities, u,v, from the preliminary velocities, F,G and the pressure, p
+/**
+ * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
+ */
 void Computation::computeVelocities() {
+    // Compute u in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
             discretization_->u(i, j) = discretization_->f(i, j) - dt_ * discretization_->computeDpDx(i, j);
         }
     }
+
+    // Compute v in the interior of the domain
     for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             discretization_->v(i, j) = discretization_->g(i, j) - dt_ * discretization_->computeDpDy(i, j);
