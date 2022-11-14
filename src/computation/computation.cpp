@@ -2,10 +2,12 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
 
+
 /**
  * Initialize the computation object
  * 
  * Parse the settings from the parameter file that is given as the command line argument
+ * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
  */
 void Computation::initialize(string filename)
 {

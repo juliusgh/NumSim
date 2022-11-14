@@ -1,7 +1,7 @@
 #pragma once
-#include "settings.h"
 #include <memory>
 #include <algorithm>
+#include "settings.h"
 #include "discretization/1_discretization.h"
 #include "discretization/2_donor_cell.h"
 #include "discretization/2_central_differences.h"
@@ -13,35 +13,59 @@
 /** This class handles the main simulation.
 * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
 */
-
 class Computation {
 public:
-    //! initialize the computation object
-    //! parse the settings from file that is given as the only command line argument
+    /**
+     * Initialize the computation object
+     * 
+     * Parse the settings from the parameter file that is given as the command line argument
+     * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
+     */
     void initialize(string filename);
 
-    //! run the whole simulation until tend
+    /**
+     * Run the whole simulation until tend
+     */
     void runSimulation();
 
 private:
-    //! set boundary values of u and v to correct values
+    /**
+     * Set the boundary values of the velocities (u, v)
+     * 
+     * Left and right boundaries should overwrite bottom and top boundaries
+     */
     void applyBoundaryValues();
 
-    //! set boundary values of F and G to correct values
+    /**
+     * Set the boundary values of the preliminary velocities (u, v)
+     * 
+     * Left and right boundaries should overwrite bottom and top boundaries
+     */
     void applyPreliminaryBoundaryValues();
 
-    //! compute the preliminary velocities, F and G
+    /**
+     * Compute the preliminary velocities (F, G) using finite differences
+     */ 
     void computePreliminaryVelocities();
 
-    //! solve the Poisson equation for the pressure
+    /**
+     * Compute the pressure p by solving the Poisson equation
+     */
     void computePressure();
 
-    //! compute the right hand side of the Poisson equation for the pressure
+    /**
+     * Compute the right hand side rhs of the pressure Poisson equation 
+     */
     void computeRightHandSide();
-    //! compute the time step width dt from maximum velocities
+
+    /**
+     * Compute the time step width dt based on the maximum velocities
+     */
     void computeTimeStepWidth();
 
-    //! compute the new velocities, u,v, from the preliminary velocities, F,G and the pressure, p
+    /**
+     * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
+     */
     void computeVelocities();
 
     Settings settings_;
