@@ -31,14 +31,8 @@ add_executable(${PROJECT_NAME}
 # Locate GTest
 find_package(GTest)
 
-# Output various cmake variables for demonstration purpose
-message("If VTK was found on the system: VTK_FOUND: ${VTK_FOUND}")
-message("The directory of VTK: VTK_DIR: ${VTK_DIR}")
-message("The include directory of VTK: VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
-
 # If an installation of vtk was found on the system
 if (GTest_FOUND)
-
     # Link runTests with what we want to test and the GTest and pthread library
     add_executable(runTests
         tests.cpp
@@ -75,11 +69,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 
 # Search for the external package "VTK"
 find_package(VTK)
-
-# Output various cmake variables for demonstration purpose
-message("If VTK was found on the system: VTK_FOUND: ${VTK_FOUND}")
-message("The directory of VTK: VTK_DIR: ${VTK_DIR}")
-message("The include directory of VTK: VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
 
 # If an installation of vtk was found on the system
 if (VTK_FOUND)
