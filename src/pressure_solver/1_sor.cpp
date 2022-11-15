@@ -25,7 +25,7 @@ void SOR::solve() {
     const double dy2 = pow(discretization_->dy(), 2);
     const double k1 = 1 - omega_;
     const double k2 = omega_ * (dx2 * dy2) / (2.0 * (dx2 + dy2));
-    const double epsilon_squared = pow(epsilon_, 2);
+    const double eps2 = pow(epsilon_, 2);
     int iteration = 0;
     do {
         iteration++;
@@ -39,6 +39,6 @@ void SOR::solve() {
         }
         setBoundaryValues();
         computeResidualNorm();
-    } while (residualNorm() > epsilon_squared && iteration < maximumNumberOfIterations_);
+    } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 };

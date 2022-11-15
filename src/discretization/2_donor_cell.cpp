@@ -72,7 +72,7 @@ double DonorCell::computeDuvDy(int i, int j) const {
     const double u_interp_down_donor = (u(i,j-1) - u(i,j)) / 2.0;
 
     const double A = (u_interp_up * v_interp_right - u_interp_down * vDown_interp_right) / dy();
-    const double B = (u_interp_up_donor * fabs(v_interp_right) -  u_interp_down_donor * fabs(vDown_interp_right)) / dy()
+    const double B = (u_interp_up_donor * fabs(v_interp_right) -  u_interp_down_donor * fabs(vDown_interp_right)) / dy();
 
     return A + alpha_ * B;
 }

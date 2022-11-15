@@ -1,8 +1,6 @@
 #include "storage/array2d.h"
 #include <iostream>
-#ifndef NDEBUG
 #include <cassert>
-#endif
 
 /**
  * This class represents a 2D array of double values.
@@ -36,8 +34,8 @@ double &Array2D::operator()(int i, int j) {
     #ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
-    #endif
     assert(j * size_[0] + i < (int) data_.size());
+    #endif
 
     return data_[index];
 }
@@ -49,8 +47,8 @@ double Array2D::operator()(int i, int j) const {
     #ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
-    #endif
     assert(j * size_[0] + i < (int) data_.size());
+    #endif
 
     return data_[index];
 }

@@ -1,4 +1,5 @@
 #include "discretization/2_central_differences.h"
+#include <cmath>
 
 /**
  *  calculate derivatives needed for pressure calculations using the central differences approach

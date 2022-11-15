@@ -97,9 +97,9 @@ void Computation::runSimulation() {
 #ifndef NDEBUG
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
-#endif
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
+#endif
         outputWriterParaview_->writeFile(time);
     }
 };
