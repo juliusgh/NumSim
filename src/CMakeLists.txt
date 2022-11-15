@@ -32,7 +32,7 @@ add_executable(${PROJECT_NAME}
 find_package(GTest)
 
 # If an installation of vtk was found on the system
-if (GTest_FOUND)
+if(GTest_FOUND)
     # Link runTests with what we want to test and the GTest and pthread library
     add_executable(runTests
         tests.cpp
@@ -71,10 +71,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 find_package(VTK)
 
 # If an installation of vtk was found on the system
-if (VTK_FOUND)
+if(VTK_FOUND)
     include_directories(${VTK_INCLUDE_DIRS})               # add the include directory where the header files are for the compiler
     target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES}) # add the libraries for the linker
-    target_link_libraries(runTests ${VTK_LIBRARIES}) # add the libraries for the linker
+    if(GTest_FOUND)
+        target_link_libraries(runTests ${VTK_LIBRARIES}) # add the libraries for the linker
+    endif(GTest_FOUND)
 endif(VTK_FOUND)
 
 # install numsim executable in build directory
