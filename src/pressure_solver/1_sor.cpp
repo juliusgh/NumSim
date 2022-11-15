@@ -21,12 +21,11 @@ SOR::SOR(std::shared_ptr <Discretization> discretization,
 }
 
 void SOR::solve() {
-    auto dx = discretization_->dx();
-    auto dy = discretization_->dy();
-    double dx2 = pow(dx, 2);
-    double dy2 = pow(dy, 2);
-    double k1 = 1 - omega_;
-    double k2 = omega_ * (dx2 * dy2) / (2.0 * (dx2 + dy2));
+    const double dx2 = pow(discretization_->dx(), 2);
+    const double dy2 = pow(discretization_->dy(), 2);
+    const double k1 = 1 - omega_;
+    const double k2 = omega_ * (dx2 * dy2) / (2.0 * (dx2 + dy2));
+    const double epsilon_squared = pow(epsilon_, 2);
     int iteration = 0;
     do {
         iteration++;
@@ -40,6 +39,6 @@ void SOR::solve() {
         }
         setBoundaryValues();
         computeResidualNorm();
-    } while (iteration < maximumNumberOfIterations_ && residualNorm() > pow(epsilon_, 2));
+    } while (residualNorm() > epsilon_squared && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 };

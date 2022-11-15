@@ -1,7 +1,8 @@
 #include "discretization/0_staggered_grid.h"
-#include <cassert>
 #include <iostream>
-
+#ifndef NDEBUG
+#include <cassert>
+#endif
 //! constructor
 StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
                              std::array<double, 2> meshWidth) :
@@ -112,16 +113,20 @@ const FieldVariable &StaggeredGrid::p() const
 //! evaluate field variable p in an element (i,j)
 double StaggeredGrid::p(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
+    #endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
 //! evaluate field variable p in an element (i,j)
 double &StaggeredGrid::p(int i, int j)
 {
+    #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
+    #endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
@@ -199,16 +204,20 @@ const FieldVariable &StaggeredGrid::u() const
 //! access value of u in element (i,j)
 double StaggeredGrid::u(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
 //! access value of u in element (i,j)
 double &StaggeredGrid::u(int i, int j)
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
@@ -283,16 +292,20 @@ const FieldVariable &StaggeredGrid::v() const
 //! access value of v in element (i,j)
 double StaggeredGrid::v(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
 //! access value of v in element (i,j)
 double &StaggeredGrid::v(int i, int j)
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
@@ -364,16 +377,20 @@ int StaggeredGrid::rhsInteriorJEnd() const
 //! access value of rhs in element (i,j)
 double StaggeredGrid::rhs(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    #endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
 //! access value of rhs in element (i,j)
 double &StaggeredGrid::rhs(int i, int j)
 {
+    #ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    #endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
@@ -390,16 +407,20 @@ const FieldVariable &StaggeredGrid::rhs() const
 //! access value of F in element (i,j)
 double StaggeredGrid::f(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
 //! access value of F in element (i,j)
 double &StaggeredGrid::f(int i, int j)
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
@@ -416,16 +437,20 @@ const FieldVariable &StaggeredGrid::f() const
 //! access value of G in element (i,j)
 double StaggeredGrid::g(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 
 //! access value of G in element (i,j)
 double &StaggeredGrid::g(int i, int j)
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 

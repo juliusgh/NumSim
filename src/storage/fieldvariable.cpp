@@ -1,7 +1,11 @@
 #include "storage/fieldvariable.h"
 #include "storage/array2d.h"
-#include <cassert>
 #include <cmath>
+
+#ifndef NDEBUG
+#include <cassert>
+#endif
+
 
 /**
  * A field variable is the discretization of a scalar function f(x) with x in the computational domain.
@@ -33,8 +37,10 @@ FieldVariable::FieldVariable(std::array<int, 2> size,
 double FieldVariable::interpolateAt(double x, double y) const
 {
     // Assert that the specified point is part of the domain
+    #ifndef NDEBUG
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
+    #endif
 
     // Determine i and j indices of the corresponding cell (shifted by origin)
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
