@@ -1,5 +1,11 @@
 #include "1_discretization.h"
 
+/**
+ * Calculate derivatives needed for velocity calculations
+ * @param nCells
+ * @param meshWidth
+ */
+
 Discretization::Discretization(std::array<int,2> nCells, std::array<double,2> meshWidth) :
         StaggeredGrid(nCells, meshWidth)
 {

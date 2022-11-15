@@ -1,6 +1,13 @@
 #include <cmath>
 #include "discretization/2_donor_cell.h"
 
+/**
+ *  calculate derivatives needed for pressure calculations using the donor cell approach
+ * @param nCells
+ * @param meshWidth
+ * @param alpha
+ */
+
 DonorCell::DonorCell(std::array<int, 2> nCells, std::array<double, 2> meshWidth, double alpha) :
     Discretization(nCells, meshWidth),
     alpha_(alpha)

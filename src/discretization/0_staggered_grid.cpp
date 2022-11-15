@@ -17,7 +17,7 @@ StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
     
 };
 
-/*
+/**
  * mesh information
  */
 
@@ -45,7 +45,7 @@ double StaggeredGrid::dy() const
     return meshWidth_[1];
 };
 
-/*
+/**
  * pressure variable p
  */
 
@@ -125,7 +125,7 @@ double &StaggeredGrid::p(int i, int j)
     return p_(i - pIBegin(), j - pJBegin());
 };
 
-/*
+/**
  * velocity in x-direction u
  */
 
@@ -212,7 +212,7 @@ double &StaggeredGrid::u(int i, int j)
     return u_(i - uIBegin(), j - uJBegin());
 };
 
-/*
+/**
  * velocity in y-direction v
  */
 
@@ -296,7 +296,7 @@ double &StaggeredGrid::v(int i, int j)
     return v_(i - vIBegin(), j - vJBegin());
 };
 
-/*
+/**
  * right hand side rhs
  */
 
@@ -383,7 +383,7 @@ const FieldVariable &StaggeredGrid::rhs() const
     return rhs_;
 };
 
-/*
+/**
  * preliminary velocity F
  */
 
@@ -409,7 +409,7 @@ const FieldVariable &StaggeredGrid::f() const
     return f_;
 };
 
-/*
+/**
  * preliminary velocity G
  */
 

@@ -2,6 +2,14 @@
 #include <cmath>
 #include <iostream>
 
+/**
+ * Successive over-relaxation solver for solving a linear system of equations.
+ * @param discretization
+ * @param epsilon
+ * @param maximumNumberOfIterations
+ * @param omega
+ */
+
 SOR::SOR(std::shared_ptr <Discretization> discretization,
          double epsilon,
          int maximumNumberOfIterations,

@@ -3,7 +3,8 @@
 #include "discretization/1_discretization.h"
 #include "pressure_solver/0_pressure_solver.h"
 
-/** Standard Gauss-Seidel solver.
+/**
+ * Standard Gauss-Seidel solver for linear systems of equations..
  */
 
 class GaussSeidel : public PressureSolver {
