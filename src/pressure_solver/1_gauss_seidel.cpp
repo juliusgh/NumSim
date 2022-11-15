@@ -2,6 +2,13 @@
 #include <cmath>
 #include <iostream>
 
+/**
+ * Standard Gauss-Seidel solver for linear systems of equations.
+ * @param discretization
+ * @param epsilon
+ * @param maximumNumberOfIterations
+ */
+
 GaussSeidel::GaussSeidel(std::shared_ptr <Discretization> discretization,
          double epsilon,
          int maximumNumberOfIterations) :

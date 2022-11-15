@@ -2,6 +2,10 @@
 
 #include "discretization/1_discretization.h"
 
+/**
+ *  calculate derivatives needed for pressure calculations using the central differences approach
+ */
+
 class CentralDifferences : public Discretization
 {
 public:

@@ -2,7 +2,8 @@
 
 #include "pressure_solver/0_pressure_solver.h"
 
-/** Successive over-relaxation solver.
+/**
+ * Successive over-relaxation solver for solving a linear system of equations.
  */
 
 class SOR : public PressureSolver {

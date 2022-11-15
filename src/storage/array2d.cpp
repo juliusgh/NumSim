@@ -2,6 +2,13 @@
 #include <iostream>
 #include <cassert>
 
+/**
+ * This class represents a 2D array of double values.
+ *  Internally they are stored consecutively in memory.
+ *  The entries can be accessed by two indices i,j.
+ * @param size
+ */
+
 Array2D::Array2D(std::array<int, 2> size) :
         size_(size) {
     // allocate data, initialize to 0

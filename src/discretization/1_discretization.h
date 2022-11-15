@@ -3,6 +3,10 @@
 #include "discretization/0_staggered_grid.h"
 #include <array>
 
+/**
+ * Calculate derivatives needed for velocity calculations
+ */
+
 class Discretization :
   public StaggeredGrid
 {
