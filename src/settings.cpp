@@ -92,76 +92,100 @@ void Settings::loadFromFile(string filename) {
         // parse actual value and set corresponding parameter
         if (parameterName == "nCellsX") {
             nCells[0] = atoi(value.c_str());
+            continue;
         }
-        else if (parameterName == "nCellsY")
+        if (parameterName == "nCellsY")
         {
             nCells[1] = atoi(value.c_str());
+            continue;
         }
-        else if (parameterName == "physicalSizeX") {
+        if (parameterName == "physicalSizeX") {
             physicalSize[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "physicalSizeY") {
+        if (parameterName == "physicalSizeY") {
             physicalSize[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "re") {
+        if (parameterName == "re") {
             re = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "endTime") {
+        if (parameterName == "endTime") {
             endTime = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "tau") {
+        if (parameterName == "tau") {
             tau = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "maximumDt") {
+        if (parameterName == "maximumDt") {
             maximumDt = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "gX") {
+        if (parameterName == "gX") {
             g[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "gY") {
+        if (parameterName == "gY") {
             g[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "useDonorCell") {
+        if (parameterName == "useDonorCell") {
             istringstream(value.c_str()) >> boolalpha >> useDonorCell;
+            continue;
         }
-        else if (parameterName == "alpha") {
+        if (parameterName == "alpha") {
             alpha = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletBottomX") {
+        if (parameterName == "dirichletBottomX") {
             dirichletBcBottom[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletBottomY") {
+        if (parameterName == "dirichletBottomY") {
             dirichletBcBottom[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletTopX") {
+        if (parameterName == "dirichletTopX") {
             dirichletBcTop[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletTopY") {
+        if (parameterName == "dirichletTopY") {
             dirichletBcTop[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletLeftX") {
+        if (parameterName == "dirichletLeftX") {
             dirichletBcLeft[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletLeftY") {
+        if (parameterName == "dirichletLeftY") {
             dirichletBcLeft[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletRightX") {
+        if (parameterName == "dirichletRightX") {
             dirichletBcRight[0] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "dirichletRightY") {
+        if (parameterName == "dirichletRightY") {
             dirichletBcRight[1] = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "pressureSolver") {
+        if (parameterName == "pressureSolver") {
             pressureSolver = value;
+            continue;
         }
-        else if (parameterName == "omega") {
+        if (parameterName == "omega") {
             omega = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "epsilon") {
+        if (parameterName == "epsilon") {
             epsilon = atof(value.c_str());
+            continue;
         }
-        else if (parameterName == "maximumNumberOfIterations") {
+        if (parameterName == "maximumNumberOfIterations") {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
+            continue;
         }
     }
 }

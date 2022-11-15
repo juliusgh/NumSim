@@ -1,8 +1,7 @@
 #include "discretization/0_staggered_grid.h"
 #include <iostream>
-#ifndef NDEBUG
 #include <cassert>
-#endif
+
 //! constructor
 StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
                              std::array<double, 2> meshWidth) :
