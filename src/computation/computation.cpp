@@ -15,7 +15,9 @@ void Computation::initialize(string filename)
     // Load settings from file
     settings_.loadFromFile(filename);
     // Print settings
+#ifndef NDEBUG
     settings_.printSettings();
+#endif
 
     // Initialize discretization
     for (int i = 0; i < 2; i++)
