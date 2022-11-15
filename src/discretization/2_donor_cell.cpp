@@ -1,12 +1,12 @@
 #include <cmath>
 #include "discretization/2_donor_cell.h"
 
-/**
- *  calculate derivatives needed for pressure calculations using the donor cell approach
- * @param nCells
- * @param meshWidth
- * @param alpha
- */
+  /**
+   * calculate derivatives needed for pressure calculations using the donor cell approach
+   * @param nCells: number of inner cells
+   * @param meshWidth: width of a cell in both directions
+   * @param alpha: donor cell weight parameter
+   */
 
 DonorCell::DonorCell(std::array<int, 2> nCells, std::array<double, 2> meshWidth, double alpha) :
     Discretization(nCells, meshWidth),
@@ -15,7 +15,12 @@ DonorCell::DonorCell(std::array<int, 2> nCells, std::array<double, 2> meshWidth,
     
 }
 
-//! compute the 1st derivative ∂ u^2 / ∂x
+/**
+ * compute the 1st derivative ∂ u^2 / ∂x
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
+ */
 double DonorCell::computeDu2Dx(int i, int j) const {
     const double u_interp_right = (u(i+1,j) + u(i,j)) / 2.0;
     const double u_interp_left = (u(i,j) + u(i-1,j)) / 2.0;
@@ -29,7 +34,12 @@ double DonorCell::computeDu2Dx(int i, int j) const {
     return A + alpha_ * B;
 }
 
-//! compute the 1st derivative ∂ v^2 / ∂y
+/**
+ * compute the 1st derivative ∂ v^2 / ∂y
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
+ */
 double DonorCell::computeDv2Dy(int i, int j) const {
     const double v_interp_up = (v(i,j+1) + v(i,j)) / 2.0;
     const double v_interp_down = (v(i,j) + v(i,j-1)) / 2.0;
@@ -43,7 +53,12 @@ double DonorCell::computeDv2Dy(int i, int j) const {
     return A + alpha_ * B;
 }
 
-//! compute the 1st derivative ∂ (uv) / ∂x
+/**
+ * compute the 1st derivative ∂ (uv) / ∂x
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
+ */
 double DonorCell::computeDuvDx(int i, int j) const {
     const double u_interp_up = (u(i,j+1) + u(i,j)) / 2.0;
     const double uLeft_interp_up =  (u(i-1,j+1) + u(i-1,j)) / 2.0;
@@ -60,7 +75,12 @@ double DonorCell::computeDuvDx(int i, int j) const {
     return A + alpha_ * B;
 }
 
-//! compute the 1st derivative ∂ (uv) / ∂y
+/**
+ * compute the 1st derivative ∂ (uv) / ∂y
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
+ */
 double DonorCell::computeDuvDy(int i, int j) const {
     const double u_interp_up = (u(i,j+1) + u(i,j)) / 2.0;
     const double u_interp_down = (u(i,j) + u(i,j-1)) / 2.0;

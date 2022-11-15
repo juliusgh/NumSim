@@ -11,12 +11,20 @@
 class PressureSolver
 {
 public:
-    //! constructor
+    /**
+    *  constructor
+    * @param discretization: pointer to distrectization implementation
+    * @param epsilon: error tolerance
+    * @param maximumNumberOfIterations: maximal number of iterations before ending the iteration
+    */
     PressureSolver(std::shared_ptr<Discretization> discretization,
                    double epsilon,
                    int maximumNumberOfIterations);
     
-    //! solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
+    /**
+     * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
+     */
+
     virtual void solve() = 0;
 
     double residualNorm() const;
@@ -24,7 +32,9 @@ public:
     int iterations() const;
 
 protected:
-    //! set the boundary values to account for homogenous Neumann boundary conditions, this has to be called after every iteration
+    /**
+     * set the boundary values to account for homogenous Neumann boundary conditions, this has to be called after every iteration
+     */
     void setBoundaryValues();
     void computeResidualNorm();
     std::shared_ptr<Discretization> discretization_;
