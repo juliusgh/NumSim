@@ -47,11 +47,9 @@ void PressureSolver::setBoundaryValues() {
  */
 void PressureSolver::computeResidualNorm() {
     double residual_norm2 = 0.0;
-    double dy = discretization_->dy();
-    double dx = discretization_->dx();
-    double dx2 = pow(dx,2);
-    double dy2 = pow(dy,2);
-    int N = discretization_->nCells()[0] * discretization_->nCells()[1];
+    const double dx2 = pow(discretization_->dx(),2);
+    const double dy2 = pow(discretization_->dy(),2);
+    const int N = discretization_->nCells()[0] * discretization_->nCells()[1];
     for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             double pxx = (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
