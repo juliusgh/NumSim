@@ -19,7 +19,9 @@ SOR::SOR(std::shared_ptr <Discretization> discretization,
 {
 
 }
-
+/**
+ * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
+ */
 void SOR::solve() {
     auto dx = discretization_->dx();
     auto dy = discretization_->dy();

@@ -2,10 +2,17 @@
 
 #include "storage/fieldvariable.h"
 
+/**
+ * Implement staggered grid, providing a variety of parameters
+ */
 class StaggeredGrid
 {
 public:
-    //! constructor
+    /**
+    * constructor
+    * @param nCells: number of cells
+    * @param meshWidth: cell width in all directions
+    */
     StaggeredGrid(std::array<int, 2> nCells,
                   std::array<double, 2> meshWidth);
 

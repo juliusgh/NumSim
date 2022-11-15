@@ -2,7 +2,6 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
 
-
 /**
  * Initialize the computation object
  * 

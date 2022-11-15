@@ -2,9 +2,9 @@
 
 /**
  *  Interface for the pressure solver. It computes the pressure field variable such that the continuity equation is fulfilled.
- * @param discretization
- * @param epsilon
- * @param maximumNumberOfIterations
+ * @param discretization: pointer to distrectization implementation
+ * @param epsilon: error tolerance
+ * @param maximumNumberOfIterations: maximal number of iterations before ending the iteration
  */
 
 PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
