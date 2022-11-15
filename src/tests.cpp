@@ -5,10 +5,10 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include <cmath>
 
-TEST(FieldVariableTest, ValueCheck) {
+TEST(FieldVariableTest, InterpolationCheck1) {
     auto size = std::array<int, 2>{3, 3};
-    auto origin = std::array<double, 2>{0.0, 0.0};
     auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto origin = std::array<double, 2>{meshWidth[0], meshWidth[1]};
     FieldVariable fv = FieldVariable(size, origin, meshWidth);
     auto nCells = std::array<int, 2>{3, 3};
 
@@ -20,10 +20,25 @@ TEST(FieldVariableTest, ValueCheck) {
     ASSERT_EQ(0.5, fv.interpolateAt(1.0, 0.5));
 }
 
+TEST(FieldVariableTest, InterpolationCheck2) {
+    auto size = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    FieldVariable fv = FieldVariable(size, origin, meshWidth);
+    auto nCells = std::array<int, 2>{3, 3};
+
+    fv(1, 1) = 1.0;
+    fv(2, 1) = 2.0;
+    ASSERT_EQ(0.25, fv.interpolateAt(0.0, 0.0));
+    ASSERT_EQ(0.75, fv.interpolateAt(1.0, 1.0));
+    ASSERT_EQ(1.0, fv.interpolateAt(0.5, 0.5));
+    ASSERT_EQ(2.0, fv.interpolateAt(1.5, 0.5));
+}
+
 TEST(FieldVariableTest, InterpolationCheck) {
     auto size = std::array<int, 2>{6+2, 5+2};
     auto meshWidth = std::array<double, 2>{1.0, 1.0};
-    auto origin = std::array<double, 2>{meshWidth[0]-meshWidth[0]/2., meshWidth[1]};
+    auto origin = std::array<double, 2>{meshWidth[0]/2., meshWidth[1]};
 
     FieldVariable v = FieldVariable(size, origin, meshWidth);
     for (int i = 1; i < size[0] - 1; i++) {
@@ -31,7 +46,7 @@ TEST(FieldVariableTest, InterpolationCheck) {
             v(i, j) = i * 10 + j;
         }
     }
-    v.print();
+    //v.print();
     
     FieldVariable v_interp = FieldVariable({size[0] - 1, size[1] - 1}, origin, meshWidth);
     for (int i = 0; i < size[0] - 1; i++) {
@@ -41,20 +56,21 @@ TEST(FieldVariableTest, InterpolationCheck) {
             v_interp(i, j) = v.interpolateAt(x, y);
         }
     }
-    v_interp.print();
+    //v_interp.print();
 }
 
 TEST(SORTest, Test1) {
-    auto nCells = std::array<int, 2>{5, 10};
-    auto meshWidth = std::array<double, 2>{0.1, 0.05};
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{1, 1};
     auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
     auto d = new CentralDifferences(nCells, meshWidth);
-    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
+    auto dRef = new CentralDifferences(nCells, meshWidth);
     for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
         for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-            pRef(i, j) = 10 * i + j ;
+            dRef->p(i, j) = i + 10 * j;
         }
     }
+#ifndef NDEBUG
     //std::cout << "p = ..." << std::endl;
     //pRef.print();
 
@@ -63,33 +79,33 @@ TEST(SORTest, Test1) {
 
     // std::cout << "pref = ..." << std::endl;
     // pRef.print();
+#endif
 
     for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
         for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
-            double rhs = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
-                  (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
-            // std::cout << rhs << std::endl;
-            d->rhs(i, j) = rhs;
+            d->rhs(i, j) = (dRef->p(i + 1, j) - 2.0 * dRef->p(i, j) + dRef->p(i - 1, j)) / pow(d->dx(),2) +
+                  (dRef->p(i, j + 1) - 2.0 * dRef->p(i, j) + dRef->p(i, j - 1)) / pow(d->dy(),2);
         }
     }
     // std::cout << "rhs = ..." << std::endl;
-    // d->rhs().print();
+    dRef->p().print();
+    d->rhs().print();
 
     double epsilon = 0.001;
     int maximumNumberOfIterations = 1000;
-    double omega = 2 / (1 + sin(3.1 * meshWidth[0]));
+    double omega = 2.0 / (1.0 + sin(3.1 * meshWidth[0]));
     auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
     sor.solve();
     /*std::cout << "Iterations "  << sor.iterations() << std::endl;
     std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
 
     //std::cout << "p = ..." << std::endl;
-    //d->p().print();
+    d->p().print();
 
     // check interior of the domain
     for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
         for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-            ASSERT_LE(fabs(d->p(i, j) - pRef(i, j)), epsilon);
+            EXPECT_NEAR(d->p(i, j), dRef->p(i, j), epsilon);
         }
     }
 
@@ -115,7 +131,7 @@ TEST(SORTest, Test1) {
 }
 
 
-TEST(GaussSeidelTest, Test1) {
+/*TEST(GaussSeidelTest, Test1) {
     auto nCells = std::array<int, 2>{5, 10};
     auto meshWidth = std::array<double, 2>{0.1, 0.05};
     auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
@@ -126,15 +142,15 @@ TEST(GaussSeidelTest, Test1) {
             pRef(i, j) = 10 * i + j ;
         }
     }
+#ifndef NDEBUG
     //std::cout << "p = ..." << std::endl;
     //pRef.print();
+    //std::cout << "p = ..." << std::endl;
+    //d->p().print();
 
-    std::cout << "p = ..." << std::endl;
-    d->p().print();
-
-    std::cout << "pref = ..." << std::endl;
-    pRef.print();
-
+    //std::cout << "pref = ..." << std::endl;
+    //pRef.print();
+#endif
     for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
         for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
             double rhs = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
@@ -143,23 +159,19 @@ TEST(GaussSeidelTest, Test1) {
             d->rhs(i, j) = rhs;
         }
     }
-    std::cout << "rhs = ..." << std::endl;
-    d->rhs().print();
+#ifndef NDEBUG
+    //std::cout << "rhs = ..." << std::endl;
+    //d->rhs().print();
+#endif
 
     double epsilon = 0.001;
     int maximumNumberOfIterations = 1000;
     auto gs = GaussSeidel(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations);
     gs.solve();
-    /*std::cout << "Iterations "  << gs.iterations() << std::endl;
-    std::cout << "Norm "  << gs.residualNorm() << std::endl;*/
-
-    //std::cout << "p = ..." << std::endl;
-    //d->p().print();
-
     // check interior of the domain
     for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
         for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-            ASSERT_LE(fabs(d->p(i, j) - pRef(i, j)), epsilon);
+            EXPECT_NEAR(d->p(i, j), pRef(i, j), epsilon);
         }
     }
 
@@ -182,7 +194,7 @@ TEST(GaussSeidelTest, Test1) {
         // check right boundary
         ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
     }
-}
+}*/
 
 TEST(DiscretizationTest, FirstOrder)
 {
