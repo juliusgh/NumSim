@@ -1,5 +1,12 @@
 #include "pressure_solver/0_pressure_solver.h"
 
+/**
+ *  Interface for the pressure solver. It computes the pressure field variable such that the continuity equation is fulfilled.
+ * @param discretization
+ * @param epsilon
+ * @param maximumNumberOfIterations
+ */
+
 PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
                                double epsilon,
                                int maximumNumberOfIterations) :
@@ -9,6 +16,9 @@ PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
 
 }
 
+/**
+ * Set pressure solver boundary values
+ */
 void PressureSolver::setBoundaryValues() {
     // copy values to bottom and top boundary (lower priority)
     for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
@@ -30,6 +40,11 @@ void PressureSolver::setBoundaryValues() {
     }
 };
 
+
+/**
+ * Compute squared Euclidean norm to measure pressure solver convergence performance
+ * ||X||_2^2 = x^2 + y^2 for X = (x,y)^T
+ */
 void PressureSolver::computeResidualNorm() {
     double residual_norm2 = 0.0;
     double dy = discretization_->dy();

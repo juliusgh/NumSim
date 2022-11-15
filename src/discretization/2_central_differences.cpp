@@ -1,5 +1,11 @@
 #include "discretization/2_central_differences.h"
 
+/**
+ *  calculate derivatives needed for pressure calculations using the central differences approach
+ * @param nCells
+ * @param meshWidth
+ */
+
 CentralDifferences::CentralDifferences(std::array<int, 2> nCells, std::array<double, 2> meshWidth) :
     Discretization(nCells, meshWidth)
 {

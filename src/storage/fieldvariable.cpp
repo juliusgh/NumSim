@@ -2,7 +2,15 @@
 #include "storage/array2d.h"
 #include <cassert>
 #include <cmath>
-#include <iostream>
+
+/**
+ * A field variable is the discretization of a scalar function f(x) with x in the computational domain.
+ *  More specifically, a scalar value is stored at discrete nodes/points. The nodes are arranged in an equidistant mesh
+ *  with specified mesh width.
+ * @param size
+ * @param origin
+ * @param meshWidth
+ */
 
 FieldVariable::FieldVariable(std::array<int, 2> size,
                              std::array<double, 2> origin,
@@ -13,11 +21,15 @@ FieldVariable::FieldVariable(std::array<int, 2> size,
 {
     
 }
-
+/**
+ * Interpolate at arbitrary position within domain including boundaries.
+ * @param x
+ * @param y
+ * @return
+ */
 double FieldVariable::interpolateAt(double x, double y) const
 {
-    // FIXME: probably does not work
-    // TODO: is this assert too strict (boundary) ?
+    // assert that interpolation point does not lie beyond boundaries of domain
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
 
@@ -53,7 +65,10 @@ double FieldVariable::interpolateAt(double x, double y) const
 
     return f;
 }
-
+/**
+ * Compute absolute maximal value needed in computation to determine optimal time step
+ * @return abs_max
+ */
 double FieldVariable::absMax() const
 {
     double abs_max = 0;
