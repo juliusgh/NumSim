@@ -1,7 +1,7 @@
 #include "storage/fieldvariable.h"
 #include "storage/array2d.h"
-#include <cassert>
 #include <cmath>
+#include <cassert>
 
 /**
  * A field variable is the discretization of a scalar function f(x) with x in the computational domain.
@@ -33,8 +33,10 @@ FieldVariable::FieldVariable(std::array<int, 2> size,
 double FieldVariable::interpolateAt(double x, double y) const
 {
     // Assert that the specified point is part of the domain
+    #ifndef NDEBUG
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
+    #endif
 
     // Determine i and j indices of the corresponding cell (shifted by origin)
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
@@ -63,7 +65,7 @@ double FieldVariable::interpolateAt(double x, double y) const
      * We implement it as a repeated linear interpolation (first along x axis, then along y axis)
      * See also https://en.wikipedia.org/wiki/Bilinear_interpolation#Repeated_linear_interpolation
      */
-     // 1) Use linear interpolation in x between left and right edge (each on the bottom and top edge)
+    // 1) Use linear interpolation in x between left and right edge (each on the bottom and top edge)
     double interpBottom = ((xRight - x) * valueLeftBottom + (x - xLeft) * valueRightBottom) / (xRight - xLeft);
     double interpTop = ((xRight - x) * valueLeftTop + (x - xLeft) * valueRightTop) / (xRight - xLeft);
     // 2) Use linear interpolation in y between bottom and top edge

@@ -32,9 +32,11 @@ double &Array2D::operator()(int i, int j) {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
+    #ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
     assert(j * size_[0] + i < (int) data_.size());
+    #endif
 
     return data_[index];
 }
@@ -48,9 +50,11 @@ double Array2D::operator()(int i, int j) const {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
+    #ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
     assert(j * size_[0] + i < (int) data_.size());
+    #endif
 
     return data_[index];
 }

@@ -1,6 +1,6 @@
 #include "discretization/0_staggered_grid.h"
-#include <cassert>
 #include <iostream>
+#include <cassert>
 
 /**
  * Implement staggered grid, providing a variety of parameters
@@ -163,8 +163,10 @@ const FieldVariable &StaggeredGrid::p() const
  */
 double StaggeredGrid::p(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
+    #endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
@@ -176,8 +178,10 @@ double StaggeredGrid::p(int i, int j) const
  */
 double &StaggeredGrid::p(int i, int j)
 {
+    #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
+    #endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
@@ -290,8 +294,10 @@ const FieldVariable &StaggeredGrid::u() const
  */
 double StaggeredGrid::u(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
@@ -303,8 +309,10 @@ double StaggeredGrid::u(int i, int j) const
  */
 double &StaggeredGrid::u(int i, int j)
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
@@ -415,8 +423,10 @@ const FieldVariable &StaggeredGrid::v() const
  */
 double StaggeredGrid::v(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
@@ -428,8 +438,10 @@ double StaggeredGrid::v(int i, int j) const
  */
 double &StaggeredGrid::v(int i, int j)
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
@@ -534,8 +546,10 @@ int StaggeredGrid::rhsInteriorJEnd() const
  */
 double StaggeredGrid::rhs(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    #endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
@@ -547,8 +561,10 @@ double StaggeredGrid::rhs(int i, int j) const
  */
 double &StaggeredGrid::rhs(int i, int j)
 {
+    #ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
+    #endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
@@ -573,8 +589,10 @@ const FieldVariable &StaggeredGrid::rhs() const
  */
 double StaggeredGrid::f(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
@@ -586,8 +604,10 @@ double StaggeredGrid::f(int i, int j) const
  */
 double &StaggeredGrid::f(int i, int j)
 {
+    #ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
+    #endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
@@ -614,8 +634,10 @@ const FieldVariable &StaggeredGrid::f() const
  */
 double StaggeredGrid::g(int i, int j) const
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 
@@ -627,8 +649,10 @@ double StaggeredGrid::g(int i, int j) const
  */
 double &StaggeredGrid::g(int i, int j)
 {
+    #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
+    #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 
