@@ -11,16 +11,32 @@
 class Array2D
 {
 public:
-    //! constructor
+    /**
+    * constructor
+    * @param size: number of cells
+    */
     Array2D(std::array<int, 2> size);
 
-    //! get the size
+    /**
+    * get number of cells
+    * @return number of cells
+    */
     std::array<int, 2> size() const;
 
-    //! access the value at coordinate (i,j), declared not const, i.e. the value can be changed
+    /**
+    * access the value at coordinate (i,j), declared not const, i.e. the value can be changed
+    * @param i: discretized position in x direction
+    * @param j: discretized position in y direction
+    * @return reference to value at the grid cell (i,j)
+    */
     double &operator()(int i, int j);
 
-    //! get the value at coordinate (i,j), declared const, i.e. it is not possible to change the value
+    /**
+    * get the value at coordinate (i,j), declared const, i.e. it is not possible to change the value
+    * @param i: discretized position in x direction
+    * @param j: discretized position in y direction
+    * @return value at the grid cell (i,j)
+    */
     double operator()(int i, int j) const;
 
     void print() const;

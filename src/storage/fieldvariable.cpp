@@ -1,15 +1,15 @@
 #include "storage/fieldvariable.h"
 #include "storage/array2d.h"
-#include <cassert>
 #include <cmath>
+#include <cassert>
 
 /**
  * A field variable is the discretization of a scalar function f(x) with x in the computational domain.
  *  More specifically, a scalar value is stored at discrete nodes/points. The nodes are arranged in an equidistant mesh
  *  with specified mesh width.
- * @param size
- * @param origin
- * @param meshWidth
+ * @param size: number of cells
+ * @param origin: origin of the coordinate system
+ * @param meshWidth: width of cells in both directions
  */
 
 FieldVariable::FieldVariable(std::array<int, 2> size,
@@ -33,8 +33,10 @@ FieldVariable::FieldVariable(std::array<int, 2> size,
 double FieldVariable::interpolateAt(double x, double y) const
 {
     // Assert that the specified point is part of the domain
+    #ifndef NDEBUG
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
+    #endif
 
     // Determine i and j indices of the corresponding cell (shifted by origin)
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
@@ -58,9 +60,11 @@ double FieldVariable::interpolateAt(double x, double y) const
     double yBottom = origin_[1] + (j - 1) * meshWidth_[1];
     double yTop = yBottom + meshWidth_[1];
 
-    // Bilinear interpolation:
-    // We implement it as a repeated linear interpolation (first along x axis, then along y axis)
-    // See also https://en.wikipedia.org/wiki/Bilinear_interpolation#Repeated_linear_interpolation
+    /*
+     * Bilinear interpolation:
+     * We implement it as a repeated linear interpolation (first along x axis, then along y axis)
+     * See also https://en.wikipedia.org/wiki/Bilinear_interpolation#Repeated_linear_interpolation
+     */
     // 1) Use linear interpolation in x between left and right edge (each on the bottom and top edge)
     double interpBottom = ((xRight - x) * valueLeftBottom + (x - xLeft) * valueRightBottom) / (xRight - xLeft);
     double interpTop = ((xRight - x) * valueLeftTop + (x - xLeft) * valueRightTop) / (xRight - xLeft);
@@ -71,7 +75,7 @@ double FieldVariable::interpolateAt(double x, double y) const
 }
 /**
  * Compute absolute maximal value needed in computation to determine optimal time step
- * @return abs_max
+ * @return maximal absolute value of the field variable given
  */
 double FieldVariable::absMax() const
 {
