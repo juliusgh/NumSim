@@ -36,7 +36,7 @@ const std::array<double, 2> StaggeredGrid::meshWidth() const
 
 /**
  * get number of cells
- * @return numer of cells
+ * @return number of cells
  */
 const std::array<int, 2> StaggeredGrid::nCells() const
 {
@@ -585,7 +585,7 @@ const FieldVariable &StaggeredGrid::rhs() const
  * access value of F in element (i,j)
  * @param i: position in x direction in discretized grid
  * @param j: position in y direction in discretized grid
- * @return
+ * @return value of F in element (i,j)
  */
 double StaggeredGrid::f(int i, int j) const
 {
