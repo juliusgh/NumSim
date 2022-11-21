@@ -80,11 +80,17 @@ double FieldVariable::interpolateAt(double x, double y) const
 double FieldVariable::absMax() const
 {
     double abs_max = 0;
-    for (int i = 0; i < size_[0]; i++) {
-        for (int j = 0; j < size_[1]; j++) {
+    for (int i = 1; i < size_[0] - 1; i++) {
+        for (int j = 1; j < size_[1] - 1; j++) {
             if (fabs((*this)(i,j)) > abs_max)
                 abs_max = fabs((*this)(i,j));
         }
     }
+    /*for (int i = 0; i < size_[0]; i++) {
+        for (int j = 0; j < size_[1]; j++) {
+            if (fabs((*this)(i,j)) > abs_max)
+                abs_max = fabs((*this)(i,j));
+        }
+    }*/
     return abs_max;
 };

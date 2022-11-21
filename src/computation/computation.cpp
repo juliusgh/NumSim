@@ -238,11 +238,15 @@ void Computation::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
 
+    // Compute maximal boundary condition values
+    double bcMax_u = std::max({fabs(settings_.dirichletBcBottom[0]), fabs(settings_.dirichletBcTop[0]), fabs(settings_.dirichletBcLeft[0]), fabs(settings_.dirichletBcRight[0])});
+    double bcMax_v = std::max({fabs(settings_.dirichletBcBottom[1]), fabs(settings_.dirichletBcTop[1]), fabs(settings_.dirichletBcLeft[1]), fabs(settings_.dirichletBcRight[1])});
+
     // Compute maximal time step width regarding the convection u
-    double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
+    double dt_conv_u = discretization_->dx() / std::max({discretization_->u().absMax(), bcMax_u});
     
     // Compute maximal time step width regarding the convection v
-    double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
+    double dt_conv_v = discretization_->dy() / std::max({discretization_->v().absMax(), bcMax_v});
 
     // Set the appropriate time step width by using a security factor tau
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
