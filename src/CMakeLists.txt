@@ -42,6 +42,8 @@ if(GTest_FOUND)
         computation/0_computation.cpp
         computation/1_computation_parallel.cpp
 
+        partitioning/partitioning.cpp
+
         storage/array2d.cpp
         storage/fieldvariable.cpp
 
