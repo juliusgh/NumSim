@@ -9,7 +9,8 @@ add_executable(${PROJECT_NAME}
     main.cpp
     settings.cpp
 
-    computation/computation.cpp
+    computation/0_computation.cpp
+    computation/1_computation_parallel.cpp
 
     storage/array2d.cpp
     storage/fieldvariable.cpp
@@ -38,7 +39,8 @@ if(GTest_FOUND)
         tests.cpp
         settings.cpp
 
-        computation/computation.cpp
+        computation/0_computation.cpp
+        computation/1_computation_parallel.cpp
 
         storage/array2d.cpp
         storage/fieldvariable.cpp

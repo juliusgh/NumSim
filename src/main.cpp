@@ -1,5 +1,5 @@
 #include "settings.h"
-#include "computation/computation.h"
+#include "computation/0_computation.h"
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
