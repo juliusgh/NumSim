@@ -1,4 +1,6 @@
 #pragma once
+
+#include <array>
 /**
  * encapsulate functionality corresponding to subdomain handling
  *
@@ -8,5 +10,15 @@
  */
 
 class Partitioning {
+public:
+    int getLeftRank(int rank) const;
+    int getRightRank(int rank) const;
+    int getTopRank(int rank) const;
+    int getBottomRank(int rank) const;
+protected:
+    int rank2i(int rank) const;
+    int rank2j(int rank) const;
+    int ij2rank(int i, int j) const;
+    const std::array<int, 2> nDomains_;
 
 };
