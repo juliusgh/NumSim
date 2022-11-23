@@ -1,5 +1,13 @@
 #include "partitioning/partitioning.h"
 
+
+Partitioning::Partitioning(std::array<int, 2> nCells, int worldSize)
+: nCells_(nCells), worldSize_(worldSize), nDomains_(std::array<int, 2>())
+{
+    // TODO: determine nDomains_;
+
+}
+
 int Partitioning::getLeftRank(int rank) const {
     int i = rank2i(rank);
     int j = rank2j(rank);
@@ -50,4 +58,8 @@ int Partitioning::rank2j(int rank) const {
 
 int Partitioning::ij2rank(int i, int j) const {
     return i + nDomains_[0] * j;
+}
+
+const std::array<int, 2> Partitioning::getCellNumbers(int rank) const {
+    return std::array<int, 2>();
 }
