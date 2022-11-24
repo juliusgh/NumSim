@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <mpi.h>
 /**
  * encapsulate functionality corresponding to subdomain handling
  *
@@ -11,17 +12,29 @@
 
 class Partitioning {
 public:
-    Partitioning(std::array<int, 2> nCells, int worldSize);
-    int getLeftRank(int rank) const;
-    int getRightRank(int rank) const;
-    int getTopRank(int rank) const;
-    int getBottomRank(int rank) const;
-    const std::array<int, 2> getCellNumbers(int rank) const;
-protected:
-    int rank2i(int rank) const;
-    int rank2j(int rank) const;
-    int ij2rank(int i, int j) const;
-    const std::array<int, 2> nDomains_;
+    Partitioning(int ownRank, int worldSize, std::array<int, 2> nCells);
+    bool containsLeftBoundary() const;
+    bool containsRightBoundary() const;
+    bool containsBottomBoundary() const;
+    bool containsTopBoundary() const;
+    int getOwnRank() const;
+    int getLeftRank() const;
+    int getRightRank() const;
+    int getBottomRank() const;
+    int getTopRank() const;
+    const std::array<int, 2> getCellNumbers() const;
+private:
+    int columnsBegin() const;
+    int columnsEnd() const;
+    int rowsBegin() const;
+    int rowsEnd() const;
+    int computeColumn(int rank) const;
+    int computeRow(int rank) const;
+    int computeRank(int i, int j) const;
+    std::array<int, 2> nDomains_;
+    int domainColumn_;
+    int domainRow_;
     const std::array<int, 2> nCells_;
+    int ownRank_;
     int worldSize_;
 };

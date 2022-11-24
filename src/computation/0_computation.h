@@ -28,7 +28,7 @@ public:
      */
     void runSimulation();
 
-private:
+protected:
     /**
      * Set the boundary values of the velocities (u, v)
      * 
@@ -71,6 +71,7 @@ private:
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;
     std::unique_ptr<PressureSolver> pressureSolver_;
+    std::unique_ptr<Partitioning> partitioning_;
     std::unique_ptr<OutputWriterParaview> outputWriterParaview_;
     std::unique_ptr<OutputWriterText> outputWriterText_;
     std::array<double, 2> meshWidth_;
