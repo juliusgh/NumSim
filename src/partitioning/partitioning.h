@@ -12,17 +12,18 @@
 
 class Partitioning {
 public:
-    Partitioning(int ownRank, int worldSize, std::array<int, 2> nCells);
+    Partitioning(int ownRank, int worldSize, std::array<int, 2> nCellsGlobal);
     bool containsLeftBoundary() const;
     bool containsRightBoundary() const;
     bool containsBottomBoundary() const;
     bool containsTopBoundary() const;
-    int getOwnRank() const;
-    int getLeftRank() const;
-    int getRightRank() const;
-    int getBottomRank() const;
-    int getTopRank() const;
-    const std::array<int, 2> getCellNumbers() const;
+    int ownRank() const;
+    int leftRank() const;
+    int rightRank() const;
+    int bottomRank() const;
+    int topRank() const;
+    const std::array<int, 2> nCells() const;
+    const std::array<int, 2> nCellsGlobal() const;
 private:
     int columnsBegin() const;
     int columnsEnd() const;
@@ -34,7 +35,8 @@ private:
     std::array<int, 2> nDomains_;
     int domainColumn_;
     int domainRow_;
-    const std::array<int, 2> nCells_;
+    std::array<int, 2> nCells_;
+    std::array<int, 2> nCellsGlobal_;
     int ownRank_;
     int worldSize_;
 };

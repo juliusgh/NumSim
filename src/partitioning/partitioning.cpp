@@ -1,12 +1,20 @@
 #include "partitioning/partitioning.h"
 
 
-Partitioning::Partitioning(int ownRank, int worldSize, std::array<int, 2> nCells)
-: ownRank_(ownRank), worldSize_(worldSize), nCells_(nCells), nDomains_(std::array<int, 2>())
+Partitioning::Partitioning(int ownRank, int worldSize, std::array<int, 2> nCellsGlobal)
+: ownRank_(ownRank), worldSize_(worldSize), nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
 {
     MPI_Dims_create(worldSize_, 2, nDomains_.data());
     domainColumn_ = computeColumn(ownRank_);
     domainRow_ = computeRow(ownRank_);
+    // compute nCells_, nCellsGlobal_
+    nCells_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
+    int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
+    int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
+    if (domainColumn_ <= cellsColumnRemainder)
+        nCells_[0]++;
+    if (domainRow_ <= cellsRowRemainder)
+        nCells_[1]++;
 }
 
 int Partitioning::columnsBegin() const {
@@ -41,7 +49,11 @@ bool Partitioning::containsTopBoundary() const {
     return domainColumn_ == rowsEnd();
 }
 
-int Partitioning::getLeftRank() const {
+int Partitioning::ownRank() const {
+    return ownRank_;
+}
+
+int Partitioning::leftRank() const {
     if (containsLeftBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
@@ -49,7 +61,7 @@ int Partitioning::getLeftRank() const {
     return computeRank(domainColumn_ - 1, domainRow_);
 }
 
-int Partitioning::getRightRank() const {
+int Partitioning::rightRank() const {
     if (containsRightBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
@@ -57,7 +69,7 @@ int Partitioning::getRightRank() const {
     return computeRank(domainColumn_ + 1, domainRow_);
 }
 
-int Partitioning::getBottomRank() const {
+int Partitioning::bottomRank() const {
     if (containsBottomBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
@@ -65,7 +77,7 @@ int Partitioning::getBottomRank() const {
     return computeRank(domainColumn_, domainRow_ - 1);
 }
 
-int Partitioning::getTopRank() const {
+int Partitioning::topRank() const {
     if (containsTopBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
@@ -85,6 +97,10 @@ int Partitioning::computeRank(int column, int row) const {
     return column + nDomains_[0] * row;
 }
 
-const std::array<int, 2> Partitioning::getCellNumbers() const {
-    return std::array<int, 2>();
+const std::array<int, 2> Partitioning::nCells() const {
+    return nCells_;
+}
+
+const std::array<int, 2> Partitioning::nCellsGlobal() const {
+    return nCellsGlobal_;
 }
