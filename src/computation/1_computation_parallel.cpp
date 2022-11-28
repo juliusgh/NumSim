@@ -45,8 +45,8 @@ void ComputationParallel::initialize(string filename)
     }
 
     // Initialize output writers
-    outputWriterText_ = std::make_unique<OutputWriterText>(discretization_);
-    outputWriterParaview_ = std::make_unique<OutputWriterParaview>(discretization_);
+    outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
+    outputWriterParaview_ = std::make_unique<OutputWriterParaviewParallel>(discretization_, partitioning_);
 };
 
 /**
