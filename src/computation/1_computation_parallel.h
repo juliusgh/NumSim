@@ -1,5 +1,7 @@
 #pragma once
+#include <mpi.h>
 #include "computation/0_computation.h"
+
 
 class ComputationParallel : public Computation {
 public:
@@ -17,4 +19,6 @@ public:
      * Run the whole simulation until tend
      */
     void runSimulation();
+
+    
 };
