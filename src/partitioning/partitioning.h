@@ -13,6 +13,8 @@
 class Partitioning {
 public:
     Partitioning(int ownRank, int worldSize, std::array<int, 2> nCellsGlobal);
+    int column() const;
+    int row() const;
     bool containsLeftBoundary() const;
     bool containsRightBoundary() const;
     bool containsBottomBoundary() const;
@@ -22,6 +24,14 @@ public:
     int rightRank() const;
     int bottomRank() const;
     int topRank() const;
+    void sendToLeft(std::vector<double> &data) const;
+    void sendToRight(std::vector<double> &data) const;
+    void sendToBottom(std::vector<double> &data) const;
+    void sendToTop(std::vector<double> &data) const;
+    void recvFromLeft(std::vector<double> &data, int count) const;
+    void recvFromRight(std::vector<double> &data, int count) const;
+    void recvFromBottom(std::vector<double> &data, int count) const;
+    void recvFromTop(std::vector<double> &data, int count) const;
     const std::array<int, 2> nCells() const;
     const std::array<int, 2> nCellsGlobal() const;
 private:
@@ -32,6 +42,8 @@ private:
     int computeColumn(int rank) const;
     int computeRow(int rank) const;
     int computeRank(int i, int j) const;
+    static void send(int destinationRank, std::vector<double> &data) ;
+    static void recv(int sourceRank, std::vector<double> &data, int count) ;
     std::array<int, 2> nDomains_;
     int domainColumn_;
     int domainRow_;
