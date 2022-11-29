@@ -13,7 +13,7 @@ add_executable(${PROJECT_NAME}
     computation/1_computation_parallel.cpp
 
     storage/array2d.cpp
-    storage/fieldvariable.cpp
+        storage/field_variable.cpp
 
     discretization/0_staggered_grid.cpp
     discretization/1_discretization.cpp
@@ -27,6 +27,8 @@ add_executable(${PROJECT_NAME}
     output_writer/output_writer.cpp
     output_writer/output_writer_text.cpp
     output_writer/output_writer_paraview.cpp
+    output_writer/output_writer_text_parallel.cpp
+    output_writer/output_writer_paraview_parallel.cpp
 )
 
 # Locate GTest
@@ -45,7 +47,7 @@ if(GTest_FOUND)
         partitioning/partitioning.cpp
 
         storage/array2d.cpp
-        storage/fieldvariable.cpp
+            storage/field_variable.cpp
 
         discretization/0_staggered_grid.cpp
         discretization/1_discretization.cpp
@@ -59,6 +61,8 @@ if(GTest_FOUND)
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp
         output_writer/output_writer_paraview.cpp
+        output_writer/output_writer_text_parallel.cpp
+        output_writer/output_writer_paraview_parallel.cpp
     )
 
     target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)

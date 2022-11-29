@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include "storage/fieldvariable.h"
+#include "storage/field_variable.h"
 #include "discretization/2_central_differences.h"
+#include "discretization/2_donor_cell.h"
 #include "pressure_solver/1_sor.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include <cmath>

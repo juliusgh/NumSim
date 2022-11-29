@@ -21,12 +21,12 @@ public:
      * Parse the settings from the parameter file that is given as the command line argument
      * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
      */
-    void initialize(string filename);
+    virtual void initialize(string filename);
 
     /**
      * Run the whole simulation until tend
      */
-    void runSimulation();
+    virtual void runSimulation();
 
 protected:
     /**
@@ -34,39 +34,39 @@ protected:
      * 
      * Left and right boundaries should overwrite bottom and top boundaries
      */
-    void applyBoundaryValues();
+    virtual void applyBoundaryValues();
 
     /**
      * Set the boundary values of the preliminary velocities (u, v)
      * 
      * Left and right boundaries should overwrite bottom and top boundaries
      */
-    void applyPreliminaryBoundaryValues();
+    virtual void applyPreliminaryBoundaryValues();
 
     /**
      * Compute the preliminary velocities (F, G) using finite differences
-     */ 
-    void computePreliminaryVelocities();
+     */
+    virtual void computePreliminaryVelocities();
 
     /**
      * Compute the pressure p by solving the Poisson equation
      */
-    void computePressure();
+    virtual void computePressure();
 
     /**
      * Compute the right hand side rhs of the pressure Poisson equation 
      */
-    void computeRightHandSide();
+    virtual void computeRightHandSide();
 
     /**
      * Compute the time step width dt based on the maximum velocities
      */
-    void computeTimeStepWidth();
+    virtual void computeTimeStepWidth();
 
     /**
      * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
      */
-    void computeVelocities();
+    virtual void computeVelocities();
 
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;

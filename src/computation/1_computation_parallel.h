@@ -13,12 +13,52 @@ public:
      *
      *  inherits from the old Computation class and overloads the public runSimulation method as well as some of the protected methods.
      */
-    void initialize(string filename);
+     virtual void initialize(string filename);
 
     /**
      * Run the whole simulation until tend
      */
-    void runSimulation();
+    virtual void runSimulation();
+
+protected:
+    /**
+     * Set the boundary values of the velocities (u, v)
+     *
+     * Left and right boundaries should overwrite bottom and top boundaries
+     */
+    virtual void applyBoundaryValues();
+
+    /**
+     * Set the boundary values of the preliminary velocities (u, v)
+     *
+     * Left and right boundaries should overwrite bottom and top boundaries
+     */
+    virtual void applyPreliminaryBoundaryValues();
+
+    /**
+     * Compute the preliminary velocities (F, G) using finite differences
+     */
+    virtual void computePreliminaryVelocities();
+
+    /**
+     * Compute the pressure p by solving the Poisson equation
+     */
+    virtual void computePressure();
+
+    /**
+     * Compute the right hand side rhs of the pressure Poisson equation
+     */
+    virtual void computeRightHandSide();
+
+    /**
+     * Compute the time step width dt based on the maximum velocities
+     */
+    virtual void computeTimeStepWidth();
+
+    /**
+     * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
+     */
+    virtual void computeVelocities();
 
 private:
     std::shared_ptr<Partitioning> partitioning_;

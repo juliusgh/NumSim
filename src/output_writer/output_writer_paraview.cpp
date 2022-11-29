@@ -4,8 +4,8 @@
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
 
-OutputWriterParaview::OutputWriterParaview(std::shared_ptr<Discretization> discretization, const Partitioning &partitioning) :
-   OutputWriter(discretization, partitioning)
+OutputWriterParaview::OutputWriterParaview(std::shared_ptr<Discretization> discretization) :
+   OutputWriter(discretization)
 {
   // Create a vtkWriter_
   vtkWriter_ = vtkSmartPointer<vtkXMLImageDataWriter>::New();
