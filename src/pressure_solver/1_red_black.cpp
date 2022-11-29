@@ -232,7 +232,6 @@ void RedBlack::computeResidualNorm() {
         }
     }
 
-    double residual_norm2_global;
-    MPI_Allreduce(&residual_norm2, &residual_norm2_global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    double residual_norm2_global = partitioning_->globalSum(residual_norm2);
     residual_norm2_ = residual_norm2_global / N;
 }

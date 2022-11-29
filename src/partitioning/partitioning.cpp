@@ -168,3 +168,19 @@ const std::array<int, 2> Partitioning::nCells() const {
 const std::array<int, 2> Partitioning::nCellsGlobal() const {
     return nCellsGlobal_;
 }
+
+double Partitioning::globalSum(double localValue) {
+    return allReduce(localValue, MPI_SUM);
+}
+
+double Partitioning::allReduce(double localValue, MPI_Op op) {
+    double globalValue;
+    MPI_Allreduce(&localValue,
+                  &globalValue,
+                  1,
+                  MPI_DOUBLE,
+                  op,
+                  MPI_COMM_WORLD
+    );
+    return globalValue;
+}
