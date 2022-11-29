@@ -1,6 +1,6 @@
 #pragma once
 
-#include "output_writer/output_writer.h"
+#include "output_writer/output_writer_paraview.h"
 #include "discretization/1_discretization.h"
 
 #include <vtkSmartPointer.h>
@@ -14,7 +14,7 @@
  *  This means, values will be interpolated because the values are stored at positions given by the staggered grid.
  */
 class OutputWriterParaviewParallel : 
-  public OutputWriter
+  public OutputWriterParaview
 {
 public:
   //! constructor
@@ -29,6 +29,8 @@ private:
   void gatherData();
 
   vtkSmartPointer<vtkXMLImageDataWriter> vtkWriter_;   //< vtk writer to write ImageData
+
+  const Partitioning partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
 
   std::array<int,2> nCellsGlobal_;   //< global number of cells
   std::array<int,2> nPointsGlobal_;  //< global number of points

@@ -17,6 +17,8 @@ public:
   //! write current velocities to file, filename is output_<count>.<rankNo>.txt
   void writeFile(double currentTime);
 
+  const Partitioning partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
+
   //! write only current values of pressure to file, filename is pressure_<count>.<rankNo>.txt
   void writePressureFile();
 };

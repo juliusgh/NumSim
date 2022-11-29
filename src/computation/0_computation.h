@@ -71,7 +71,6 @@ protected:
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;
     std::unique_ptr<PressureSolver> pressureSolver_;
-    std::unique_ptr<Partitioning> partitioning_;
     std::unique_ptr<OutputWriterParaview> outputWriterParaview_;
     std::unique_ptr<OutputWriterText> outputWriterText_;
     std::array<double, 2> meshWidth_;
