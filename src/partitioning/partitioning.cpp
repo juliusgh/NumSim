@@ -1,3 +1,4 @@
+#include <vector>
 #include "partitioning/partitioning.h"
 
 
@@ -15,6 +16,14 @@ Partitioning::Partitioning(int ownRank, int worldSize, std::array<int, 2> nCells
         nCells_[0]++;
     if (domainRow_ <= cellsRowRemainder)
         nCells_[1]++;
+}
+
+int Partitioning::column() const {
+    return computeColumn(ownRank());
+}
+
+int Partitioning::row() const {
+    return computeRow(ownRank());
 }
 
 int Partitioning::columnsBegin() const {
@@ -83,6 +92,61 @@ int Partitioning::topRank() const {
         return ownRank_;
     }
     return computeRank(domainColumn_, domainRow_ + 1);
+}
+
+void Partitioning::send(int destinationRank, std::vector<double> &data) {
+    MPI_Send(
+            data.data(),
+            data.size(),
+            MPI_DOUBLE,
+            destinationRank,
+            0,
+            MPI_COMM_WORLD
+    );
+}
+
+void Partitioning::recv(int sourceRank, std::vector<double> &data, int count) {
+    MPI_Recv(
+            data.data(),
+            count,
+            MPI_DOUBLE,
+            sourceRank,
+            0,
+            MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE
+    );
+}
+
+void Partitioning::sendToLeft(std::vector<double> &data) const {
+    send(leftRank(), data);
+}
+
+void Partitioning::sendToRight(std::vector<double> &data) const {
+    send(rightRank(), data);
+}
+
+void Partitioning::sendToBottom(std::vector<double> &data) const {
+    send(bottomRank(), data);
+}
+
+void Partitioning::sendToTop(std::vector<double> &data) const {
+    send(topRank(), data);
+}
+
+void Partitioning::recvFromLeft(std::vector<double> &data, int count) const {
+    recv(leftRank(), data, count);
+}
+
+void Partitioning::recvFromRight(std::vector<double> &data, int count) const {
+    recv(leftRank(), data, count);
+}
+
+void Partitioning::recvFromBottom(std::vector<double> &data, int count) const {
+    recv(leftRank(), data, count);
+}
+
+void Partitioning::recvFromTop(std::vector<double> &data, int count) const {
+    recv(leftRank(), data, count);
 }
 
 int Partitioning::computeColumn(int rank) const {

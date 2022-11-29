@@ -85,6 +85,11 @@ public:
      * evaluate field variable p in an element (i,j)
     */
      double & p(int i, int j);
+
+    /**
+     * Number of ghost layers for p in x direction (each left and right)
+    */
+     //int pIGhost() const;
     
     /**
      * first valid index for p in x direction
@@ -95,6 +100,11 @@ public:
      * one after last valid index for p in x direction
     */
      int pIEnd() const;
+
+    /**
+     * Number of ghost layers for p in y direction (each bottom and top)
+    */
+    int pJGhost() const;
     
     /**
      * first valid index for p in y direction

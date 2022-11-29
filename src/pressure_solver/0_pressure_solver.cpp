@@ -21,25 +21,41 @@ PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
  */
 void PressureSolver::setBoundaryValues() {
     // copy values to bottom and top boundary (lower priority)
-    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
+    setBoundaryValuesBottom();
+    setBoundaryValuesTop();
 
+    // copy values to left and right boundary (higher priority)
+    setBoundaryValuesLeft();
+    setBoundaryValuesRight();
+}
+
+void PressureSolver::setBoundaryValuesBottom() {
+    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
         // copy values to bottom boundary
         discretization_->p(i, discretization_->pJBegin()) = discretization_->p(i, discretization_->pInteriorJBegin());
+    }
+}
 
+void PressureSolver::setBoundaryValuesTop() {
+    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
         // copy values to top boundary
         discretization_->p(i, discretization_->pJEnd() - 1) = discretization_->p(i, discretization_->pInteriorJEnd() - 1);
     }
-    // copy values to left and right boundary (higher priority)
-    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
+}
 
+void PressureSolver::setBoundaryValuesLeft() {
+    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
         // copy values to left boundary
         discretization_->p(discretization_->pIBegin(), j) = discretization_->p(discretization_->pInteriorIBegin(), j);
+    }
+}
 
+void PressureSolver::setBoundaryValuesRight() {
+    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
         // copy values to right boundary
         discretization_->p(discretization_->pIEnd() - 1, j) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
     }
-};
-
+}
 
 /**
  * Compute squared Euclidean norm to measure pressure solver convergence performance
