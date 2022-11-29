@@ -12,7 +12,7 @@
 
 class Partitioning {
 public:
-    Partitioning(int ownRank, int worldSize, std::array<int, 2> nCellsGlobal);
+    Partitioning(std::array<int, 2> nCellsGlobal);
     int column() const;
     int row() const;
     bool containsLeftBoundary() const;

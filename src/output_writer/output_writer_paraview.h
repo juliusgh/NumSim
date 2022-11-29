@@ -18,7 +18,7 @@ class OutputWriterParaview :
 {
 public:
   //! constructor
-  OutputWriterParaview(std::shared_ptr<Discretization> discretization, const Partitioning &partitioning);
+  OutputWriterParaview(std::shared_ptr<Discretization> discretization);
 
   //! write current velocities to file, filename is output_<count>.vti
   void writeFile(double currentTime);

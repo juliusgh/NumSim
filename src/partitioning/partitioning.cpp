@@ -2,9 +2,19 @@
 #include "partitioning/partitioning.h"
 
 
-Partitioning::Partitioning(int ownRank, int worldSize, std::array<int, 2> nCellsGlobal)
-: ownRank_(ownRank), worldSize_(worldSize), nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
+Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
+: nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
 {
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
+
+    // Get the number of processes
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize_);
+
+    // Get the rank of the process
+    MPI_Comm_rank(MPI_COMM_WORLD, &ownRank_);
+
+    // Partition the domain
     MPI_Dims_create(worldSize_, 2, nDomains_.data());
     domainColumn_ = computeColumn(ownRank_);
     domainRow_ = computeRow(ownRank_);

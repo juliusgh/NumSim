@@ -8,9 +8,8 @@
 #include <vtkPointData.h>
 #include <mpi.h>
 
-OutputWriterParaviewParallel::OutputWriterParaviewParallel(std::shared_ptr<Discretization> discretization, const Partitioning &partitioning) :
-   OutputWriter(discretization, partitioning),
-
+OutputWriterParaviewParallel::OutputWriterParaviewParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning) :
+   OutputWriterParaview(discretization), partitioning_(partitioning),
   nCellsGlobal_(partitioning_.nCellsGlobal()),
   nPointsGlobal_ {nCellsGlobal_[0]+1, nCellsGlobal_[1]+1},    // we have one point more than cells in every coordinate direction
   

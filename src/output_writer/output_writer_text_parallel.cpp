@@ -5,6 +5,12 @@
 #include <sstream>
 #include <iomanip>
 
+OutputWriterTextParallel::OutputWriterTextParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning)
+: OutputWriterText(discretization), partitioning_(partitioning)
+{
+
+}
+
 void OutputWriterTextParallel::writeFile(double currentTime)
 {
   // Assemble the filename

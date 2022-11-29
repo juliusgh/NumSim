@@ -1,6 +1,8 @@
 #include "computation/1_computation_parallel.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
+#include "output_writer/output_writer_text_parallel.h"
+#include "output_writer/output_writer_paraview_parallel.h"
 
 /**
  * Initialize the ComputationParallel object for a parallel simulation
@@ -18,7 +20,7 @@ void ComputationParallel::initialize(string filename)
     settings_.printSettings();
 #endif
 
-    partitioning_ = std::make_unique<Partitioning>(ownRank, worldSize, settings_.ncells);
+    partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
 
     // Initialize discretization
     for (int i = 0; i < 2; i++)

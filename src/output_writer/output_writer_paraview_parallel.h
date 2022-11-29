@@ -18,7 +18,7 @@ class OutputWriterParaviewParallel :
 {
 public:
   //! constructor
-  OutputWriterParaviewParallel(std::shared_ptr<Discretization> discretization, const Partitioning &partitioning);
+  OutputWriterParaviewParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning);
 
   //! write current velocities to file, filename is output_<count>.vti
   void writeFile(double currentTime);
@@ -30,7 +30,7 @@ private:
 
   vtkSmartPointer<vtkXMLImageDataWriter> vtkWriter_;   //< vtk writer to write ImageData
 
-  const Partitioning partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
+    std::shared_ptr<Partitioning> partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
 
   std::array<int,2> nCellsGlobal_;   //< global number of cells
   std::array<int,2> nPointsGlobal_;  //< global number of points

@@ -21,6 +21,6 @@ public:
     void runSimulation();
 
 private:
-    std::unique_ptr<Partitioning> partitioning_;
+    std::shared_ptr<Partitioning> partitioning_;
     
 };
