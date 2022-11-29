@@ -173,6 +173,14 @@ double Partitioning::globalSum(double localValue) {
     return allReduce(localValue, MPI_SUM);
 }
 
+double Partitioning::globalMax(double localValue) {
+    return allReduce(localValue, MPI_MAX);
+}
+
+double Partitioning::globalMin(double localValue) {
+    return allReduce(localValue, MPI_MIN);
+}
+
 double Partitioning::allReduce(double localValue, MPI_Op op) {
     double globalValue;
     MPI_Allreduce(&localValue,

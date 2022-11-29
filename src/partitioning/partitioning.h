@@ -33,6 +33,8 @@ public:
     void recvFromBottom(std::vector<double> &data, int count) const;
     void recvFromTop(std::vector<double> &data, int count) const;
     double globalSum(double localValue);
+    double globalMax(double localValue);
+    double globalMin(double localValue);
     const std::array<int, 2> nCells() const;
     const std::array<int, 2> nCellsGlobal() const;
 private:
