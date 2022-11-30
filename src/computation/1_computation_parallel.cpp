@@ -1,14 +1,16 @@
-#include "computation/computation.h"
+#include "computation/1_computation_parallel.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
+#include "output_writer/output_writer_text_parallel.h"
+#include "output_writer/output_writer_paraview_parallel.h"
 
 /**
- * Initialize the computation object
+ * Initialize the ComputationParallel object for a parallel simulation
  * 
  * Parse the settings from the parameter file that is given as the command line argument
  * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
  */
-void Computation::initialize(string filename)
+void ComputationParallel::initialize(string filename)
 {
     settings_ = Settings();
     // Load settings from file
@@ -17,6 +19,8 @@ void Computation::initialize(string filename)
 #ifndef NDEBUG
     settings_.printSettings();
 #endif
+
+    partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
 
     // Initialize discretization
     for (int i = 0; i < 2; i++)
@@ -36,21 +40,21 @@ void Computation::initialize(string filename)
     }
     else if (settings_.pressureSolver == "GaussSeidel") {
         pressureSolver_ = std::make_unique<GaussSeidel>(discretization_, settings_.epsilon,
-                                                settings_.maximumNumberOfIterations);
+                                                        settings_.maximumNumberOfIterations);
 
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
 
     // Initialize output writers
-    outputWriterText_ = std::make_unique<OutputWriterText>(discretization_);
-    outputWriterParaview_ = std::make_unique<OutputWriterParaview>(discretization_);
+    outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
+    outputWriterParaview_ = std::make_unique<OutputWriterParaviewParallel>(discretization_, partitioning_);
 };
 
 /**
  * Run the whole simulation until tend
  */
-void Computation::runSimulation() {
+void ComputationParallel::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
     while (time < settings_.endTime){
@@ -97,7 +101,7 @@ void Computation::runSimulation() {
         */
 #ifndef NDEBUG
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-            ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
+             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
 #endif
@@ -110,7 +114,7 @@ void Computation::runSimulation() {
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
-void Computation::applyBoundaryValues() {
+void ComputationParallel::applyBoundaryValues() {
     // set boundary values for u at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
         // set boundary values for u at bottom side
@@ -153,7 +157,7 @@ void Computation::applyBoundaryValues() {
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
-void Computation::applyPreliminaryBoundaryValues(){
+void ComputationParallel::applyPreliminaryBoundaryValues(){
     // set boundary values for F at bottom and top side (lower priority)
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
         // set boundary values for F at bottom side
@@ -189,8 +193,8 @@ void Computation::applyPreliminaryBoundaryValues(){
 
 /**
  * Compute the preliminary velocities (F, G) using finite differences
- */ 
-void Computation::computePreliminaryVelocities(){
+ */
+void ComputationParallel::computePreliminaryVelocities(){
     // Compute F in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
@@ -213,14 +217,14 @@ void Computation::computePreliminaryVelocities(){
 /**
  * Compute the pressure p by solving the Poisson equation
  */
-void Computation::computePressure() {
+void ComputationParallel::computePressure() {
     pressureSolver_->solve();
 };
 
 /**
  * Compute the right hand side rhs of the pressure Poisson equation 
  */
-void Computation::computeRightHandSide() {
+void ComputationParallel::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
     for (int i = discretization_->rhsInteriorIBegin(); i < discretization_->rhsInteriorIEnd(); i++) {
         for (int j = discretization_->rhsInteriorJBegin(); j < discretization_->rhsInteriorJEnd(); j++) {
@@ -234,13 +238,13 @@ void Computation::computeRightHandSide() {
 /**
  * Compute the time step width dt based on the maximum velocities
  */
-void Computation::computeTimeStepWidth() {
+void ComputationParallel::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
 
     // Compute maximal time step width regarding the convection u
     double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
-    
+
     // Compute maximal time step width regarding the convection v
     double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
 
@@ -251,7 +255,7 @@ void Computation::computeTimeStepWidth() {
 /**
  * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
  */
-void Computation::computeVelocities() {
+void ComputationParallel::computeVelocities() {
     // Compute u in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {

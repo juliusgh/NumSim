@@ -1,9 +1,12 @@
 #include "settings.h"
-#include "computation/computation.h"
+#ifndef NPARALLEL
+    #include "computation/0_computation.h"
+#else
+    #include "computation/1_computation_parallel.h"
+#endif
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
-
 using namespace std;
 
 /**
@@ -25,8 +28,11 @@ int main(int argc, char *argv[]) {
         // read in the first argument
         filename = argv[1];
     }
-
+#ifndef NPARALLEL
     auto computation = Computation();
+#else
+    auto computation = ComputationParallel();
+#endif
     computation.initialize(filename);
     computation.runSimulation();
 
