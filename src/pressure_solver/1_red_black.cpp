@@ -1,11 +1,10 @@
 #include "pressure_solver/1_red_black.h"
 
 /**
- * Successive over-relaxation solver for solving a linear system of equations.
- * @param discretization
- * @param epsilon
+ * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
+ * @param discretization pointer to the implementation of the discretization
+ * @param epsilon error tolerance below which we consider the solver to be converged
  * @param maximumNumberOfIterations
- * @param omega
  */
 
 RedBlack::RedBlack(std::shared_ptr<Discretization> discretization,
@@ -62,7 +61,9 @@ void RedBlack::solve() {
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 }
-
+/**
+ *  Implementation of horizontal communication of pressure values between neighbouring subdomains
+ */
 void RedBlack::pGhostLayerHorizontal() {
     int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int columnOffset = discretization_->pInteriorJBegin();
@@ -144,6 +145,9 @@ void RedBlack::pGhostLayerHorizontal() {
     }
 }
 
+/**
+ *  Implementation of vertical communication of pressure values between neighbouring subdomains
+ */
 void RedBlack::pGhostLayerVertical() {
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
     int rowOffset = discretization_->pInteriorIBegin();
@@ -218,7 +222,9 @@ void RedBlack::pGhostLayerVertical() {
         }
     }
 }
-
+/**
+ * Calculation of the global residual norm using the squared Euclidean norm
+ */
 void RedBlack::computeResidualNorm() {
     double residual_norm2 = 0.0;
     const double dx2 = pow(discretization_->dx(),2);

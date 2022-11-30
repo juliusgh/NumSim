@@ -1,13 +1,12 @@
 #pragma once
 
 #include <array>
-#include <mpi.h>
 /**
- * encapsulate functionality corresponding to subdomain handling
+ * Partitioning encapsulate functionality corresponding to subdomain handling.
+ * This includes the ability to tell the own rank and the ranks of the neighbouring processes.
+ * It can check whether a process lies on a  global grid boundary.
+ * Additionally, the number of cells in a local staggered grid can be queried.
  *
- * should be able to tell the own rank number and the rank numbers of neighbouring processes,
- * know whether the own subdomain touches one of the boundaries left, right, top or bottom of the global domain
- * and it should know the number of cells in the local staggered grid of the own subdomain.
  */
 
 class Partitioning {
