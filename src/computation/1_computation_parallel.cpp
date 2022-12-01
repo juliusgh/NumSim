@@ -1,6 +1,7 @@
 #include "computation/1_computation_parallel.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
+#include "pressure_solver/1_red_black.h"
 #include "output_writer/output_writer_text_parallel.h"
 #include "output_writer/output_writer_paraview_parallel.h"
 
@@ -27,24 +28,14 @@ void ComputationParallel::initialize(string filename)
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(partitioning_->nCellsLocal(), meshWidth_, settings_.alpha);
+        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha);
     }
     else {
-        discretization_ = std::make_shared<CentralDifferences>(partitioning_->nCellsLocal(), meshWidth_);
+        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_);
     }
 
     // Initialize solver
-    if (settings_.pressureSolver == "SOR") {
-        pressureSolver_ = std::make_unique<SOR>(discretization_, settings_.epsilon,
-                                                settings_.maximumNumberOfIterations, settings_.omega);
-    }
-    else if (settings_.pressureSolver == "GaussSeidel") {
-        pressureSolver_ = std::make_unique<GaussSeidel>(discretization_, settings_.epsilon,
-                                                        settings_.maximumNumberOfIterations);
-
-    } else {
-        std::cout << "Solver not found!" << std::endl;
-    }
+    pressureSolver_ std::make_unique<RedBlack>(discretization_, settings_.epsilon, settings_.maximumNumberOfIterations, partitioning_)
 
     // Initialize output writers
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
@@ -94,7 +85,7 @@ void ComputationParallel::runSimulation() {
         /*
         * 6) Update the velocities (u, v)
         */
-        computeVelocities();
+        computeVelocities(); 
 
         /*
         * 7) Output debug information and simulation results
@@ -116,39 +107,78 @@ void ComputationParallel::runSimulation() {
  */
 void ComputationParallel::applyBoundaryValues() {
     // set boundary values for u at bottom and top side (lower priority)
-    for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
-        // set boundary values for u at bottom side
-        discretization_->u(i, discretization_->uJBegin()) =
-                2.0 * settings_.dirichletBcBottom[0] - discretization_->u(i, discretization_->uInteriorJBegin());
-        // set boundary values for u at top side
-        discretization_->u(i, discretization_->uJEnd() - 1) =
-                2.0 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uInteriorJEnd() - 1);
-    }
 
-    // set boundary values for v at bottom and top side (lower priority)
-    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
-        // set boundary values for v at bottom side
-        discretization_->v(i, discretization_->vJBegin()) = settings_.dirichletBcBottom[1];
-        // set boundary values for v at top side
-        discretization_->v(i, discretization_->vJEnd() - 1) = settings_.dirichletBcTop[1];
-    }
+    int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
+    int rowOffset = discretization_->pInteriorIBegin();
 
-    // set boundary values for u at left and right side (higher priority)
-    for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
-        // set boundary values for u at left side
-        discretization_->u(discretization_->uIBegin(), j) = settings_.dirichletBcLeft[0];
-        // set boundary values for u at right side
-        discretization_->u(discretization_->uIEnd() - 1, j) = settings_.dirichletBcRight[0];
-    }
+    // Even processes first send to bottom and top, then receive from bottom and top
+    if (partitioning_->row() % 2) {
+        if (partitioning_->ownPartitionContainsTopBoundary()) {
+            applyBoundaryValuesTop();
+        }
+        else {
+            // send row on the top to top neighbour
+            std::vector<double> topRow;
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
+            }
+            partitioning_->sendToTop(topRow);
 
-    // set boundary values for v at left and right side (higher priority)
-    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
-        // set boundary values for v at left side
-        discretization_->v(discretization_->vIBegin(), j) =
-                2.0 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
-        // set boundary values for v at right side
-        discretization_->v(discretization_->vIEnd() - 1, j) =
-                2.0 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vInteriorIEnd() - 1, j);
+            // receive ghost layer row on the top from top neighbour
+            partitioning_->recvFromTop(topRow, rowCount);
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                discretization_->p(i, discretization_->pJEnd()) = topRow.at(i - rowOffset);
+            }
+        }
+        if (!partitioning_->ownPartitionContainsBottomBoundary()) {
+            // send row on the bottom to bottom neighbour
+            std::vector<double> bottomRow;
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
+            }
+            partitioning_->sendToBottom(bottomRow);
+
+            // receive ghost layer row on the bottom from bottom neighbour
+            partitioning_->recvFromTop(bottomRow, rowCount);
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
+            }
+        }
+    } else {
+        if (partitioning_->ownPartitionContainsTopBoundary()) {
+            applyBoundaryValuesTop();
+        }
+        else {
+            // receive row on the top from top neighbour
+            std::vector<double> topRow;
+            partitioning_->recvFromTop(topRow, rowCount);
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                discretization_->p(i, discretization_->pInteriorJEnd()) = topRow.at(i - rowOffset);
+            }
+
+            // send row on the top to top neighbour
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
+            }
+            partitioning_->sendToTop(topRow);
+        }
+        if (partitioning_->ownPartitionContainsBottomBoundary()) {
+            applyBoundaryValuesBottom();
+        }
+        else {
+            // receive column on the right from right neighbour
+            std::vector<double> bottomRow;
+            partitioning_->recvFromTop(bottomRow, rowCount);
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                discretization_->p(i, discretization_->pInteriorJBegin()) = bottomRow.at(i - rowOffset);
+            }
+
+            // send row on the bottom to bottom neighbour
+            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+                bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
+            }
+            partitioning_->sendToBottom(bottomRow);
+        }
     }
 };
 
@@ -191,49 +221,6 @@ void ComputationParallel::applyPreliminaryBoundaryValues(){
     }
 };
 
-/**
- * Compute the preliminary velocities (F, G) using finite differences
- */
-void ComputationParallel::computePreliminaryVelocities(){
-    // Compute F in the interior of the domain
-    for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            double lap_u = discretization_->computeD2uDx2(i,j) + discretization_->computeD2uDy2(i,j);
-            double conv_u = discretization_->computeDu2Dx(i,j) + discretization_->computeDuvDy(i,j);
-            discretization_->f(i,j) = discretization_->u(i,j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
-        }
-    }
-
-    // Compute G in the interior of the domain
-    for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            double lap_v = discretization_->computeD2vDx2(i,j) + discretization_->computeD2vDy2(i,j);
-            double conv_v = discretization_->computeDv2Dy(i,j) + discretization_->computeDuvDx(i,j);
-            discretization_->g(i,j) = discretization_->v(i,j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
-        }
-    }
-};
-
-/**
- * Compute the pressure p by solving the Poisson equation
- */
-void ComputationParallel::computePressure() {
-    pressureSolver_->solve();
-};
-
-/**
- * Compute the right hand side rhs of the pressure Poisson equation 
- */
-void ComputationParallel::computeRightHandSide() {
-    // Compute rhs in the interior of the domain using finite differences
-    for (int i = discretization_->rhsInteriorIBegin(); i < discretization_->rhsInteriorIEnd(); i++) {
-        for (int j = discretization_->rhsInteriorJBegin(); j < discretization_->rhsInteriorJEnd(); j++) {
-            double fx = (discretization_->f(i, j) - discretization_->f(i - 1, j)) / discretization_->dx();
-            double gy = (discretization_->g(i, j) - discretization_->g(i, j - 1)) / discretization_->dy();
-            discretization_->rhs(i, j) = (fx + gy) / dt_;
-        }
-    }
-};
 
 /**
  * Compute the time step width dt based on the maximum velocities
@@ -257,21 +244,63 @@ void ComputationParallel::computeTimeStepWidth() {
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
 };
 
-/**
- * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
- */
-void ComputationParallel::computeVelocities() {
-    // Compute u in the interior of the domain
-    for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            discretization_->u(i, j) = discretization_->f(i, j) - dt_ * discretization_->computeDpDx(i, j);
-        }
+
+
+void ComputationParallel::applyBoundaryValuesTop(){
+    for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
+        // set boundary values for u at top side
+        discretization_->u(i, discretization_->uJEnd() - 1) =
+                2.0 * settings_.dirichletBcTop[0] - discretization_->u(i, discretization_->uInteriorJEnd() - 1);
     }
 
-    // Compute v in the interior of the domain
-    for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            discretization_->v(i, j) = discretization_->g(i, j) - dt_ * discretization_->computeDpDy(i, j);
-        }
+    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
+        ;
+        // set boundary values for v at top side
+        discretization_->v(i, discretization_->vJEnd() - 1) = settings_.dirichletBcTop[1];
     }
+};
+
+void ComputationParallel::applyBoundaryValuesBottom(){
+    for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
+        // set boundary values for u at bottom side
+        discretization_->u(i, discretization_->uJBegin()) =
+                2.0 * settings_.dirichletBcBottom[0] - discretization_->u(i, discretization_->uInteriorJBegin());
+    }
+
+    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
+        // set boundary values for v at bottom side
+        discretization_->v(i, discretization_->vJBegin()) = settings_.dirichletBcBottom[1];
+    }  
+};
+
+void ComputationParallel::applyBoundaryValuesLeft(){
+    // set boundary values for u at left and right side (higher priority)
+    for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
+        // set boundary values for u at left side
+        discretization_->u(discretization_->uIBegin(), j) = settings_.dirichletBcLeft[0];
+    }
+
+    // set boundary values for v at left and right side (higher priority)
+    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
+        // set boundary values for v at left side
+        discretization_->v(discretization_->vIBegin(), j) =
+                2.0 * settings_.dirichletBcLeft[1] - discretization_->v(discretization_->vIBegin() + 1, j);
+    }
+    
+};
+
+void ComputationParallel::applyBoundaryValuesRight(){
+    // set boundary values for u at left and right side (higher priority)
+    for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
+        // set boundary values for u at right side
+        discretization_->u(discretization_->uIEnd() - 1, j) = settings_.dirichletBcRight[0];
+    }
+
+    // set boundary values for v at left and right side (higher priority)
+    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
+        // set boundary values for v at right side
+        discretization_->v(discretization_->vIEnd() - 1, j) =
+                2.0 * settings_.dirichletBcRight[1] - discretization_->v(discretization_->vInteriorIEnd() - 1, j);
+    }
+    
 };
