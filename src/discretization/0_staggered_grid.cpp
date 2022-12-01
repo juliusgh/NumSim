@@ -7,9 +7,10 @@
  * @param nCells: number of cells
  * @param meshWidth: cell width in all directions
  */
-StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
+StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                              std::array<double, 2> meshWidth) :
-    nCells_(nCells),
+    partitioning_(partitioning),
+    nCells_(partitioning->nCellsLocal()),
     meshWidth_(meshWidth),
     f_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     g_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
@@ -18,7 +19,7 @@ StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
     u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth)
 {
-    
+
 };
 
 /**
@@ -195,6 +196,9 @@ double &StaggeredGrid::p(int i, int j)
  */
 int StaggeredGrid::uIBegin() const
 {
+    if (partitioning_->ownPartitionContainsLeftBoundary()) {
+        return -2;
+    }
     return -1;
 };
 
@@ -204,6 +208,9 @@ int StaggeredGrid::uIBegin() const
  */
 int StaggeredGrid::uIEnd() const
 {
+    if (partitioning_->ownPartitionContainsRightBoundary()) {
+        return nCells_[0] + 1;
+    }
     return nCells_[0];
 };
 

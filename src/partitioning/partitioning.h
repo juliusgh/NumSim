@@ -1,5 +1,7 @@
 #pragma once
 
+#include "discretization/1_discretization.h"
+#include <memory>
 #include <array>
 #include <mpi.h>
 
@@ -58,6 +60,12 @@ public:
     void recvFromRight(std::vector<double> &data, int count) const;
     void recvFromBottom(std::vector<double> &data, int count) const;
     void recvFromTop(std::vector<double> &data, int count) const;
+    static void send(int destinationRank, std::vector<double> &data);
+    static void recv(int sourceRank, std::vector<double> &data, int count);
+    static void isend(int destinationRank, std::vector<double> &data, MPI_Request &request);
+    static void irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request &request);
+    static void wait(MPI_Request &request);
+    static double allReduce(double localValue, MPI_Op op);
     double globalSum(double localValue);
     double globalMax(double localValue);
     double globalMin(double localValue);
@@ -72,11 +80,6 @@ private:
     int computeColumn(int rank) const;
     int computeRow(int rank) const;
     int computeRank(int i, int j) const;
-    static void send(int destinationRank, std::vector<double> &data);
-    static void recv(int sourceRank, std::vector<double> &data, int count);
-    static void isend(int destinationRank, std::vector<double> &data, MPI_Request request);
-    static void irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request request);
-    static double allReduce(double localValue, MPI_Op op);
     std::array<int, 2> nDomains_;
     int domainColumn_;
     int domainRow_;

@@ -1,6 +1,6 @@
 #include <vector>
-#include "partitioning/partitioning.h"
 #include <iostream>
+#include "partitioning/partitioning.h"
 
 /**
  * Partitioning encapsulate functionality corresponding to subdomain handling.
@@ -28,7 +28,8 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
     domainColumn_ = computeColumn(ownRankNo_);
     domainRow_ = computeRow(ownRankNo_);
-    // compute nCells_, nCellsGlobal_
+
+    // Compute nCells_, nCellsGlobal_
     nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
     int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
     int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
@@ -233,7 +234,7 @@ void Partitioning::recv(int sourceRank, std::vector<double> &data, int count) {
  * @param destinationRank rank of the process, data is send to
  * @param data data to be send
  */
-void Partitioning::isend(int destinationRank, std::vector<double> &data, MPI_Request request) {
+void Partitioning::isend(int destinationRank, std::vector<double> &data, MPI_Request &request) {
     MPI_Isend(
             data.data(),
             data.size(),
@@ -251,7 +252,7 @@ void Partitioning::isend(int destinationRank, std::vector<double> &data, MPI_Req
  * @param data data to be received
  * @param count size of data to be received
  */
-void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request request) {
+void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request &request) {
     MPI_Irecv(
             data.data(),
             count,
@@ -263,6 +264,10 @@ void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, M
     );
 }
 
+void Partitioning::wait(MPI_Request &request) {
+    MPI_Wait(&request, MPI_STATUS_IGNORE);
+}
+
 /**
  * method used to send information to the subdomain left of the current subdomain
  * @param data information to be send to the left
@@ -270,6 +275,7 @@ void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, M
 void Partitioning::sendToLeft(std::vector<double> &data) const {
     send(leftNeighbourRankNo(), data);
 }
+
 /**
  * method used to send information to the subdomain right of the current subdomain
  * @param data information to be send to the right

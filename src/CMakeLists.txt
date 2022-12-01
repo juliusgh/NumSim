@@ -24,6 +24,7 @@ add_executable(${PROJECT_NAME}
     pressure_solver/0_pressure_solver.cpp
     pressure_solver/1_gauss_seidel.cpp
     pressure_solver/1_sor.cpp
+    pressure_solver/1_red_black.cpp
 
     output_writer/output_writer.cpp
     output_writer/output_writer_text.cpp
@@ -58,6 +59,7 @@ if(GTest_FOUND)
         pressure_solver/0_pressure_solver.cpp
         pressure_solver/1_gauss_seidel.cpp
         pressure_solver/1_sor.cpp
+        pressure_solver/1_red_black.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp

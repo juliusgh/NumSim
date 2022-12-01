@@ -40,8 +40,7 @@ void RedBlack::solve() {
             }
         }
 
-        pGhostLayerHorizontal();
-        pGhostLayerVertical();
+        pGhostLayer();
 
         // black half step
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j += 2) {
@@ -54,8 +53,7 @@ void RedBlack::solve() {
             }
         }
 
-        pGhostLayerHorizontal();
-        pGhostLayerVertical();
+        pGhostLayer();
 
         computeResidualNorm();
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
@@ -65,161 +63,95 @@ void RedBlack::solve() {
 /**
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
-void RedBlack::pGhostLayerHorizontal() {
+void RedBlack::pGhostLayer() {
     int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int columnOffset = discretization_->pInteriorJBegin();
-
-    // Even processes first send to left and right, then receive from left and right
-    if (partitioning_->column() % 2) {
-        if (partitioning_->ownPartitionContainsRightBoundary()) {
-            setBoundaryValuesRight();
-        }
-        else {
-            // send to column on the right to right neighbour
-            std::vector<double> rightColumn;
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
-            }
-            partitioning_->sendToRight(rightColumn);
-
-            // receive ghost layer column on the right from right neighbour
-            partitioning_->recvFromRight(rightColumn, columnCount);
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
-            }
-        }
-        if (partitioning_->ownPartitionContainsLeftBoundary()) {
-            setBoundaryValuesLeft();
-        }
-        else {
-            // send to column on the left to left neighbour
-            std::vector<double> leftColumn;
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                leftColumn.push_back(discretization_->p(discretization_->pInteriorIBegin(), j));
-            }
-            partitioning_->sendToLeft(leftColumn);
-
-            // receive ghost layer column on the left from left neighbour
-            partitioning_->recvFromRight(leftColumn, columnCount);
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                discretization_->p(discretization_->pIBegin(), j) = leftColumn.at(j - columnOffset);
-            }
-        }
-    }
-
-    // Odd processes first receive from left and right, then send to left and right
-    else {
-        if (partitioning_->ownPartitionContainsRightBoundary()) {
-            setBoundaryValuesRight();
-        }
-        else {
-            // receive ghost layer column on the right from right neighbour
-            std::vector<double> rightColumn;
-            partitioning_->recvFromRight(rightColumn, columnCount);
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
-            }
-
-            // send to column on the right to right neighbour
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
-            }
-            partitioning_->sendToRight(rightColumn);
-        }
-        if (partitioning_->ownPartitionContainsLeftBoundary()) {
-            setBoundaryValuesLeft();
-        }
-        else {
-            // receive ghost layer column on the right from right neighbour
-            std::vector<double> leftColumn;
-            partitioning_->recvFromLeft(leftColumn, columnCount);
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                discretization_->p(discretization_->pIBegin(), j) = leftColumn.at(j - columnOffset);
-            }
-
-            // send to column on the left to left neighbour
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                leftColumn.push_back(discretization_->p(discretization_->pInteriorIBegin(), j));
-            }
-            partitioning_->sendToLeft(leftColumn);
-        }
-    }
-}
-
-/**
- *  Implementation of vertical communication of pressure values between neighbouring subdomains
- */
-void RedBlack::pGhostLayerVertical() {
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
     int rowOffset = discretization_->pInteriorIBegin();
 
-    // Even processes first send to bottom and top, then receive from bottom and top
-    if (partitioning_->row() % 2) {
-        if (partitioning_->ownPartitionContainsTopBoundary()) {
-            setBoundaryValuesTop();
-        }
-        else {
-            // send row on the top to top neighbour
-            std::vector<double> topRow;
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
-            }
-            partitioning_->sendToTop(topRow);
+    MPI_Request request;
+    std::vector<double> rightColumn;
+    std::vector<double> leftColumn;
+    std::vector<double> topRow;
+    std::vector<double> bottomRow;
 
-            // receive ghost layer row on the top from top neighbour
-            partitioning_->recvFromTop(topRow, rowCount);
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                discretization_->p(i, discretization_->pJEnd()) = topRow.at(i - rowOffset);
-            }
+    if (partitioning_->ownPartitionContainsRightBoundary()) {
+        setBoundaryValuesRight();
+    }
+    else {
+        // send to column on the right to right neighbour
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
         }
-        if (!partitioning_->ownPartitionContainsBottomBoundary()) {
-            // send row on the bottom to bottom neighbour
-            std::vector<double> bottomRow;
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
-            }
-            partitioning_->sendToBottom(bottomRow);
 
-            // receive ghost layer row on the bottom from bottom neighbour
-            partitioning_->recvFromTop(bottomRow, rowCount);
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
-            }
-        }
-    } else {
-        if (partitioning_->ownPartitionContainsTopBoundary()) {
-            setBoundaryValuesTop();
-        }
-        else {
-            // receive row on the top from top neighbour
-            std::vector<double> topRow;
-            partitioning_->recvFromTop(topRow, rowCount);
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                discretization_->p(i, discretization_->pInteriorJEnd()) = topRow.at(i - rowOffset);
-            }
+        partitioning_->isend(partitioning_->rightNeighbourRankNo(), rightColumn, request);
 
-            // send row on the top to top neighbour
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
-            }
-            partitioning_->sendToTop(topRow);
+        // receive ghost layer column on the right from right neighbour
+        partitioning_->irecv(partitioning_->rightNeighbourRankNo(), rightColumn, columnCount, request);
+    }
+    if (partitioning_->ownPartitionContainsLeftBoundary()) {
+        setBoundaryValuesLeft();
+    }
+    else {
+        // send to column on the left to left neighbour
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            leftColumn.push_back(discretization_->p(discretization_->pInteriorIBegin(), j));
         }
-        if (partitioning_->ownPartitionContainsBottomBoundary()) {
-            setBoundaryValuesBottom();
-        }
-        else {
-            // receive column on the right from right neighbour
-            std::vector<double> bottomRow;
-            partitioning_->recvFromTop(bottomRow, rowCount);
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                discretization_->p(i, discretization_->pInteriorJBegin()) = bottomRow.at(i - rowOffset);
-            }
+        partitioning_->isend(partitioning_->leftNeighbourRankNo(), leftColumn, request);
 
-            // send row on the bottom to bottom neighbour
-            for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-                bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
-            }
-            partitioning_->sendToBottom(bottomRow);
+        // receive ghost layer column on the left from left neighbour
+        partitioning_->irecv(partitioning_->leftNeighbourRankNo(), leftColumn, columnCount, request);
+    }
+    if (partitioning_->ownPartitionContainsTopBoundary()) {
+        setBoundaryValuesTop();
+    }
+    else {
+        // send row on the top to top neighbour
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
+        }
+        partitioning_->isend(partitioning_->topNeighbourRankNo(), topRow, request);
+
+        // receive ghost layer row on the top from top neighbour
+        partitioning_->irecv(partitioning_->topNeighbourRankNo(), topRow, rowCount, request);
+    }
+    if (partitioning_->ownPartitionContainsTopBoundary()) {
+        setBoundaryValuesBottom();
+    }
+    else {
+        // send row on the bottom to bottom neighbour
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
+        }
+        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), bottomRow, request);
+
+        // receive ghost layer row on the bottom from bottom neighbour
+        partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), bottomRow, rowCount, request);
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
+        }
+    }
+
+    partitioning_->wait(request);
+
+    if (!partitioning_->ownPartitionContainsRightBoundary()) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsLeftBoundary()) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(discretization_->pIBegin(), j) = leftColumn.at(j - columnOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsTopBoundary()) {
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            discretization_->p(i, discretization_->pJEnd()) = topRow.at(i - rowOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsBottomBoundary()) {
+        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
         }
     }
 }
