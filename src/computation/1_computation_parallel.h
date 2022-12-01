@@ -36,6 +36,8 @@ protected:
      */
     virtual void applyPreliminaryBoundaryValues();
 
+    virtual void computeTimeStepWidth();
+
 
     void applyBoundaryValuesTop();
 
