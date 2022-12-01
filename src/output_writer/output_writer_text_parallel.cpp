@@ -15,7 +15,7 @@ void OutputWriterTextParallel::writeFile(double currentTime)
 {
   // Assemble the filename
   std::stringstream fileName;
-  fileName << "out/output_" << std::setw(4) << std::setfill('0') << fileNo_ << "." << partitioning_.ownRankNo() << ".txt";
+  fileName << "out/output_" << std::setw(4) << std::setfill('0') << fileNo_ << "." << partitioning_->ownRankNo() << ".txt";
   
   // increment file no.
   fileNo_++;
@@ -185,7 +185,7 @@ void OutputWriterTextParallel::writePressureFile()
 
   // Assemble the filename
   std::stringstream fileName;
-  fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << "." << partitioning_.ownRankNo() << ".txt";
+  fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << "." << partitioning_->ownRankNo() << ".txt";
   
   // open file
   std::ofstream file(fileName.str().c_str());

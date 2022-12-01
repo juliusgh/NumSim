@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <mpi.h>
+
 /**
  * Partitioning encapsulate functionality corresponding to subdomain handling.
  * This includes the ability to tell the own rank and the ranks of the neighbouring processes.
@@ -14,6 +16,7 @@ public:
     Partitioning(std::array<int, 2> nCellsGlobal);
     int column() const;
     int row() const;
+
     //! if the own partition has part of the bottom boundary of the whole domain
     bool ownPartitionContainsBottomBoundary() const;
 
@@ -27,11 +30,26 @@ public:
     //! if the own partition has part of the right boundary of the whole domain
     //! used in OutputWriterParaviewParallel
     bool ownPartitionContainsRightBoundary() const;
+
+    //! number of MPI ranks
+    int nRanks() const;
+
+    //! get the own MPI rank no
+    //! used in OutputWriterParaviewParallel and OutputWriterTextParallel
     int ownRankNo() const;
-    int leftRank() const;
-    int rightRank() const;
-    int bottomRank() const;
-    int topRank() const;
+
+    //! get the rank no of the left neighbouring rank
+    int leftNeighbourRankNo() const;
+
+    //! get the rank no of the right neighbouring rank
+    int rightNeighbourRankNo() const;
+
+    //! get the rank no of the bottom neighbouring rank
+    int bottomNeighbourRankNo() const;
+
+    //! get the rank no of the top neighbouring rank
+    int topNeighbourRankNo() const;
+
     void sendToLeft(std::vector<double> &data) const;
     void sendToRight(std::vector<double> &data) const;
     void sendToBottom(std::vector<double> &data) const;
@@ -43,7 +61,7 @@ public:
     double globalSum(double localValue);
     double globalMax(double localValue);
     double globalMin(double localValue);
-    const std::array<int, 2> nCells() const;
+    const std::array<int, 2> nCellsLocal() const;
     const std::array<int, 2> nCellsGlobal() const;
     std::array<int, 2> nodeOffset() const;
 private:
@@ -60,8 +78,9 @@ private:
     std::array<int, 2> nDomains_;
     int domainColumn_;
     int domainRow_;
-    std::array<int, 2> nCells_;
+    std::array<int, 2> nCellsLocal_;
     std::array<int, 2> nCellsGlobal_;
-    int ownRank_;
-    int worldSize_;
+    std::array<int, 2> nodeOffset_;
+    int ownRankNo_;
+    int nRanks_;
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include <mpi.h>
 #include "computation/0_computation.h"
+#include "partitioning/partitioning.h"
 
 
 class ComputationParallel : public Computation {

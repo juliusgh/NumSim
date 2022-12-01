@@ -1,5 +1,6 @@
 #include <vector>
 #include "partitioning/partitioning.h"
+#include <iostream>
 
 /**
  * Partitioning encapsulate functionality corresponding to subdomain handling.
@@ -16,26 +17,44 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Init(NULL, NULL);
 
     // Get the number of processes
-    MPI_Comm_size(MPI_COMM_WORLD, &worldSize_);
+    MPI_Comm_size(MPI_COMM_WORLD, &nRanks_);
+
+    std::cout << "number of processes: " << nRanks_ << std::endl;
 
     // Get the rank of the process
-    MPI_Comm_rank(MPI_COMM_WORLD, &ownRank_);
+    MPI_Comm_rank(MPI_COMM_WORLD, &ownRankNo_);
 
     // Partition the domain
-    MPI_Dims_create(worldSize_, 2, nDomains_.data());
-    domainColumn_ = computeColumn(ownRank_);
-    domainRow_ = computeRow(ownRank_);
+    MPI_Dims_create(nRanks_, 2, nDomains_.data());
+    domainColumn_ = computeColumn(ownRankNo_);
+    domainRow_ = computeRow(ownRankNo_);
     // compute nCells_, nCellsGlobal_
-    nCells_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
+    nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
     int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
     int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
     if (domainColumn_ <= cellsColumnRemainder)
-        nCells_[0]++;
+        nCellsLocal_[0]++;
     if (domainRow_ <= cellsRowRemainder)
-        nCells_[1]++;
+        nCellsLocal_[1]++;
+
+    int columnOffset = 0;
+    for (int i = columnsBegin(); i < domainColumn_; i++) {
+        columnOffset += nCellsLocal_[0];
+        if (i <= cellsColumnRemainder)
+            columnOffset++;
+    }
+
+    int rowOffset = 0;
+    for (int j = rowsBegin(); j < domainRow_; j++) {
+        rowOffset += nCellsLocal_[1];
+        if (j <= cellsRowRemainder)
+            rowOffset++;
+    }
+
+    nodeOffset_ = {columnOffset, rowOffset};
 }
 /**
- * get position of process in global
+ * get column index of subdomain
  * @return column length of process
  */
 int Partitioning::column() const {
@@ -43,7 +62,7 @@ int Partitioning::column() const {
 }
 
 /**
- * get column row of process
+ * get row index of subdomain
  * @return row length of process
  */
 int Partitioning::row() const {
@@ -115,7 +134,7 @@ bool Partitioning::ownPartitionContainsTopBoundary() const {
  * @return own rank
  */
 int Partitioning::ownRankNo() const {
-    return ownRank_;
+    return ownRankNo_;
 }
 
 /**
@@ -123,10 +142,10 @@ int Partitioning::ownRankNo() const {
  * In the case that the current boundary touches the left boundary, its own rank is returned.
  * @return rank of left neighbour process
  */
-int Partitioning::leftRank() const {
+int Partitioning::leftNeighbourRankNo() const {
     if (ownPartitionContainsLeftBoundary()) {
         // subdomain boundary is domain boundary
-        return ownRank_;
+        return ownRankNo_;
     }
     return computeRank(domainColumn_ - 1, domainRow_);
 }
@@ -135,10 +154,10 @@ int Partitioning::leftRank() const {
  * In the case that the current boundary touches the right boundary, its own rank is returned.
  * @return rank of right neighbour process
  */
-int Partitioning::rightRank() const {
+int Partitioning::rightNeighbourRankNo() const {
     if (ownPartitionContainsRightBoundary()) {
         // subdomain boundary is domain boundary
-        return ownRank_;
+        return ownRankNo_;
     }
     return computeRank(domainColumn_ + 1, domainRow_);
 }
@@ -147,10 +166,10 @@ int Partitioning::rightRank() const {
  * In the case that the current boundary touches the bottom boundary, its own rank is returned.
  * @return rank of bottom neighbour process
  */
-int Partitioning::bottomRank() const {
+int Partitioning::bottomNeighbourRankNo() const {
     if (ownPartitionContainsBottomBoundary()) {
         // subdomain boundary is domain boundary
-        return ownRank_;
+        return ownRankNo_;
     }
     return computeRank(domainColumn_, domainRow_ - 1);
 }
@@ -160,10 +179,10 @@ int Partitioning::bottomRank() const {
  * In the case that the current boundary touches the top boundary, its own rank is returned.
  * @return rank of top neighbour process
  */
-int Partitioning::topRank() const {
+int Partitioning::topNeighbourRankNo() const {
     if (ownPartitionContainsTopBoundary()) {
         // subdomain boundary is domain boundary
-        return ownRank_;
+        return ownRankNo_;
     }
     return computeRank(domainColumn_, domainRow_ + 1);
 }
@@ -205,14 +224,14 @@ void Partitioning::recv(int sourceRank, std::vector<double> &data, int count) {
  * @param data information to be send to the left
  */
 void Partitioning::sendToLeft(std::vector<double> &data) const {
-    send(leftRank(), data);
+    send(leftNeighbourRankNo(), data);
 }
 /**
  * method used to send information to the subdomain right of the current subdomain
  * @param data information to be send to the right
  */
 void Partitioning::sendToRight(std::vector<double> &data) const {
-    send(rightRank(), data);
+    send(rightNeighbourRankNo(), data);
 }
 
 /**
@@ -220,7 +239,7 @@ void Partitioning::sendToRight(std::vector<double> &data) const {
  * @param data information to be send down
  */
 void Partitioning::sendToBottom(std::vector<double> &data) const {
-    send(bottomRank(), data);
+    send(bottomNeighbourRankNo(), data);
 }
 
 /**
@@ -228,7 +247,7 @@ void Partitioning::sendToBottom(std::vector<double> &data) const {
  * @param data information to be send up
  */
 void Partitioning::sendToTop(std::vector<double> &data) const {
-    send(topRank(), data);
+    send(topNeighbourRankNo(), data);
 }
 
 /**
@@ -236,7 +255,7 @@ void Partitioning::sendToTop(std::vector<double> &data) const {
  * @param data information to be received from the left
  */
 void Partitioning::recvFromLeft(std::vector<double> &data, int count) const {
-    recv(leftRank(), data, count);
+    recv(leftNeighbourRankNo(), data, count);
 }
 
 /**
@@ -244,7 +263,7 @@ void Partitioning::recvFromLeft(std::vector<double> &data, int count) const {
  * @param data information to be received from the right
  */
 void Partitioning::recvFromRight(std::vector<double> &data, int count) const {
-    recv(leftRank(), data, count);
+    recv(rightNeighbourRankNo(), data, count);
 }
 
 /**
@@ -252,7 +271,7 @@ void Partitioning::recvFromRight(std::vector<double> &data, int count) const {
  * @param data information to be received from below
  */
 void Partitioning::recvFromBottom(std::vector<double> &data, int count) const {
-    recv(leftRank(), data, count);
+    recv(bottomNeighbourRankNo(), data, count);
 }
 
 /**
@@ -260,7 +279,7 @@ void Partitioning::recvFromBottom(std::vector<double> &data, int count) const {
  * @param data information to be received from the top
  */
 void Partitioning::recvFromTop(std::vector<double> &data, int count) const {
-    recv(leftRank(), data, count);
+    recv(topNeighbourRankNo(), data, count);
 }
 
 /**
@@ -295,8 +314,8 @@ int Partitioning::computeRank(int column, int row) const {
  * get local number of cells in current subdomain
  * @return number of cells in current subdomain
  */
-const std::array<int, 2> Partitioning::nCells() const {
-    return nCells_;
+const std::array<int, 2> Partitioning::nCellsLocal() const {
+    return nCellsLocal_;
 }
 
 /**
@@ -359,7 +378,6 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
  * @return offset
  */
 std::array<int, 2> Partitioning::nodeOffset() const {
-    std::array<int, 2> offSet = {(domainRow_ - 1) * nCells_[0], (domainColumn_ - 1) * nCells_[1]};
-    return offSet;
+    return nodeOffset_;
 }
 

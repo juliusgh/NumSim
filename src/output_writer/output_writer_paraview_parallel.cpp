@@ -1,5 +1,4 @@
 #include "output_writer/output_writer_paraview_parallel.h"
-
 #include "storage/field_variable.h"
 #include "discretization/1_discretization.h"
 
@@ -10,7 +9,7 @@
 
 OutputWriterParaviewParallel::OutputWriterParaviewParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning) :
    OutputWriterParaview(discretization), partitioning_(partitioning),
-  nCellsGlobal_(partitioning_.nCellsGlobal()),
+  nCellsGlobal_(partitioning_->nCellsGlobal()),
   nPointsGlobal_ {nCellsGlobal_[0]+1, nCellsGlobal_[1]+1},    // we have one point more than cells in every coordinate direction
   
   // create field variables for resulting values, only for local data as send buffer
@@ -43,14 +42,14 @@ void OutputWriterParaviewParallel::gatherData()
   int iEnd = nCells[0];
 
   // add right-most points at ranks with right boundary
-  if (partitioning_.ownPartitionContainsRightBoundary())
+  if (partitioning_->ownPartitionContainsRightBoundary())
     iEnd += 1;
 
   // add right-most points at ranks with top boundary
-  if (partitioning_.ownPartitionContainsTopBoundary())
+  if (partitioning_->ownPartitionContainsTopBoundary())
     jEnd += 1;
 
-  std::array<int,2> nodeOffset = partitioning_.nodeOffset();
+  std::array<int,2> nodeOffset = partitioning_->nodeOffset();
 
   u_.setToZero();
   v_.setToZero();
@@ -86,7 +85,7 @@ void OutputWriterParaviewParallel::writeFile(double currentTime)
   gatherData();
 
   // only continue to write the file on rank 0
-  if (partitioning_.ownRankNo() != 0)
+  if (partitioning_->ownRankNo() != 0)
   {
     return;
   }

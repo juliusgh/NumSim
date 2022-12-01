@@ -11,9 +11,10 @@ add_executable(${PROJECT_NAME}
 
     computation/0_computation.cpp
     computation/1_computation_parallel.cpp
+    partitioning/partitioning.cpp
 
     storage/array2d.cpp
-        storage/field_variable.cpp
+    storage/field_variable.cpp
 
     discretization/0_staggered_grid.cpp
     discretization/1_discretization.cpp
@@ -47,7 +48,7 @@ if(GTest_FOUND)
         partitioning/partitioning.cpp
 
         storage/array2d.cpp
-            storage/field_variable.cpp
+        storage/field_variable.cpp
 
         discretization/0_staggered_grid.cpp
         discretization/1_discretization.cpp

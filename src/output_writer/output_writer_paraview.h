@@ -2,6 +2,7 @@
 
 #include "output_writer/output_writer.h"
 #include "discretization/1_discretization.h"
+#include "partitioning/partitioning.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkXMLImageDataWriter.h>

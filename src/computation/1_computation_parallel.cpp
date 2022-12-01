@@ -27,10 +27,10 @@ void ComputationParallel::initialize(string filename)
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(settings_.nCells, meshWidth_, settings_.alpha);
+        discretization_ = std::make_shared<DonorCell>(partitioning_->nCellsLocal(), meshWidth_, settings_.alpha);
     }
     else {
-        discretization_ = std::make_shared<CentralDifferences>(settings_.nCells, meshWidth_);
+        discretization_ = std::make_shared<CentralDifferences>(partitioning_->nCellsLocal(), meshWidth_);
     }
 
     // Initialize solver
@@ -243,10 +243,15 @@ void ComputationParallel::computeTimeStepWidth() {
     double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
 
     // Compute maximal time step width regarding the convection u
-    double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
+    double u_absMax_local = discretization_->u().absMax();
+    double u_absMax = partitioning_->globalMax(u_absMax_local);
+    double dt_conv_u = discretization_->dx() / u_absMax;
+
 
     // Compute maximal time step width regarding the convection v
-    double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
+    double v_absMax_local = discretization_->v().absMax();
+    double v_absMax = partitioning_->globalMax(v_absMax_local);
+    double dt_conv_v = discretization_->dy() / v_absMax;
 
     // Set the appropriate time step width by using a security factor tau
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});

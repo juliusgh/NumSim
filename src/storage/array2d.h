@@ -41,6 +41,12 @@ public:
 
     void print() const;
 
+    //! set all data of 2D array to zero
+    void setToZero();
+
+    //! return data vector
+    void *data();
+
 protected:
     std::vector<double> data_;      //< storage array values, in row-major order
     const std::array<int, 2> size_; //< width, height of the domain

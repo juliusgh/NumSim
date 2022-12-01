@@ -1,8 +1,8 @@
 #include "settings.h"
 #ifndef NPARALLEL
-    #include "computation/0_computation.h"
-#else
     #include "computation/1_computation_parallel.h"
+#else
+    #include "computation/0_computation.h"
 #endif
 #include <iostream>
 #include <cmath>
@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
         filename = argv[1];
     }
 #ifndef NPARALLEL
-    auto computation = Computation();
-#else
     auto computation = ComputationParallel();
+#else
+    auto computation = Computation();
 #endif
     computation.initialize(filename);
     computation.runSimulation();

@@ -72,3 +72,13 @@ void Array2D::print() const {
         std::cout << std::endl << "----------" << std::endl;
     }
 }
+
+void Array2D::setToZero()
+{
+    data_.resize(size_[0] * size_[1], 0.0);
+}
+
+void *Array2D::data()
+{
+    return data_.data();
+}
