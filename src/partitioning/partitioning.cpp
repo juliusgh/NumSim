@@ -35,11 +35,11 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
         nCells_[1]++;
 }
 /**
- * get column length of process
+ * get position of process in global
  * @return column length of process
  */
 int Partitioning::column() const {
-    return computeColumn(ownRank());
+    return computeColumn(ownRankNo());
 }
 
 /**
@@ -47,7 +47,7 @@ int Partitioning::column() const {
  * @return row length of process
  */
 int Partitioning::row() const {
-    return computeRow(ownRank());
+    return computeRow(ownRankNo());
 }
 
 /**
@@ -85,28 +85,28 @@ int Partitioning::rowsEnd() const {
  * check whether current subdomain touches global left boundary
  * @return  whether current subdomain touches global left boundary
  */
-bool Partitioning::containsLeftBoundary() const {
+bool Partitioning::ownPartitionContainsLeftBoundary() const {
     return domainColumn_ == columnsBegin();
 }
 /**
  * check whether current subdomain touches global right boundary
  * @return  whether current subdomain touches global right boundary
  */
-bool Partitioning::containsRightBoundary() const {
+bool Partitioning::ownPartitionContainsRightBoundary() const {
     return domainColumn_ == columnsEnd();
 }
 /**
  * check whether current subdomain touches global bottom boundary
  * @return  whether current subdomain touches global bottom boundary
  */
-bool Partitioning::containsBottomBoundary() const {
+bool Partitioning::ownPartitionContainsBottomBoundary() const {
     return domainRow_ == rowsBegin();
 }
 /**
  * check whether current subdomain touches global top boundary
  * @return  whether current subdomain touches global top boundary
  */
-bool Partitioning::containsTopBoundary() const {
+bool Partitioning::ownPartitionContainsTopBoundary() const {
     return domainColumn_ == rowsEnd();
 }
 
@@ -114,7 +114,7 @@ bool Partitioning::containsTopBoundary() const {
  * get own rank
  * @return own rank
  */
-int Partitioning::ownRank() const {
+int Partitioning::ownRankNo() const {
     return ownRank_;
 }
 
@@ -124,7 +124,7 @@ int Partitioning::ownRank() const {
  * @return rank of left neighbour process
  */
 int Partitioning::leftRank() const {
-    if (containsLeftBoundary()) {
+    if (ownPartitionContainsLeftBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
     }
@@ -136,7 +136,7 @@ int Partitioning::leftRank() const {
  * @return rank of right neighbour process
  */
 int Partitioning::rightRank() const {
-    if (containsRightBoundary()) {
+    if (ownPartitionContainsRightBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
     }
@@ -148,7 +148,7 @@ int Partitioning::rightRank() const {
  * @return rank of bottom neighbour process
  */
 int Partitioning::bottomRank() const {
-    if (containsBottomBoundary()) {
+    if (ownPartitionContainsBottomBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
     }
@@ -161,7 +161,7 @@ int Partitioning::bottomRank() const {
  * @return rank of top neighbour process
  */
 int Partitioning::topRank() const {
-    if (containsTopBoundary()) {
+    if (ownPartitionContainsTopBoundary()) {
         // subdomain boundary is domain boundary
         return ownRank_;
     }
@@ -285,7 +285,7 @@ int Partitioning::computeRow(int rank) const {
  * get the rank of a subdomain based on its position in the global grid
  * @param column
  * @param row
- * @return
+ * @return subdomain rank
  */
 int Partitioning::computeRank(int column, int row) const {
     return column + nDomains_[0] * row;
@@ -352,3 +352,14 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
     );
     return globalValue;
 }
+/**
+ * get the offset values for counting local nodes in x and y direction.
+ * (i_local,j_local) + nodeOffset = (i_global,j_global)
+ * used in OutputWriterParaviewParallel
+ * @return offset
+ */
+std::array<int, 2> Partitioning::nodeOffset() const {
+    std::array<int, 2> offSet = {domainRow_ * nCells_[0], domainColumn_ * nCells_[1]};
+    return offSet;
+}
+

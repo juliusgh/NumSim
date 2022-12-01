@@ -14,11 +14,20 @@ public:
     Partitioning(std::array<int, 2> nCellsGlobal);
     int column() const;
     int row() const;
-    bool containsLeftBoundary() const;
-    bool containsRightBoundary() const;
-    bool containsBottomBoundary() const;
-    bool containsTopBoundary() const;
-    int ownRank() const;
+    //! if the own partition has part of the bottom boundary of the whole domain
+    bool ownPartitionContainsBottomBoundary() const;
+
+    //! if the own partition has part of the top boundary of the whole domain
+    //! used in OutputWriterParaviewParallel
+    bool ownPartitionContainsTopBoundary() const;
+
+    //! if the own partition has part of the left boundary of the whole domain
+    bool ownPartitionContainsLeftBoundary() const;
+
+    //! if the own partition has part of the right boundary of the whole domain
+    //! used in OutputWriterParaviewParallel
+    bool ownPartitionContainsRightBoundary() const;
+    int ownRankNo() const;
     int leftRank() const;
     int rightRank() const;
     int bottomRank() const;
@@ -36,6 +45,7 @@ public:
     double globalMin(double localValue);
     const std::array<int, 2> nCells() const;
     const std::array<int, 2> nCellsGlobal() const;
+    std::array<int, 2> nodeOffset() const;
 private:
     int columnsBegin() const;
     int columnsEnd() const;
