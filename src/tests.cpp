@@ -64,8 +64,9 @@ TEST(SORTest, Test1) {
     auto nCells = std::array<int, 2>{3, 3};
     auto meshWidth = std::array<double, 2>{1, 1};
     auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
-    auto d = new CentralDifferences(nCells, meshWidth);
-    auto dRef = new CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    auto d = new CentralDifferences(partitioning, meshWidth);
+    auto dRef = new CentralDifferences(partitioning, meshWidth);
     for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
         for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
             dRef->p(i, j) = i + 10 * j;
@@ -202,7 +203,8 @@ TEST(DiscretizationTest, FirstOrder)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for p by p(x,y)=x*y
     for (int i = discr.pIBegin(); i < discr.pIEnd(); i++)
@@ -234,7 +236,8 @@ TEST(DiscretizationTest, SecondOrder)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -286,7 +289,8 @@ TEST(DiscretizationTest, FirstOrderSquared)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -336,7 +340,8 @@ TEST(DiscretizationTest, FirstOrderMixed)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -393,7 +398,8 @@ TEST(DiscretizationTest, ConsistencyOrder)
     double dt = 0.1;
     double alpha = 0.0;
 
-    auto discr_exact = DonorCell(nCells_exact, meshWidth_exact, alpha);
+    auto partitioning_exact = std::make_shared<Partitioning>(nCells_exact);
+    auto discr_exact = DonorCell(partitioning_exact, meshWidth_exact, alpha);
     //auto discr_exact = CentralDifferences(nCells_exact, meshWidth_exact);
 
     // Assign values for v by v(x,y)=x*y
@@ -450,7 +456,8 @@ TEST(DiscretizationTest, ConsistencyOrder)
         auto nCells = std::array<int, 2>{n, n};
         auto meshWidth = std::array<double, 2>{1.0/n, 1.0/n};
 
-        auto discr = DonorCell(nCells, meshWidth, alpha);
+        auto partitioning = std::make_shared<Partitioning>(nCells);
+        auto discr = DonorCell(partitioning, meshWidth, alpha);
         // auto discr = CentralDifferences(nCells, meshWidth);
 
         // Assign values for v by v(x,y)=x*y
