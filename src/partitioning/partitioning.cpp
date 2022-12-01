@@ -359,7 +359,7 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
  * @return offset
  */
 std::array<int, 2> Partitioning::nodeOffset() const {
-    std::array<int, 2> offSet = {domainRow_ * nCells_[0], domainColumn_ * nCells_[1]};
+    std::array<int, 2> offSet = {(domainRow_ - 1) * nCells_[0], (domainColumn_ - 1) * nCells_[1]};
     return offSet;
 }
 
