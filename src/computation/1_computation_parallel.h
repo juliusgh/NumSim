@@ -36,30 +36,20 @@ protected:
      */
     virtual void applyPreliminaryBoundaryValues();
 
-    /**
-     * Compute the preliminary velocities (F, G) using finite differences
-     */
-    virtual void computePreliminaryVelocities();
 
-    /**
-     * Compute the pressure p by solving the Poisson equation
-     */
-    virtual void computePressure();
+    void applyBoundaryValuesTop();
 
-    /**
-     * Compute the right hand side rhs of the pressure Poisson equation
-     */
-    virtual void computeRightHandSide();
+    void applyBoundaryValuesBottom();
 
-    /**
-     * Compute the time step width dt based on the maximum velocities
-     */
-    virtual void computeTimeStepWidth();
+    void applyBoundaryValuesLeft();
 
-    /**
-     * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
-     */
-    virtual void computeVelocities();
+    void applyBoundaryValuesRight();
+
+
+
+
+
+
 
 private:
     std::shared_ptr<Partitioning> partitioning_;
