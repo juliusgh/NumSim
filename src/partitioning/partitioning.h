@@ -74,6 +74,8 @@ private:
     int computeRank(int i, int j) const;
     static void send(int destinationRank, std::vector<double> &data);
     static void recv(int sourceRank, std::vector<double> &data, int count);
+    static void isend(int destinationRank, std::vector<double> &data, MPI_Request request);
+    static void irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request request);
     static double allReduce(double localValue, MPI_Op op);
     std::array<int, 2> nDomains_;
     int domainColumn_;

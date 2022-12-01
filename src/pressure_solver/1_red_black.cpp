@@ -61,6 +61,7 @@ void RedBlack::solve() {
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 }
+
 /**
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
@@ -70,7 +71,7 @@ void RedBlack::pGhostLayerHorizontal() {
 
     // Even processes first send to left and right, then receive from left and right
     if (partitioning_->column() % 2) {
-        if (partitioning_->containsRightBoundary()) {
+        if (partitioning_->ownPartitionContainsRightBoundary()) {
             setBoundaryValuesRight();
         }
         else {
@@ -87,7 +88,7 @@ void RedBlack::pGhostLayerHorizontal() {
                 discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
             }
         }
-        if (partitioning_->containsLeftBoundary()) {
+        if (partitioning_->ownPartitionContainsLeftBoundary()) {
             setBoundaryValuesLeft();
         }
         else {
@@ -108,7 +109,7 @@ void RedBlack::pGhostLayerHorizontal() {
 
     // Odd processes first receive from left and right, then send to left and right
     else {
-        if (partitioning_->containsRightBoundary()) {
+        if (partitioning_->ownPartitionContainsRightBoundary()) {
             setBoundaryValuesRight();
         }
         else {
@@ -125,7 +126,7 @@ void RedBlack::pGhostLayerHorizontal() {
             }
             partitioning_->sendToRight(rightColumn);
         }
-        if (partitioning_->containsLeftBoundary()) {
+        if (partitioning_->ownPartitionContainsLeftBoundary()) {
             setBoundaryValuesLeft();
         }
         else {
@@ -154,7 +155,7 @@ void RedBlack::pGhostLayerVertical() {
 
     // Even processes first send to bottom and top, then receive from bottom and top
     if (partitioning_->row() % 2) {
-        if (partitioning_->containsTopBoundary()) {
+        if (partitioning_->ownPartitionContainsTopBoundary()) {
             setBoundaryValuesTop();
         }
         else {
@@ -171,7 +172,7 @@ void RedBlack::pGhostLayerVertical() {
                 discretization_->p(i, discretization_->pJEnd()) = topRow.at(i - rowOffset);
             }
         }
-        if (!partitioning_->containsBottomBoundary()) {
+        if (!partitioning_->ownPartitionContainsBottomBoundary()) {
             // send row on the bottom to bottom neighbour
             std::vector<double> bottomRow;
             for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
@@ -186,7 +187,7 @@ void RedBlack::pGhostLayerVertical() {
             }
         }
     } else {
-        if (partitioning_->containsTopBoundary()) {
+        if (partitioning_->ownPartitionContainsTopBoundary()) {
             setBoundaryValuesTop();
         }
         else {
@@ -203,7 +204,7 @@ void RedBlack::pGhostLayerVertical() {
             }
             partitioning_->sendToTop(topRow);
         }
-        if (partitioning_->containsBottomBoundary()) {
+        if (partitioning_->ownPartitionContainsBottomBoundary()) {
             setBoundaryValuesBottom();
         }
         else {
@@ -222,6 +223,7 @@ void RedBlack::pGhostLayerVertical() {
         }
     }
 }
+
 /**
  * Calculation of the global residual norm using the squared Euclidean norm
  */

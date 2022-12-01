@@ -53,6 +53,7 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 
     nodeOffset_ = {columnOffset, rowOffset};
 }
+
 /**
  * get column index of subdomain
  * @return column length of process
@@ -100,6 +101,7 @@ int Partitioning::rowsBegin() const {
 int Partitioning::rowsEnd() const {
     return nDomains_[1];
 }
+
 /**
  * check whether current subdomain touches global left boundary
  * @return  whether current subdomain touches global left boundary
@@ -107,6 +109,7 @@ int Partitioning::rowsEnd() const {
 bool Partitioning::ownPartitionContainsLeftBoundary() const {
     return domainColumn_ == columnsBegin();
 }
+
 /**
  * check whether current subdomain touches global right boundary
  * @return  whether current subdomain touches global right boundary
@@ -114,6 +117,7 @@ bool Partitioning::ownPartitionContainsLeftBoundary() const {
 bool Partitioning::ownPartitionContainsRightBoundary() const {
     return domainColumn_ == columnsEnd();
 }
+
 /**
  * check whether current subdomain touches global bottom boundary
  * @return  whether current subdomain touches global bottom boundary
@@ -121,6 +125,7 @@ bool Partitioning::ownPartitionContainsRightBoundary() const {
 bool Partitioning::ownPartitionContainsBottomBoundary() const {
     return domainRow_ == rowsBegin();
 }
+
 /**
  * check whether current subdomain touches global top boundary
  * @return  whether current subdomain touches global top boundary
@@ -149,6 +154,7 @@ int Partitioning::leftNeighbourRankNo() const {
     }
     return computeRank(domainColumn_ - 1, domainRow_);
 }
+
 /**
  * get rank of right neighbour process.
  * In the case that the current boundary touches the right boundary, its own rank is returned.
@@ -161,6 +167,7 @@ int Partitioning::rightNeighbourRankNo() const {
     }
     return computeRank(domainColumn_ + 1, domainRow_);
 }
+
 /**
  * get rank of bottom neighbour process.
  * In the case that the current boundary touches the bottom boundary, its own rank is returned.
@@ -186,6 +193,7 @@ int Partitioning::topNeighbourRankNo() const {
     }
     return computeRank(domainColumn_, domainRow_ + 1);
 }
+
 /**
  * Implementation of call of the MPI-send command
  * @param destinationRank rank of the process, data is send to
@@ -201,6 +209,7 @@ void Partitioning::send(int destinationRank, std::vector<double> &data) {
             MPI_COMM_WORLD
     );
 }
+
 /**
  * Implementation of call of the MPI-receive command
  * @param sourceRank rank of the process, data is received from
@@ -216,6 +225,41 @@ void Partitioning::recv(int sourceRank, std::vector<double> &data, int count) {
             0,
             MPI_COMM_WORLD,
             MPI_STATUS_IGNORE
+    );
+}
+
+/**
+ * Implementation of call of the MPI-send command
+ * @param destinationRank rank of the process, data is send to
+ * @param data data to be send
+ */
+void Partitioning::isend(int destinationRank, std::vector<double> &data, MPI_Request request) {
+    MPI_Isend(
+            data.data(),
+            data.size(),
+            MPI_DOUBLE,
+            destinationRank,
+            0,
+            MPI_COMM_WORLD,
+            &request
+    );
+}
+
+/**
+ * Implementation of call of the MPI-receive command
+ * @param sourceRank rank of the process, data is received from
+ * @param data data to be received
+ * @param count size of data to be received
+ */
+void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, MPI_Request request) {
+    MPI_Irecv(
+            data.data(),
+            count,
+            MPI_DOUBLE,
+            sourceRank,
+            0,
+            MPI_COMM_WORLD,
+            &request
     );
 }
 
