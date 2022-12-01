@@ -18,15 +18,17 @@ void Computation::initialize(string filename)
     settings_.printSettings();
 #endif
 
+    partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
+
     // Initialize discretization
     for (int i = 0; i < 2; i++)
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(settings_.nCells, meshWidth_, settings_.alpha);
+        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha);
     }
     else {
-        discretization_ = std::make_shared<CentralDifferences>(settings_.nCells, meshWidth_);
+        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_);
     }
 
     // Initialize solver

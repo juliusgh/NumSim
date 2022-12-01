@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+#include <memory>
 #include "storage/field_variable.h"
 #include "partitioning/partitioning.h"
 

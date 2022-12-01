@@ -1,6 +1,4 @@
 #include "discretization/0_staggered_grid.h"
-#include <iostream>
-#include <cassert>
 
 /**
  * Implement staggered grid, providing a variety of parameters
@@ -351,6 +349,9 @@ int StaggeredGrid::vIEnd() const
  */
 int StaggeredGrid::vJBegin() const
 {
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
+        return -2;
+    }
     return -1;
 };
 
@@ -360,6 +361,9 @@ int StaggeredGrid::vJBegin() const
  */
 int StaggeredGrid::vJEnd() const
 {
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
+        nCells_[1] + 1;
+    }
     return nCells_[1];
 };
 

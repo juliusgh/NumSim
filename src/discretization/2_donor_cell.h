@@ -16,7 +16,7 @@ public:
    * @param meshWidth: width of a cell in both directions
    * @param alpha: donor cell weight parameter
    */
-  DonorCell(std::array<int,2> nCells, std::array<double,2> meshWidth, double alpha);
+  DonorCell(std::shared_ptr<Partitioning> partitioning, std::array<double,2> meshWidth, double alpha);
 
   /**
    * compute the 1st derivative ∂ u^2 / ∂x
