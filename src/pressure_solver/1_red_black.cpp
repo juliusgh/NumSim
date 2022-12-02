@@ -69,7 +69,10 @@ void RedBlack::pGhostLayer() {
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
     int rowOffset = discretization_->pInteriorIBegin();
 
-    MPI_Request request;
+    MPI_Request request_p_rightColumn;
+    MPI_Request request_p_leftColumn;
+    MPI_Request request_p_topRow;
+    MPI_Request request_p_bottomRow;
     std::vector<double> rightColumn;
     std::vector<double> leftColumn;
     std::vector<double> topRow;
@@ -84,10 +87,10 @@ void RedBlack::pGhostLayer() {
             rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
         }
 
-        partitioning_->isend(partitioning_->rightNeighbourRankNo(), rightColumn, request);
+        partitioning_->isend(partitioning_->rightNeighbourRankNo(), rightColumn, request_p_rightColumn);
 
         // receive ghost layer column on the right from right neighbour
-        partitioning_->irecv(partitioning_->rightNeighbourRankNo(), rightColumn, columnCount, request);
+        partitioning_->irecv(partitioning_->rightNeighbourRankNo(), rightColumn, columnCount, request_p_rightColumn);
     }
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         setBoundaryValuesLeft();
@@ -97,10 +100,10 @@ void RedBlack::pGhostLayer() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             leftColumn.push_back(discretization_->p(discretization_->pInteriorIBegin(), j));
         }
-        partitioning_->isend(partitioning_->leftNeighbourRankNo(), leftColumn, request);
+        partitioning_->isend(partitioning_->leftNeighbourRankNo(), leftColumn, request_p_leftColumn);
 
         // receive ghost layer column on the left from left neighbour
-        partitioning_->irecv(partitioning_->leftNeighbourRankNo(), leftColumn, columnCount, request);
+        partitioning_->irecv(partitioning_->leftNeighbourRankNo(), leftColumn, columnCount, request_p_leftColumn);
     }
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         setBoundaryValuesTop();
@@ -110,10 +113,10 @@ void RedBlack::pGhostLayer() {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
         }
-        partitioning_->isend(partitioning_->topNeighbourRankNo(), topRow, request);
+        partitioning_->isend(partitioning_->topNeighbourRankNo(), topRow, request_p_topRow);
 
         // receive ghost layer row on the top from top neighbour
-        partitioning_->irecv(partitioning_->topNeighbourRankNo(), topRow, rowCount, request);
+        partitioning_->irecv(partitioning_->topNeighbourRankNo(), topRow, rowCount, request_p_topRow);
     }
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         setBoundaryValuesBottom();
@@ -123,13 +126,16 @@ void RedBlack::pGhostLayer() {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
         }
-        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), bottomRow, request);
+        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), bottomRow, request_p_bottomRow);
 
         // receive ghost layer row on the bottom from bottom neighbour
-        partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), bottomRow, rowCount, request);
+        partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), bottomRow, rowCount, request_p_bottomRow);
     }
 
-    partitioning_->wait(request);
+    partitioning_->wait(request_p_rightColumn);
+    partitioning_->wait(request_p_leftColumn);
+    partitioning_->wait(request_p_topRow);
+    partitioning_->wait(request_p_bottomRow);
 
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {

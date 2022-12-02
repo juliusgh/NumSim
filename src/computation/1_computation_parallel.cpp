@@ -147,17 +147,17 @@ void ComputationParallel::applyBoundaryValues() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             p_rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
         }
+        partitioning_->isend(partitioning_->rightNeighbourRankNo(), p_rightColumn, request_p_rightColumn);
+
         // v: send last column on the right to right neighbour
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             v_rightColumn.push_back(discretization_->v(discretization_->vInteriorIEnd(), j));
         }
+        partitioning_->isend(partitioning_->rightNeighbourRankNo(), v_rightColumn, request_v_rightColumn);
         // u: send second to last column on the right to right neighbour
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
             u_rightColumn.push_back(discretization_->u(discretization_->uInteriorIEnd()-1, j));
         }
-
-        partitioning_->isend(partitioning_->rightNeighbourRankNo(), p_rightColumn, request_p_rightColumn);
-        partitioning_->isend(partitioning_->rightNeighbourRankNo(), v_rightColumn, request_v_rightColumn);
         partitioning_->isend(partitioning_->rightNeighbourRankNo(), u_rightColumn, request_u_rightColumn);
         
 
@@ -174,17 +174,16 @@ void ComputationParallel::applyBoundaryValues() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             p_leftColumn.push_back(discretization_->p(discretization_->pInteriorIBegin(), j));
         }
+        partitioning_->isend(partitioning_->leftNeighbourRankNo(), p_leftColumn, request_p_leftColumn);
         // v: send first column on the left to left neighbour
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vpInteriorJEnd(); j++) {
             v_leftColumn.push_back(discretization_->v(discretization_->vInteriorIBegin(), j));
         }
+        partitioning_->isend(partitioning_->leftNeighbourRankNo(), v_leftColumn, request_v_leftColumn);
         // u: send second column on the left to left neighbour
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
             p_leftColumn.push_back(discretization_->u(discretization_->uInteriorIBegin()+1, j));
         }
-
-        partitioning_->isend(partitioning_->leftNeighbourRankNo(), p_leftColumn, request_p_leftColumn);
-        partitioning_->isend(partitioning_->leftNeighbourRankNo(), v_leftColumn, request_v_leftColumn);
         partitioning_->isend(partitioning_->leftNeighbourRankNo(), u_leftColumn, request_u_leftColumn);
 
         // receive ghost layer column on the left from left neighbour
@@ -201,18 +200,18 @@ void ComputationParallel::applyBoundaryValues() {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             p_topRow.push_back(discretization_->p(i, discretization_->pInteriorJEnd()));
         }
+        partitioning_->isend(partitioning_->topNeighbourRankNo(), p_topRow, request_p_topRow);
         // v: send second to last row on the top to top neighbour
         for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
             v_topRow.push_back(discretization_->v(i, discretization_->vInteriorJEnd()-1));
         }
+        partitioning_->isend(partitioning_->topNeighbourRankNo(), v_topRow, request_v_topRow);
         // u: send last row on the top to top neighbour
         for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
             u_topRow.push_back(discretization_->u(i, discretization_->uInteriorJEnd()));
         }
-
-        partitioning_->isend(partitioning_->topNeighbourRankNo(), p_topRow, request_p_topRow);
-        partitioning_->isend(partitioning_->topNeighbourRankNo(), v_topRow, request_v_topRow);
         partitioning_->isend(partitioning_->topNeighbourRankNo(), u_topRow, request_u_topRow);
+
 
         // receive ghost layer row on the top from top neighbour
         partitioning_->irecv(partitioning_->topNeighbourRankNo(), p_topRow, rowCount, request_p_topRow);
@@ -227,18 +226,19 @@ void ComputationParallel::applyBoundaryValues() {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             p_bottomRow.push_back(discretization_->p(i, discretization_->pInteriorJBegin()));
         }
+        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), p_bottomRow, request_p_bottomRow);
         // v: send second row on the bottom to bottom neighbour
         for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
             v_bottomRow.push_back(discretization_->v(i, discretization_->vInteriorJBegin()+1));
         }
+        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), v_bottomRow, request_v_bottomRow);
         // u: send first row on the bottom to bottom neighbour
         for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
             u_bottomRow.push_back(discretization_->u(i, discretization_->uInteriorJBegin()));
         }
-
-        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), p_bottomRow, request_p_bottomRow);
-        partitioning_->isend(partitioning_->bottomNeighbourRankNo(), v_bottomRow, request_v_bottomRow);
         partitioning_->isend(partitioning_->bottomNeighbourRankNo(), u_bottomRow, request_u_bottomRow);
+        
+        
 
         // receive ghost layer row on the bottom from bottom neighbour
         partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), p_bottomRow, rowCount, request_p_bottomRow);
@@ -305,45 +305,6 @@ void ComputationParallel::applyBoundaryValues() {
         for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
             discretization_->u(i, discretization_->uJBegin()) = u_bottomRow.at(i - rowOffset);
         }
-    }
-};
-
-/**
- * Set the boundary values of the preliminary velocities (u, v)
- * 
- * Left and right boundaries should overwrite bottom and top boundaries
- */
-void ComputationParallel::applyPreliminaryBoundaryValues(){
-    // set boundary values for F at bottom and top side (lower priority)
-    for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
-        // set boundary values for F at bottom side
-        discretization_->f(i, discretization_->uJBegin()) = discretization_->u(i, discretization_->uJBegin());
-        // set boundary values for F at top side
-        discretization_->f(i, discretization_->uJEnd() - 1) = discretization_->u(i, discretization_->uJEnd() - 1);
-    }
-
-    // set boundary values for G at bottom and top side (lower priority)
-    for (int i = discretization_->vIBegin(); i < discretization_->vIEnd(); i++) {
-        // set boundary values for v at bottom side
-        discretization_->g(i, discretization_->vJBegin()) = discretization_->v(i, discretization_->vJBegin());
-        // set boundary values for v at top side
-        discretization_->g(i, discretization_->vJEnd() - 1) = discretization_->v(i, discretization_->vJEnd() - 1);
-    }
-
-    // set boundary values for F at left and right side (higher priority)
-    for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
-        // set boundary values for F at left side
-        discretization_->f(discretization_->uIBegin(), j) = discretization_->u(discretization_->uIBegin(), j);
-        // set boundary values for F at right side
-        discretization_->f(discretization_->uIEnd() - 1, j) = discretization_->u(discretization_->uIEnd() - 1, j);
-    }
-
-    // set boundary values for G at left and right side (higher priority)
-    for (int j = discretization_->vJBegin(); j < discretization_->vJEnd(); j++) {
-        // set boundary values for G at left side
-        discretization_->g(discretization_->vIBegin(), j) = discretization_->v(discretization_->vIBegin(), j);
-        // set boundary values for G at right side
-        discretization_->g(discretization_->vIEnd() - 1, j) = discretization_->v(discretization_->vIEnd() - 1, j);
     }
 };
 

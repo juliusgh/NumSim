@@ -4,6 +4,6 @@
 - [x] Partitioning
 - [ ] Add ghost layers in discretization
 - [ ] Pressure Solver: Red Black
-- [ ] Computation Parallel
+- [x] Computation Parallel
 - [ ] Pressure Solver: CG???
 - [x] Time-step widht

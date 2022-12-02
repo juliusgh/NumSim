@@ -29,15 +29,7 @@ protected:
      */
     virtual void applyBoundaryValues();
 
-    /**
-     * Set the boundary values of the preliminary velocities (u, v)
-     *
-     * Left and right boundaries should overwrite bottom and top boundaries
-     */
-    virtual void applyPreliminaryBoundaryValues();
-
     virtual void computeTimeStepWidth();
-
 
     void applyBoundaryValuesTop();
 
@@ -46,12 +38,6 @@ protected:
     void applyBoundaryValuesLeft();
 
     void applyBoundaryValuesRight();
-
-
-
-
-
-
 
 private:
     std::shared_ptr<Partitioning> partitioning_;
