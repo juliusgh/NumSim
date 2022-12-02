@@ -48,4 +48,5 @@ protected:
     int maximumNumberOfIterations_;
     double residual_norm2_;
     int iterations_;
+    std::shared_ptr<Partitioning> partitioning_;
 };

@@ -176,7 +176,7 @@ void ComputationParallel::applyBoundaryValues() {
         }
         partitioning_->isend(partitioning_->leftNeighbourRankNo(), p_leftColumn, request_p_leftColumn);
         // v: send first column on the left to left neighbour
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vpInteriorJEnd(); j++) {
+        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             v_leftColumn.push_back(discretization_->v(discretization_->vInteriorIBegin(), j));
         }
         partitioning_->isend(partitioning_->leftNeighbourRankNo(), v_leftColumn, request_v_leftColumn);

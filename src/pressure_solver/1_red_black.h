@@ -29,7 +29,6 @@ public:
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
     void solve();
-    void pGhostLayer();
 
 protected:
     virtual void computeResidualNorm();
