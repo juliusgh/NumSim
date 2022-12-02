@@ -115,7 +115,7 @@ void RedBlack::pGhostLayer() {
         // receive ghost layer row on the top from top neighbour
         partitioning_->irecv(partitioning_->topNeighbourRankNo(), topRow, rowCount, request);
     }
-    if (partitioning_->ownPartitionContainsTopBoundary()) {
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
         setBoundaryValuesBottom();
     }
     else {
@@ -127,9 +127,6 @@ void RedBlack::pGhostLayer() {
 
         // receive ghost layer row on the bottom from bottom neighbour
         partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), bottomRow, rowCount, request);
-        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-            discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
-        }
     }
 
     partitioning_->wait(request);
