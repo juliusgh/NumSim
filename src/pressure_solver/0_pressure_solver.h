@@ -27,6 +27,8 @@ public:
 
     virtual void solve() = 0;
 
+    virtual void pGhostLayer();
+
     double residualNorm() const;
 
     int iterations() const;
