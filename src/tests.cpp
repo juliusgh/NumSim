@@ -10,31 +10,38 @@
 TEST(MPITest, PartitioningCheck1) {
     auto size = std::array<int, 2>{10, 10};
     auto partitioning = std::make_shared<Partitioning>(size);
-
+    std::cout << "own rank no: " << partitioning->ownRankNo() << std::endl;
     ASSERT_EQ(4, partitioning->nRanks());
     ASSERT_EQ(size[0] / 2, partitioning->nCellsLocal()[0]);
     ASSERT_EQ(size[1] / 2, partitioning->nCellsLocal()[1]);
-    ASSERT_EQ(0, partitioning->ownRankNo());
     switch (partitioning->ownRankNo()) {
         case 0:
+            ASSERT_EQ(0, partitioning->column());
+            ASSERT_EQ(0, partitioning->row());
             ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
             ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
             ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
             break;
         case 1:
+            ASSERT_EQ(1, partitioning->column());
+            ASSERT_EQ(0, partitioning->row());
             ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
             ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
             break;
         case 2:
+            ASSERT_EQ(0, partitioning->column());
+            ASSERT_EQ(1, partitioning->row());
             ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
             ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
             ASSERT_EQ(false, partitioning->ownPartitionContainsBottomBoundary());
             break;
         case 3:
+            ASSERT_EQ(1, partitioning->column());
+            ASSERT_EQ(1, partitioning->row());
             ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
             ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
