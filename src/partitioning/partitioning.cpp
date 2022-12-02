@@ -129,7 +129,7 @@ bool Partitioning::ownPartitionContainsBottomBoundary() const {
  * @return  whether current subdomain touches global top boundary
  */
 bool Partitioning::ownPartitionContainsTopBoundary() const {
-    return domainColumn_ == rowsEnd();
+    return domainRow_ == rowsEnd();
 }
 
 /**
@@ -206,7 +206,7 @@ int Partitioning::topNeighbourRankNo() const {
  * @param data data to be send
  */
 void Partitioning::send(int destinationRank, std::vector<double> &data) {
-    std::cout << "destination Rank: " << destinationRank << std::endl;
+    std::cout << "own Rank: " << ownRankNo() << ", destination Rank: " << destinationRank << std::endl;
     MPI_Send(
             data.data(),
             data.size(),
@@ -278,7 +278,7 @@ void Partitioning::wait(MPI_Request &request) {
  * method used to send information to the subdomain left of the current subdomain
  * @param data information to be send to the left
  */
-void Partitioning::sendToLeft(std::vector<double> &data) const {
+void Partitioning::sendToLeft(std::vector<double> &data) {
     send(leftNeighbourRankNo(), data);
 }
 
@@ -286,7 +286,7 @@ void Partitioning::sendToLeft(std::vector<double> &data) const {
  * method used to send information to the subdomain right of the current subdomain
  * @param data information to be send to the right
  */
-void Partitioning::sendToRight(std::vector<double> &data) const {
+void Partitioning::sendToRight(std::vector<double> &data) {
     send(rightNeighbourRankNo(), data);
 }
 
@@ -294,7 +294,7 @@ void Partitioning::sendToRight(std::vector<double> &data) const {
  * method used to send information to the subdomain below the current subdomain
  * @param data information to be send down
  */
-void Partitioning::sendToBottom(std::vector<double> &data) const {
+void Partitioning::sendToBottom(std::vector<double> &data) {
     send(bottomNeighbourRankNo(), data);
 }
 
@@ -302,7 +302,7 @@ void Partitioning::sendToBottom(std::vector<double> &data) const {
  * method used to send information to the subdomain above the current subdomain
  * @param data information to be send up
  */
-void Partitioning::sendToTop(std::vector<double> &data) const {
+void Partitioning::sendToTop(std::vector<double> &data) {
     send(topNeighbourRankNo(), data);
 }
 
@@ -310,7 +310,7 @@ void Partitioning::sendToTop(std::vector<double> &data) const {
  * method used to receive information from the subdomain left of the current subdomain
  * @param data information to be received from the left
  */
-void Partitioning::recvFromLeft(std::vector<double> &data, int count) const {
+void Partitioning::recvFromLeft(std::vector<double> &data, int count) {
     recv(leftNeighbourRankNo(), data, count);
 }
 
@@ -318,7 +318,7 @@ void Partitioning::recvFromLeft(std::vector<double> &data, int count) const {
  * method used to receive information from the subdomain right of the current subdomain
  * @param data information to be received from the right
  */
-void Partitioning::recvFromRight(std::vector<double> &data, int count) const {
+void Partitioning::recvFromRight(std::vector<double> &data, int count) {
     recv(rightNeighbourRankNo(), data, count);
 }
 
@@ -326,7 +326,7 @@ void Partitioning::recvFromRight(std::vector<double> &data, int count) const {
  * method used to receive information from the subdomain below of the current subdomain
  * @param data information to be received from below
  */
-void Partitioning::recvFromBottom(std::vector<double> &data, int count) const {
+void Partitioning::recvFromBottom(std::vector<double> &data, int count) {
     recv(bottomNeighbourRankNo(), data, count);
 }
 
@@ -334,8 +334,74 @@ void Partitioning::recvFromBottom(std::vector<double> &data, int count) const {
  * method used to receive information from the subdomain above of the current subdomain
  * @param data information to be received from the top
  */
-void Partitioning::recvFromTop(std::vector<double> &data, int count) const {
+void Partitioning::recvFromTop(std::vector<double> &data, int count) {
     recv(topNeighbourRankNo(), data, count);
+}
+
+
+
+/**
+ * method used to send information to the subdomain left of the current subdomain
+ * @param data information to be send to the left
+ */
+void Partitioning::isendToLeft(std::vector<double> &data, MPI_Request &request) {
+    isend(leftNeighbourRankNo(), data, request);
+}
+
+/**
+ * method used to send information to the subdomain right of the current subdomain
+ * @param data information to be send to the right
+ */
+void Partitioning::isendToRight(std::vector<double> &data, MPI_Request &request) {
+    isend(rightNeighbourRankNo(), data, request);
+}
+
+/**
+ * method used to send information to the subdomain below the current subdomain
+ * @param data information to be send down
+ */
+void Partitioning::isendToBottom(std::vector<double> &data, MPI_Request &request) {
+    isend(bottomNeighbourRankNo(), data, request);
+}
+
+/**
+ * method used to send information to the subdomain above the current subdomain
+ * @param data information to be send up
+ */
+void Partitioning::isendToTop(std::vector<double> &data, MPI_Request &request) {
+    isend(topNeighbourRankNo(), data, request);
+}
+
+/**
+ * method used to receive information from the subdomain left of the current subdomain
+ * @param data information to be received from the left
+ */
+void Partitioning::irecvFromLeft(std::vector<double> &data, int count, MPI_Request &request) {
+    irecv(leftNeighbourRankNo(), data, count, request);
+}
+
+/**
+ * method used to receive information from the subdomain right of the current subdomain
+ * @param data information to be received from the right
+ */
+void Partitioning::irecvFromRight(std::vector<double> &data, int count, MPI_Request &request) {
+    irecv(rightNeighbourRankNo(), data, count, request);
+}
+
+/**
+ * method used to receive information from the subdomain below of the current subdomain
+ * @param data information to be received from below
+ */
+void Partitioning::irecvFromBottom(std::vector<double> &data, int count, MPI_Request &request) {
+    irecv(bottomNeighbourRankNo(), data, count, request);
+}
+
+/**
+ * method used to receive information from the subdomain above of the current subdomain
+ * @param data information to be received from the top
+ */
+void Partitioning::irecvFromTop(std::vector<double> &data, int count, MPI_Request &request) {
+    irecv(topNeighbourRankNo(), data, count, request);
 }
 
 /**
@@ -344,7 +410,7 @@ void Partitioning::recvFromTop(std::vector<double> &data, int count) const {
  * @return column position of the subdomain
  */
 int Partitioning::computeColumn(int rank) const {
-    return rank % nDomains_[0];
+    return rank % nDomains_[0] + 1;
 }
 
 /**
@@ -353,7 +419,7 @@ int Partitioning::computeColumn(int rank) const {
  * @return row position of the subdomain
  */
 int Partitioning::computeRow(int rank) const {
-    return (int)((rank - 1) / nDomains_[0]) + 1;
+    return (int)(rank / nDomains_[0]) + 1;
 }
 
 /**
@@ -363,7 +429,7 @@ int Partitioning::computeRow(int rank) const {
  * @return subdomain rank
  */
 int Partitioning::computeRank(int column, int row) const {
-    return column + nDomains_[0] * row;
+    return (column - 1) + nDomains_[0] * (row - 1);
 }
 
 /**

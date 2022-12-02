@@ -1,3 +1,4 @@
+#include <iostream>
 #include "discretization/0_staggered_grid.h"
 
 /**
