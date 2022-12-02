@@ -3,21 +3,6 @@ cmake_minimum_required(VERSION 3.8)
 # Define the project name.
 project(numsim)
 
-find_package(MPI REQUIRED)
-
-include_directories(${MPI_INCLUDE_PATH})
-target_link_libraries(${PROJECT_NAME} ${MPI_LIBRARIES})
-
-if(MPI_COMPILE_FLAGS)
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-
-if(MPI_LINK_FLAGS)
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    LINK_FLAGS "${MPI_LINK_FLAGS}")
-endif()
-
 # Specify the name of the executable (${PROJECT_NAME} which is equal to what was set in the project() command).
 # Also specify the source files.
 add_executable(${PROJECT_NAME}
@@ -47,6 +32,21 @@ add_executable(${PROJECT_NAME}
     output_writer/output_writer_text_parallel.cpp
     output_writer/output_writer_paraview_parallel.cpp
 )
+
+find_package(MPI REQUIRED)
+
+include_directories(${MPI_INCLUDE_PATH})
+target_link_libraries(${PROJECT_NAME} ${MPI_LIBRARIES})
+
+if(MPI_COMPILE_FLAGS)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+endif()
+
+if(MPI_LINK_FLAGS)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+endif()
 
 # Locate GTest
 find_package(GTest)
