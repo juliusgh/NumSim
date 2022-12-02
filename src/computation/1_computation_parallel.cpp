@@ -246,22 +246,10 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecv(partitioning_->bottomNeighbourRankNo(), u_bottomRow, rowCount, request_u_bottomRow);
     }
 
+
     partitioning_->wait(request_p_rightColumn);
-    partitioning_->wait(request_p_leftColumn);
-    partitioning_->wait(request_p_topRow);
-    partitioning_->wait(request_p_bottomRow);
-
     partitioning_->wait(request_v_rightColumn);
-    partitioning_->wait(request_v_leftColumn);
-    partitioning_->wait(request_v_topRow);
-    partitioning_->wait(request_v_bottomRow);
-    
     partitioning_->wait(request_u_rightColumn);
-    partitioning_->wait(request_u_leftColumn);
-    partitioning_->wait(request_u_topRow);
-    partitioning_->wait(request_u_bottomRow);
-
-
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             discretization_->p(discretization_->pIEnd(), j) = p_rightColumn.at(j - columnOffset);
@@ -273,6 +261,9 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(discretization_->uIEnd(), j) = u_rightColumn.at(j - columnOffset);
         }
     }
+    partitioning_->wait(request_p_leftColumn);
+    partitioning_->wait(request_v_leftColumn);
+    partitioning_->wait(request_u_leftColumn);
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             discretization_->p(discretization_->pIBegin(), j) = p_leftColumn.at(j - columnOffset);
@@ -284,6 +275,9 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(discretization_->uIBegin(), j) = u_leftColumn.at(j - columnOffset);
         }
     }
+    partitioning_->wait(request_p_topRow);
+    partitioning_->wait(request_v_topRow);
+    partitioning_->wait(request_u_topRow);
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             discretization_->p(i, discretization_->pJEnd()) = p_topRow.at(i - rowOffset);
@@ -295,6 +289,9 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(i, discretization_->uJEnd()) = u_topRow.at(i - rowOffset);
         }
     }
+    partitioning_->wait(request_p_bottomRow);
+    partitioning_->wait(request_v_bottomRow);
+    partitioning_->wait(request_u_bottomRow);
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             discretization_->p(i, discretization_->pJBegin()) = p_bottomRow.at(i - rowOffset);

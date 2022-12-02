@@ -87,7 +87,7 @@ int PressureSolver::iterations() const {
 /**
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
-virtual void RedBlack::pGhostLayer() {
+void PressureSolver::pGhostLayer() {
     int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int columnOffset = discretization_->pInteriorJBegin();
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
@@ -157,25 +157,24 @@ virtual void RedBlack::pGhostLayer() {
     }
 
     partitioning_->wait(request_p_rightColumn);
-    partitioning_->wait(request_p_leftColumn);
-    partitioning_->wait(request_p_topRow);
-    partitioning_->wait(request_p_bottomRow);
-
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
         }
     }
+    partitioning_->wait(request_p_leftColumn);
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             discretization_->p(discretization_->pIBegin(), j) = leftColumn.at(j - columnOffset);
         }
     }
+    partitioning_->wait(request_p_topRow);
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             discretization_->p(i, discretization_->pJEnd()) = topRow.at(i - rowOffset);
         }
     }
+    partitioning_->wait(request_p_bottomRow);
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             discretization_->p(i, discretization_->pJBegin()) = bottomRow.at(i - rowOffset);
