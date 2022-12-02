@@ -13,9 +13,6 @@
 Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 : nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
 {
-    // Initialize the MPI environment
-    MPI_Init(NULL, NULL);
-
     // Get the number of processes
     MPI_Comm_size(MPI_COMM_WORLD, &nRanks_);
 
@@ -33,22 +30,22 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
     int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
     int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
-    if (domainColumn_ <= cellsColumnRemainder)
+    if (domainColumn_ < cellsColumnRemainder)
         nCellsLocal_[0]++;
-    if (domainRow_ <= cellsRowRemainder)
+    if (domainRow_ < cellsRowRemainder)
         nCellsLocal_[1]++;
 
     int columnOffset = 0;
     for (int i = columnsBegin(); i < domainColumn_; i++) {
         columnOffset += nCellsLocal_[0];
-        if (i <= cellsColumnRemainder)
+        if (i < cellsColumnRemainder)
             columnOffset++;
     }
 
     int rowOffset = 0;
     for (int j = rowsBegin(); j < domainRow_; j++) {
         rowOffset += nCellsLocal_[1];
-        if (j <= cellsRowRemainder)
+        if (j < cellsRowRemainder)
             rowOffset++;
     }
 
@@ -144,6 +141,14 @@ int Partitioning::ownRankNo() const {
 }
 
 /**
+ * get number of ranks (world size)
+ * @return world size
+ */
+int Partitioning::nRanks() const {
+    return nRanks_;
+}
+
+/**
  * get rank of left neighbour process.
  * In the case that the current boundary touches the left boundary, its own rank is returned.
  * @return rank of left neighbour process
@@ -201,6 +206,7 @@ int Partitioning::topNeighbourRankNo() const {
  * @param data data to be send
  */
 void Partitioning::send(int destinationRank, std::vector<double> &data) {
+    std::cout << "destination Rank: " << destinationRank << std::endl;
     MPI_Send(
             data.data(),
             data.size(),

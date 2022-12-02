@@ -29,13 +29,17 @@ int main(int argc, char *argv[]) {
         filename = argv[1];
     }
 #ifndef NPARALLEL
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
     auto computation = ComputationParallel();
 #else
     auto computation = Computation();
 #endif
     computation.initialize(filename);
     computation.runSimulation();
-
+#ifndef NPARALLEL
+    MPI_Finalize();
+#endif
     return EXIT_SUCCESS;
 }
 

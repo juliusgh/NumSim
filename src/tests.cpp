@@ -4,7 +4,82 @@
 #include "discretization/2_donor_cell.h"
 #include "pressure_solver/1_sor.h"
 #include "pressure_solver/1_gauss_seidel.h"
+#include "partitioning/partitioning.h"
 #include <cmath>
+
+TEST(MPITest, PartitioningCheck1) {
+    auto size = std::array<int, 2>{10, 10};
+    auto partitioning = std::make_shared<Partitioning>(size);
+
+    ASSERT_EQ(4, partitioning->nRanks());
+    ASSERT_EQ(size[0] / 2, partitioning->nCellsLocal()[0]);
+    ASSERT_EQ(size[1] / 2, partitioning->nCellsLocal()[1]);
+    ASSERT_EQ(0, partitioning->ownRankNo());
+    switch (partitioning->ownRankNo()) {
+        case 0:
+            ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 1:
+            ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 2:
+            ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 3:
+            ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+    }
+}
+
+TEST(MPITest, CommunicationCheck1) {
+    auto size = std::array<int, 2>{10, 10};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto partitioning_ = std::make_shared<Partitioning>(size);
+
+    ASSERT_EQ(4, partitioning_->nRanks());
+    ASSERT_EQ(size[0] / 2, partitioning_->nCellsLocal()[0]);
+    ASSERT_EQ(size[1] / 2, partitioning_->nCellsLocal()[1]);
+
+    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0);
+    int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
+    int columnOffset = discretization_->pInteriorJBegin();
+    int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
+    int rowOffset = discretization_->pInteriorIBegin();
+
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(i, j) = i + 10 * j + 100 * partitioning_->ownRankNo();
+        }
+    }
+
+    discretization_->p().print();
+
+    std::vector<double> rightColumn;
+    if (partitioning_->ownPartitionContainsLeftBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            rightColumn.push_back(discretization_->p(discretization_->pInteriorIEnd(), j));
+        }
+        partitioning_->sendToRight(rightColumn);
+    }
+    if (partitioning_->ownPartitionContainsRightBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        partitioning_->recvFromLeft(rightColumn, columnCount);
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(discretization_->pIEnd(), j) = rightColumn.at(j - columnOffset);
+        }
+    }
+}
 
 TEST(FieldVariableTest, InterpolationCheck1) {
     auto size = std::array<int, 2>{3, 3};
@@ -60,7 +135,7 @@ TEST(FieldVariableTest, InterpolationCheck) {
     //v_interp.print();
 }
 
-TEST(SORTest, Test1) {
+/*TEST(SORTest, Test1) {
     auto nCells = std::array<int, 2>{3, 3};
     auto meshWidth = std::array<double, 2>{1, 1};
     auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
@@ -98,8 +173,8 @@ TEST(SORTest, Test1) {
     double omega = 2.0 / (1.0 + sin(3.1 * meshWidth[0]));
     auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
     sor.solve();
-    /*std::cout << "Iterations "  << sor.iterations() << std::endl;
-    std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
+    std::cout << "Iterations "  << sor.iterations() << std::endl;
+    std::cout << "Norm "  << sor.residualNorm() << std::endl;
 
     //std::cout << "p = ..." << std::endl;
     d->p().print();
@@ -130,7 +205,7 @@ TEST(SORTest, Test1) {
         // check right boundary
         ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
     }
-}
+}*/
 
 
 /*TEST(GaussSeidelTest, Test1) {
@@ -388,7 +463,7 @@ TEST(DiscretizationTest, FirstOrderMixed)
 
 //################################################ Consistency Order ####################################################
 
-TEST(DiscretizationTest, ConsistencyOrder)
+/*TEST(DiscretizationTest, ConsistencyOrder)
 {
     double p_exact = 12;
     int n_exact = pow(2, p_exact);
@@ -677,6 +752,10 @@ TEST(DiscretizationTest, ConsistencyOrder)
 }*/
 
 int main(int argc, char **argv) {
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int status = RUN_ALL_TESTS();
+    MPI_Finalize();
+    return status;
 }
