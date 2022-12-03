@@ -30,6 +30,8 @@ public:
      */
     void solve();
 
+    void pGhostLayer();
+
 protected:
     virtual void computeResidualNorm();
     std::shared_ptr<Partitioning> partitioning_;

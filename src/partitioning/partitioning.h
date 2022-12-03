@@ -79,6 +79,7 @@ public:
     const std::array<int, 2> nCellsLocal() const;
     const std::array<int, 2> nCellsGlobal() const;
     std::array<int, 2> nodeOffset() const;
+    void log(const char* message);
 private:
     int columnsBegin() const;
     int columnsEnd() const;

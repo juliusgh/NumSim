@@ -18,7 +18,7 @@ void ComputationParallel::initialize(string filename)
     settings_.loadFromFile(filename);
     // Print settings
 #ifndef NDEBUG
-    settings_.printSettings();
+    //settings_.printSettings();
 #endif
 
     partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
@@ -54,12 +54,15 @@ void ComputationParallel::runSimulation() {
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
+        partitioning_->log("applyBoundaryValues");
         applyBoundaryValues();
+        partitioning_->log("applyPreliminaryBoundaryValues");
         applyPreliminaryBoundaryValues();
 
         /*
         * 2) Compute the next time step width
         */
+        partitioning_->log("computeTimeStepWidth");
         computeTimeStepWidth();
         // endTime should be reached exactly:
         if (time + dt_ > settings_.endTime) {
@@ -214,12 +217,12 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromBottom(u_bottomRow, rowCount, request_u_bottomRow);
     }
 
-    // wait until all MPI requests from the left neighbour are finished
-    partitioning_->wait(request_v_rightColumn);
-    partitioning_->wait(request_u_rightColumn);
-
-    // write values from right neighbour to right ghost layer
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
+        // wait until all MPI requests from the left neighbour are finished
+        partitioning_->wait(request_v_rightColumn);
+        partitioning_->wait(request_u_rightColumn);
+
+        // write values from right neighbour to right ghost layer
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             discretization_->v(discretization_->vIEnd(), j) = v_rightColumn.at(j - columnOffset);
         }
@@ -228,12 +231,12 @@ void ComputationParallel::applyBoundaryValues() {
         }
     }
 
-    // wait until all MPI requests from the left neighbour are finished
-    partitioning_->wait(request_v_leftColumn);
-    partitioning_->wait(request_u_leftColumn);
-
-    // write values from left neighbour to left ghost layer
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
+        // wait until all MPI requests from the left neighbour are finished
+        partitioning_->wait(request_v_leftColumn);
+        partitioning_->wait(request_u_leftColumn);
+
+        // write values from left neighbour to left ghost layer
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             discretization_->v(discretization_->vIBegin(), j) = v_leftColumn.at(j - columnOffset);
         }
@@ -242,12 +245,12 @@ void ComputationParallel::applyBoundaryValues() {
         }
     }
 
-    // wait until all MPI requests from the top neighbour are finished
-    partitioning_->wait(request_v_topRow);
-    partitioning_->wait(request_u_topRow);
-
-    // write values from top neighbour to top ghost layer
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
+        // wait until all MPI requests from the top neighbour are finished
+        partitioning_->wait(request_v_topRow);
+        partitioning_->wait(request_u_topRow);
+
+        // write values from top neighbour to top ghost layer
         for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
             discretization_->v(i, discretization_->vJEnd()) = v_topRow.at(i - rowOffset);
         }
@@ -256,12 +259,12 @@ void ComputationParallel::applyBoundaryValues() {
         }
     }
 
-    // wait until all MPI requests from the bottom neighbour are finished
-    partitioning_->wait(request_v_bottomRow);
-    partitioning_->wait(request_u_bottomRow);
-
-    // write values from bottom neighbour to bottom ghost layer
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
+        // wait until all MPI requests from the bottom neighbour are finished
+        partitioning_->wait(request_v_bottomRow);
+        partitioning_->wait(request_u_bottomRow);
+
+        // write values from bottom neighbour to bottom ghost layer
         for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
             discretization_->v(i, discretization_->vJBegin()) = v_bottomRow.at(i - rowOffset);
         }

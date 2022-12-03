@@ -30,16 +30,5 @@ protected:
     virtual void applyBoundaryValues();
 
     virtual void computeTimeStepWidth();
-
-    void applyBoundaryValuesTop();
-
-    void applyBoundaryValuesBottom();
-
-    void applyBoundaryValuesLeft();
-
-    void applyBoundaryValuesRight();
-
-private:
-    std::shared_ptr<Partitioning> partitioning_;
     
 };

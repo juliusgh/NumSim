@@ -27,8 +27,6 @@ public:
 
     virtual void solve() = 0;
 
-    void pGhostLayer();
-
     double residualNorm() const;
 
     int iterations() const;
@@ -48,5 +46,4 @@ protected:
     int maximumNumberOfIterations_;
     double residual_norm2_;
     int iterations_;
-    std::shared_ptr<Partitioning> partitioning_;
 };

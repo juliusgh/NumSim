@@ -503,3 +503,6 @@ std::array<int, 2> Partitioning::nodeOffset() const {
     return nodeOffset_;
 }
 
+void Partitioning::log(const char* message) {
+    std::cout << "RANK " << ownRankNo() << " : " << message << std::endl;
+}
