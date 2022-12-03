@@ -302,16 +302,27 @@ void ComputationParallel::computeTimeStepWidth() {
 
     // Compute maximal time step width regarding the convection u
     double u_absMax_local = discretization_->u().absMax();
-    partitioning_->log("globalMax u");
+    partitioning_->log("u_absMax_local:");
+    std::cout << u_absMax_local << std::endl;
+    discretization_->u().print();
     double u_absMax = partitioning_->globalMax(u_absMax_local);
-    double dt_conv_u = discretization_->dx() / u_absMax;
+    partitioning_->log("u_absMax:");
+    std::cout << u_absMax << std::endl;
+    double dt_conv_u = std::numeric_limits<double>::max();
+    if (u_absMax > 0.0)
+        dt_conv_u = discretization_->dx() / u_absMax;
 
 
     // Compute maximal time step width regarding the convection v
     double v_absMax_local = discretization_->v().absMax();
-    partitioning_->log("globalMax v");
+    partitioning_->log("v_absMax_local:");
+    std::cout << v_absMax_local << std::endl;
     double v_absMax = partitioning_->globalMax(v_absMax_local);
-    double dt_conv_v = discretization_->dy() / v_absMax;
+    partitioning_->log("v_absMax:");
+    std::cout << v_absMax << std::endl;
+    double dt_conv_v = std::numeric_limits<double>::max();
+    if (v_absMax > 0.0)
+        dt_conv_v = discretization_->dy() / v_absMax;
 
     // Set the appropriate time step width by using a security factor tau
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
