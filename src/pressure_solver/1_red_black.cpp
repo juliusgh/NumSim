@@ -30,7 +30,7 @@ void RedBlack::solve() {
         iteration++;
 
         // red half step
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j += 2) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j += 1) {
             int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pJBegin()) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
                 //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
@@ -43,7 +43,7 @@ void RedBlack::solve() {
         pGhostLayer();
 
         // black half step
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j += 2) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j += 1) {
             int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pInteriorJBegin()) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
                 //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
