@@ -196,9 +196,9 @@ double &StaggeredGrid::p(int i, int j)
 int StaggeredGrid::uIBegin() const
 {
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
-        return -2;
+        return -1;
     }
-    return -1;
+    return -2;
 };
 
 /**
@@ -208,9 +208,9 @@ int StaggeredGrid::uIBegin() const
 int StaggeredGrid::uIEnd() const
 {
     if (partitioning_->ownPartitionContainsRightBoundary()) {
-        return nCells_[0] + 1;
+        return nCells_[0];
     }
-    return nCells_[0];
+    return nCells_[0] + 1;
 };
 
 /**
@@ -351,9 +351,9 @@ int StaggeredGrid::vIEnd() const
 int StaggeredGrid::vJBegin() const
 {
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
-        return -2;
+        return -1;
     }
-    return -1;
+    return -2;
 };
 
 /**
@@ -363,9 +363,9 @@ int StaggeredGrid::vJBegin() const
 int StaggeredGrid::vJEnd() const
 {
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
-        nCells_[1] + 1;
+        nCells_[1];
     }
-    return nCells_[1];
+    return nCells_[1] + 1;
 };
 
 /**

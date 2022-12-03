@@ -483,7 +483,7 @@ double Partitioning::globalMin(double localValue) {
  * @return globalValue combined value
  */
 double Partitioning::allReduce(double localValue, MPI_Op op) {
-    double globalValue = 7.0;
+    double globalValue = 0.0;
     MPI_Allreduce(&localValue,
                   &globalValue,
                   1,
