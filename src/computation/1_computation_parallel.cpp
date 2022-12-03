@@ -118,10 +118,10 @@ void ComputationParallel::applyBoundaryValues() {
     int v_rowCount = discretization_->vInteriorIEnd() - discretization_->vInteriorIBegin();
     int v_rowOffset = discretization_->vInteriorIBegin();
 
-    MPI_Request request_v_rightColumn;
-    MPI_Request request_v_leftColumn;
-    MPI_Request request_v_topRow;
-    MPI_Request request_v_bottomRow;
+    MPI_Request request_v_rightColumn; // send to right - receive from left
+    MPI_Request request_v_leftColumn; // send to left - receive from right
+    MPI_Request request_v_topRow; // send to top - receive from bottom
+    MPI_Request request_v_bottomRow; //senf to bottom - reiceive from top
     std::vector<double> v_rightColumn(v_columnCount, 0);
     std::vector<double> v_leftColumn(v_columnCount, 0);
     std::vector<double> v_topRow(v_rowCount, 0);
@@ -207,7 +207,7 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromTop(u_topRow, u_rowCount, request_u_topRow);
     }
 
-    if (partitioning_->ownPartitionContainsTopBoundary()) {
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
         applyBoundaryValuesBottom();
     }
     else {
@@ -229,7 +229,7 @@ void ComputationParallel::applyBoundaryValues() {
     }
 
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
-        // wait until all MPI requests from the left neighbour are finished
+        // wait until all MPI requests from the right neighbour are finished
         partitioning_->wait(request_v_rightColumn);
         partitioning_->wait(request_u_rightColumn);
 
