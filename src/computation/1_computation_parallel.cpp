@@ -40,7 +40,7 @@ void ComputationParallel::initialize(string filename)
     // Initialize output writers
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
     outputWriterParaview_ = std::make_unique<OutputWriterParaviewParallel>(discretization_, partitioning_);
-};
+}
 
 /**
  * Run the whole simulation until tend
@@ -94,14 +94,17 @@ void ComputationParallel::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
+        if (partitioning_->ownRankNo() < 2) {
+            cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
+                 ", res. " << pressureSolver_->residualNorm() << ", solver iterations: "
+                 << pressureSolver_->iterations() << endl;
+        }
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
 #endif
         outputWriterParaview_->writeFile(time);
     }
-};
+}
 
 /**
  * Set the boundary values of the velocities (u, v)

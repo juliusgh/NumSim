@@ -29,8 +29,8 @@ void RedBlack::solve() {
     int iteration = 0;
     do {
         iteration++;
-        /*getchar();
-        if (partitioning_->ownRankNo() == 0) {
+        //getchar();
+        /*if (partitioning_->ownRankNo() == 0) {
             discretization_->p().print();
         }
         if (getchar() == '1' && partitioning_->ownRankNo() == 1) {
@@ -64,6 +64,8 @@ void RedBlack::solve() {
         //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 2" << std::endl;
         pGhostLayer();
         computeResidualNorm();
+        //partitioning_->log("residual norm final:");
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residualNorm() << std::endl;
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 }
@@ -85,8 +87,11 @@ void RedBlack::computeResidualNorm() {
             residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
         }
     }
-
+    //partitioning_->log("residual_norm2_local:");
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residual_norm2 << std::endl;
     double residual_norm2_global = partitioning_->globalSum(residual_norm2);
+    //partitioning_->log("residual_norm2_global:");
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residual_norm2_global << std::endl;
     residual_norm2_ = residual_norm2_global / N;
 }
 
