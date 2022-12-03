@@ -362,8 +362,8 @@ int StaggeredGrid::vJBegin() const
  */
 int StaggeredGrid::vJEnd() const
 {
-    if (partitioning_->ownPartitionContainsBottomBoundary()) {
-        nCells_[1];
+    if (partitioning_->ownPartitionContainsTopBoundary()) {
+        return nCells_[1];
     }
     return nCells_[1] + 1;
 };
