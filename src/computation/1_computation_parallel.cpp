@@ -54,15 +54,15 @@ void ComputationParallel::runSimulation() {
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
-        partitioning_->log("applyBoundaryValues");
+        //partitioning_->log("applyBoundaryValues");
         applyBoundaryValues();
-        partitioning_->log("applyPreliminaryBoundaryValues");
+        //partitioning_->log("applyPreliminaryBoundaryValues");
         applyPreliminaryBoundaryValues();
 
         /*
         * 2) Compute the next time step width
         */
-        partitioning_->log("computeTimeStepWidth");
+        //partitioning_->log("computeTimeStepWidth");
         computeTimeStepWidth();
         // endTime should be reached exactly:
         if (time + dt_ > settings_.endTime) {
@@ -186,16 +186,16 @@ void ComputationParallel::applyBoundaryValues() {
     else {
         // v: send last column on the right to right neighbour
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            partitioning_->log("send Right: j - v_columnOffset =");
-            std::cout << j - v_columnOffset << std::endl;
+            //partitioning_->log("send Right: j - v_columnOffset =");
+            //std::cout << j - v_columnOffset << std::endl;
             v_rightColumn.at(j - v_columnOffset) = discretization_->v(discretization_->vInteriorIEnd() - 1, j);
         }
         partitioning_->isendToRight(v_rightColumn, request_v_rightColumn);
 
         // u: send second to last column on the right to right neighbour
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            partitioning_->log("send Right: j - u_columnOffset =");
-            std::cout << j - u_columnOffset << std::endl;
+            //partitioning_->log("send Right: j - u_columnOffset =");
+            //std::cout << j - u_columnOffset << std::endl;
             u_rightColumn.at(j - u_columnOffset) = discretization_->u(discretization_->uInteriorIEnd() - 2, j);
         }
         partitioning_->isendToRight(u_rightColumn, request_u_rightColumn);
@@ -211,16 +211,16 @@ void ComputationParallel::applyBoundaryValues() {
     else {
         // v: send first column on the left to left neighbour
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            partitioning_->log("send Left: j - v_columnOffset =");
-            std::cout << j - v_columnOffset << std::endl;
+            //partitioning_->log("send Left: j - v_columnOffset =");
+            //std::cout << j - v_columnOffset << std::endl;
             v_leftColumn.at(j - v_columnOffset) = discretization_->v(discretization_->vInteriorIBegin(), j);
         }
         partitioning_->isendToLeft(v_leftColumn, request_v_leftColumn);
 
         // u: send second column on the left to left neighbour
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            partitioning_->log("send Left: j - u_columnOffset =");
-            std::cout << j - u_columnOffset << std::endl;
+            //partitioning_->log("send Left: j - u_columnOffset =");
+            //std::cout << j - u_columnOffset << std::endl;
             u_leftColumn.at(j - u_columnOffset) = discretization_->u(discretization_->uInteriorIBegin() + 1, j);
         }
         partitioning_->isendToLeft(u_leftColumn, request_u_leftColumn);
@@ -269,13 +269,13 @@ void ComputationParallel::applyBoundaryValues() {
 
         // write values from right neighbour to right ghost layer
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            partitioning_->log("recv Right: j - v_columnOffset =");
-            std::cout << j - v_columnOffset << std::endl;
+            //partitioning_->log("recv Right: j - v_columnOffset =");
+            //std::cout << j - v_columnOffset << std::endl;
             discretization_->v(discretization_->vIEnd() - 1, j) = v_rightColumn.at(j - v_columnOffset);
         }
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            partitioning_->log("recv Right: j - u_columnOffset =");
-            std::cout << j - u_columnOffset << std::endl;
+            //partitioning_->log("recv Right: j - u_columnOffset =");
+            //std::cout << j - u_columnOffset << std::endl;
             discretization_->u(discretization_->uIEnd() - 1, j) = u_rightColumn.at(j - u_columnOffset);
         }
     }
@@ -287,13 +287,13 @@ void ComputationParallel::applyBoundaryValues() {
 
         // write values from left neighbour to left ghost layer
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            partitioning_->log("recv Left: j - v_columnOffset =");
-            std::cout << j - v_columnOffset << std::endl;
+            //partitioning_->log("recv Left: j - v_columnOffset =");
+            //std::cout << j - v_columnOffset << std::endl;
             discretization_->v(discretization_->vIBegin(), j) = v_leftColumn.at(j - v_columnOffset);
         }
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            partitioning_->log("recv Left: j - u_columnOffset =");
-            std::cout << j - u_columnOffset << std::endl;
+            //partitioning_->log("recv Left: j - u_columnOffset =");
+            //std::cout << j - u_columnOffset << std::endl;
             discretization_->u(discretization_->uIBegin(), j) = u_leftColumn.at(j - u_columnOffset);
         }
     }
@@ -308,12 +308,12 @@ void ComputationParallel::computeTimeStepWidth() {
 
     // Compute maximal time step width regarding the convection u
     double u_absMax_local = discretization_->u().absMax();
-    partitioning_->log("u_absMax_local:");
-    std::cout << u_absMax_local << std::endl;
-    discretization_->u().print();
+    //partitioning_->log("u_absMax_local:");
+    //std::cout << u_absMax_local << std::endl;
+    //discretization_->u().print();
     double u_absMax = partitioning_->globalMax(u_absMax_local);
-    partitioning_->log("u_absMax:");
-    std::cout << u_absMax << std::endl;
+    //partitioning_->log("u_absMax:");
+    //std::cout << u_absMax << std::endl;
     double dt_conv_u = std::numeric_limits<double>::max();
     if (u_absMax > 0.0)
         dt_conv_u = discretization_->dx() / u_absMax;
@@ -321,11 +321,11 @@ void ComputationParallel::computeTimeStepWidth() {
 
     // Compute maximal time step width regarding the convection v
     double v_absMax_local = discretization_->v().absMax();
-    partitioning_->log("v_absMax_local:");
-    std::cout << v_absMax_local << std::endl;
+    //partitioning_->log("v_absMax_local:");
+    //std::cout << v_absMax_local << std::endl;
     double v_absMax = partitioning_->globalMax(v_absMax_local);
-    partitioning_->log("v_absMax:");
-    std::cout << v_absMax << std::endl;
+    //partitioning_->log("v_absMax:");
+    //std::cout << v_absMax << std::endl;
     double dt_conv_v = std::numeric_limits<double>::max();
     if (v_absMax > 0.0)
         dt_conv_v = discretization_->dy() / v_absMax;

@@ -29,8 +29,13 @@ void RedBlack::solve() {
     int iteration = 0;
     do {
         iteration++;
-        /*discretization_->p().print();
-        getchar();*/
+        /*getchar();
+        if (partitioning_->ownRankNo() == 0) {
+            discretization_->p().print();
+        }
+        if (getchar() == '1' && partitioning_->ownRankNo() == 1) {
+            discretization_->p().print();
+        }*/
 
         // black half step
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
@@ -42,7 +47,7 @@ void RedBlack::solve() {
                 discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
             }
         }
-
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 1" << std::endl;
         pGhostLayer();
 
         // red half step
@@ -56,6 +61,7 @@ void RedBlack::solve() {
             }
         }
 
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 2" << std::endl;
         pGhostLayer();
         computeResidualNorm();
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
@@ -109,7 +115,7 @@ void RedBlack::pGhostLayer() {
         //std::cout << "comm Top" << std::endl;
         // send row on the top to top neighbour
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-            p_topRow.at(i - p_rowOffset) = discretization_->p(i, discretization_->pInteriorJEnd());
+            p_topRow.at(i - p_rowOffset) = discretization_->p(i, discretization_->pInteriorJEnd() - 1);
         }
         partitioning_->isendToTop(p_topRow, request_p_topRow);
 
@@ -141,7 +147,8 @@ void RedBlack::pGhostLayer() {
         //std::cout << "comm Right" << std::endl;
         // send to column on the right to right neighbour
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            p_rightColumn.at(j - p_columnOffset) = discretization_->p(discretization_->pInteriorIEnd(), j);
+            p_rightColumn.at(j - p_columnOffset) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
 
         partitioning_->isendToRight(p_rightColumn, request_p_rightColumn);
@@ -158,6 +165,7 @@ void RedBlack::pGhostLayer() {
         // send to column on the left to left neighbour
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             p_leftColumn.at(j - p_columnOffset) = discretization_->p(discretization_->pInteriorIBegin(), j);
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
         partitioning_->isendToLeft(p_leftColumn, request_p_leftColumn);
 
@@ -180,12 +188,14 @@ void RedBlack::pGhostLayer() {
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         partitioning_->wait(request_p_rightColumn);
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right recv no. " << j << " = " << p_rightColumn.at(j - p_columnOffset) << std::endl;
             discretization_->p(discretization_->pIEnd() - 1, j) = p_rightColumn.at(j - p_columnOffset);
         }
     }
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left recv no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
             discretization_->p(discretization_->pIBegin(), j) = p_leftColumn.at(j - p_columnOffset);
         }
     }
