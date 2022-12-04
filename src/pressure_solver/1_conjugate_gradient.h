@@ -33,5 +33,6 @@ public:
 
 protected:
     virtual void computeResidualNorm();
+    std::shared_ptr<Array2D> residual_;
     std::shared_ptr<Partitioning> partitioning_;
 };
