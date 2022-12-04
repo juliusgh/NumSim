@@ -2,6 +2,7 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
 #include "pressure_solver/1_red_black.h"
+#include "pressure_solver/1_conjugate_gradient.h"
 #include "output_writer/output_writer_text_parallel.h"
 #include "output_writer/output_writer_paraview_parallel.h"
 #include "pressure_solver/2_red_black_sor.h"
@@ -53,7 +54,7 @@ void ComputationParallel::initialize(string filename)
     }
 
     // Initialize solver
-    pressureSolver_ = std::make_unique<RedBlack>(discretization_, settings_.epsilon, settings_.maximumNumberOfIterations, partitioning_);
+    pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon, settings_.maximumNumberOfIterations, partitioning_);
 
     // Initialize output writers
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
