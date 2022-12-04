@@ -23,12 +23,14 @@ public:
     ConjugateGradient(std::shared_ptr <Discretization> discretization,
         double epsilon,
         int maximumNumberOfIterations,
-        std::shared_ptr<Partitioning> partitioning);
+        std::shared_ptr<Partitioning> partitioning,
+        std::shared_ptr<Array2D> residual);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
-    void solve();
+    void solve() override;
+    
     void pGhostLayer();
 
 protected:

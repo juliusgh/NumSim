@@ -47,14 +47,12 @@ void ComputationParallel::initialize(string filename)
         pressureSolver_ = std::make_unique<RedBlack>(discretization_, settings_.epsilon,
                                                      settings_.maximumNumberOfIterations, partitioning_);
     } else if (settings_.pressureSolver == "CG") {
-        //pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
-        //                                             settings_.maximumNumberOfIterations, partitioning_);
+        std::shared_ptr<Array2D> residual_ = std::make_shared<Array2D>(discretization_->pSize());
+        pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+                                                     settings_.maximumNumberOfIterations, partitioning_, residual_);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
-
-    // Initialize solver
-    pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon, settings_.maximumNumberOfIterations, partitioning_);
 
     // Initialize output writers
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
