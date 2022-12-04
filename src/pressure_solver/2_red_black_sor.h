@@ -1,17 +1,12 @@
 #pragma once
 
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include "mpi.h"
-#include "pressure_solver/0_pressure_solver.h"
-#include "partitioning/partitioning.h"
+#include "pressure_solver/1_red_black.h"
 
 /**
  * Parallel red black solver for solving a linear system of equations.
  */
 
-class RedBlack : public PressureSolver {
+class RedBlackSOR : public RedBlack {
 public:
     /**
     * constructor
@@ -20,19 +15,16 @@ public:
     * @param maximumNumberOfIterations
     * @param omega
     */
-    RedBlack(std::shared_ptr <Discretization> discretization,
+    RedBlackSOR(std::shared_ptr <Discretization> discretization,
         double epsilon,
         int maximumNumberOfIterations,
+        double omega,
         std::shared_ptr<Partitioning> partitioning);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
     void solve() override;
-
-    void pGhostLayer();
-
-protected:
-    virtual void computeResidualNorm();
-    std::shared_ptr<Partitioning> partitioning_;
+private:
+    double omega_;
 };

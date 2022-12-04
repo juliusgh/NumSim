@@ -13,17 +13,24 @@
 Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 : nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
 {
+#ifndef NPARALLEL
     // Get the number of processes
     MPI_Comm_size(MPI_COMM_WORLD, &nRanks_);
 
     // Get the rank of the process
     MPI_Comm_rank(MPI_COMM_WORLD, &ownRankNo_);
 
-    if (ownRankNo_ == 0)
-        std::cout << "number of processes: " << nRanks_ << std::endl;
-
     // Partition the domain
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
+
+    if (ownRankNo_ == 0)
+        std::cout << "number of processes: " << nRanks_ << std::endl;
+#else
+    nRanks_ = 1;
+    ownRankNo_ = 0;
+    nDomains_ = {1, 1};
+#endif
+
     domainColumn_ = computeColumn(ownRankNo_);
     domainRow_ = computeRow(ownRankNo_);
 

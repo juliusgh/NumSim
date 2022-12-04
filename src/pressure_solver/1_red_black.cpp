@@ -1,5 +1,4 @@
 #include "pressure_solver/1_red_black.h"
-#include <iostream>
 
 /**
  * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.

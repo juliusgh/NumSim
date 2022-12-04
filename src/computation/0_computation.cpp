@@ -18,7 +18,6 @@ void Computation::initialize(string filename)
     settings_.printSettings();
 #endif
 
-    cout << "Partitioning" << endl;
     partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
 
     // Initialize discretization
@@ -63,7 +62,6 @@ void Computation::runSimulation() {
         * 1) Apply boundary values (for u, v, F, G)
         */
         applyBoundaryValues();
-        cout << "applyPreliminaryBoundaryValues" << endl;
         applyPreliminaryBoundaryValues();
 
         /*
@@ -99,12 +97,12 @@ void Computation::runSimulation() {
         /*
         * 7) Output debug information and simulation results
         */
-//#ifndef NDEBUG
+#ifndef NDEBUG
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
-//#endif
+#endif
         outputWriterParaview_->writeFile(time);
     }
 };
