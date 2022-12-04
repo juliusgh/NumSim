@@ -31,12 +31,10 @@ int main(int argc, char *argv[]) {
 #ifndef NPARALLEL
     // Initialize the MPI environment
     MPI_Init(NULL, NULL);
-    cout << "ComputationParallel" << endl;
     auto computation = ComputationParallel();
 #else
     auto computation = Computation();
 #endif
-    cout << "computation.initialize_" << endl;
     computation.initialize(filename);
     computation.runSimulation();
 #ifndef NPARALLEL
