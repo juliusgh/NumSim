@@ -1,4 +1,3 @@
-#include <iostream>
 #include "pressure_solver/0_pressure_solver.h"
 
 /**
@@ -13,7 +12,8 @@ PressureSolver::PressureSolver(std::shared_ptr <Discretization> discretization,
                                int maximumNumberOfIterations) :
         discretization_(discretization),
         epsilon_(epsilon),
-        maximumNumberOfIterations_(maximumNumberOfIterations) {
+        maximumNumberOfIterations_(maximumNumberOfIterations)
+{
 
 }
 

@@ -25,6 +25,7 @@ add_executable(${PROJECT_NAME}
     pressure_solver/1_gauss_seidel.cpp
     pressure_solver/1_sor.cpp
     pressure_solver/1_red_black.cpp
+    pressure_solver/2_red_black_sor.cpp
 
     output_writer/output_writer.cpp
     output_writer/output_writer_text.cpp
@@ -75,6 +76,7 @@ if(GTest_FOUND)
         pressure_solver/1_gauss_seidel.cpp
         pressure_solver/1_sor.cpp
         pressure_solver/1_red_black.cpp
+        pressure_solver/2_red_black_sor.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp
@@ -114,5 +116,11 @@ add_compile_options(-O2)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# custom options
+option(NPARALLEL "Disable MPI parallelization" OFF)
+if (NPARALLEL)
+    add_definitions(-DNPARALLEL)
+endif()
 
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
