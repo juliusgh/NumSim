@@ -1,4 +1,4 @@
-#include "pressure_solver/2_red_black_sor.h"
+#include "pressure_solver/2_red_black.h"
 
 /**
  * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
@@ -7,13 +7,11 @@
  * @param maximumNumberOfIterations
  */
 
-RedBlackSOR::RedBlackSOR(std::shared_ptr<Discretization> discretization,
+RedBlack::RedBlack(std::shared_ptr<Discretization> discretization,
          double epsilon,
          int maximumNumberOfIterations,
-         double omega,
          std::shared_ptr<Partitioning> partitioning) :
-PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning),
-omega_(omega)
+PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning)
 {
 
 }
@@ -21,11 +19,10 @@ omega_(omega)
 /**
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */
-void RedBlackSOR::solve() {
+void RedBlack::solve() {
     const double dx2 = pow(discretization_->dx(), 2);
     const double dy2 = pow(discretization_->dy(), 2);
-    const double k1 = 1 - omega_;
-    const double k2 = omega_ * (dx2 * dy2) / (2.0 * (dx2 + dy2));
+    const double k = (dx2 * dy2) / (2.0 * (dx2 + dy2));
     const double eps2 = pow(epsilon_, 2);
     int iteration = 0;
     do {
@@ -45,7 +42,7 @@ void RedBlackSOR::solve() {
                 //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
-                discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
+                discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
             }
         }
         //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 1" << std::endl;
@@ -58,7 +55,7 @@ void RedBlackSOR::solve() {
                 //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
-                discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
+                discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
             }
         }
 

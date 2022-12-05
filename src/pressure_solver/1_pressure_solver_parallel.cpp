@@ -1,4 +1,4 @@
-#include "pressure_solver/0_pressure_solver_parallel.h"
+#include "pressure_solver/1_pressure_solver_parallel.h"
 
 /**
  *  Interface for the pressure solver. It computes the pressure field variable such that the continuity equation is fulfilled.
@@ -7,10 +7,12 @@
  * @param maximumNumberOfIterations: maximal number of iterations before ending the iteration
  */
 
-PressureSolverParallel::PressureSolverParallel(std::shared_ptr <Discretization> discretization,
+PressureSolverParallel::PressureSolverParallel(std::shared_ptr<Discretization> discretization,
                                double epsilon,
-                               int maximumNumberOfIterations) :
-PressureSolver(discretization, epsilon, maximumNumberOfIterations)
+                               int maximumNumberOfIterations,
+                               std::shared_ptr<Partitioning> partitioning) :
+PressureSolver(discretization, epsilon, maximumNumberOfIterations),
+partitioning_(partitioning)
 {
 
 }
@@ -18,7 +20,7 @@ PressureSolver(discretization, epsilon, maximumNumberOfIterations)
 /**
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
-void RedBlack::pGhostLayer() {
+void PressureSolverParallel::pGhostLayer() {
     int p_columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int p_columnOffset = discretization_->pInteriorJBegin();
     int p_rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
@@ -124,4 +126,27 @@ void RedBlack::pGhostLayer() {
             discretization_->p(discretization_->pIBegin(), j) = p_leftColumn.at(j - p_columnOffset);
         }
     }
+}
+
+/**
+ * Calculation of the global residual norm using the squared Euclidean norm
+ */
+void PressureSolverParallel::computeResidualNorm() {
+    double residual_norm2 = 0.0;
+    const double dx2 = pow(discretization_->dx(),2);
+    const double dy2 = pow(discretization_->dy(),2);
+    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            double pxx = (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
+            double pyy = (discretization_->p(i, j + 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j - 1)) / dy2;
+            residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
+        }
+    }
+    //partitioning_->log("residual_norm2_local:");
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residual_norm2 << std::endl;
+    double residual_norm2_global = partitioning_->globalSum(residual_norm2);
+    //partitioning_->log("residual_norm2_global:");
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residual_norm2_global << std::endl;
+    residual_norm2_ = residual_norm2_global / N;
 }

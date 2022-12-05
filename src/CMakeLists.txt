@@ -22,10 +22,12 @@ add_executable(${PROJECT_NAME}
     discretization/2_donor_cell.cpp
 
     pressure_solver/0_pressure_solver.cpp
+    pressure_solver/1_pressure_solver_parallel.cpp
     pressure_solver/1_gauss_seidel.cpp
     pressure_solver/1_sor.cpp
-    pressure_solver/1_red_black.cpp
+    pressure_solver/2_red_black.cpp
     pressure_solver/2_red_black_sor.cpp
+    pressure_solver/2_conjugate_gradient.cpp
 
     output_writer/output_writer.cpp
     output_writer/output_writer_text.cpp
@@ -73,10 +75,12 @@ if(GTest_FOUND)
         discretization/2_donor_cell.cpp
 
         pressure_solver/0_pressure_solver.cpp
+        pressure_solver/1_pressure_solver_parallel.cpp
         pressure_solver/1_gauss_seidel.cpp
         pressure_solver/1_sor.cpp
-        pressure_solver/1_red_black.cpp
+        pressure_solver/2_red_black.cpp
         pressure_solver/2_red_black_sor.cpp
+        pressure_solver/2_conjugate_gradient.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp
