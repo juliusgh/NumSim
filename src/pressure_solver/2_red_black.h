@@ -4,14 +4,15 @@
 #include <iostream>
 #include <vector>
 #include "mpi.h"
-#include "pressure_solver/0_pressure_solver_parallel.h"
+#include "pressure_solver/0_pressure_solver.h"
 #include "partitioning/partitioning.h"
+#include "1_pressure_solver_parallel.h"
 
 /**
  * Parallel red black solver for solving a linear system of equations.
  */
 
-class ConjugateGradient : public PressureSolverParallel {
+class RedBlack : public PressureSolverParallel {
 public:
     /**
     * constructor
@@ -20,19 +21,16 @@ public:
     * @param maximumNumberOfIterations
     * @param omega
     */
-    ConjugateGradient(std::shared_ptr <Discretization> discretization,
+    RedBlack(std::shared_ptr <Discretization> discretization,
         double epsilon,
         int maximumNumberOfIterations,
-        std::shared_ptr<Partitioning> partitioning,
-        std::shared_ptr<Array2D> residual);
+        std::shared_ptr<Partitioning> partitioning);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
-    void solve() override;
+    void solve();
 
 protected:
-    virtual void computeResidualNorm();
-    std::shared_ptr<Array2D> residual_;
     std::shared_ptr<Partitioning> partitioning_;
 };

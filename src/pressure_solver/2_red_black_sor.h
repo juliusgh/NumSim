@@ -1,12 +1,13 @@
 #pragma once
 
-#include "pressure_solver/1_red_black.h"
+#include "pressure_solver/2_red_black.h"
+#include "1_pressure_solver_parallel.h"
 
 /**
  * Parallel red black solver for solving a linear system of equations.
  */
 
-class RedBlackSOR : public RedBlack {
+class RedBlackSOR : public PressureSolverParallel {
 public:
     /**
     * constructor
