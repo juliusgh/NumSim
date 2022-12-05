@@ -43,6 +43,7 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     if (domainRow_ < cellsRowRemainder)
         nCellsLocal_[1]++;
 
+    // compute node offset of local subdomain in comparison to global domain
     int columnOffset = 0;
     for (int i = columnsBegin(); i < domainColumn_; i++) {
         columnOffset += nCellsLocal_[0];
@@ -211,7 +212,7 @@ int Partitioning::topNeighbourRankNo() const {
 /**
  * Implementation of call of the MPI-send command
  * @param destinationRank rank of the process, data is send to
- * @param data data to be send
+ * @param data data to be sent
  */
 void Partitioning::send(int destinationRank, std::vector<double> &data) {
     std::cout << "own Rank: " << ownRankNo() << ", destination Rank: " << destinationRank << std::endl;
@@ -246,7 +247,7 @@ void Partitioning::recv(int sourceRank, std::vector<double> &data, int count) {
 /**
  * Implementation of call of the MPI-send command
  * @param destinationRank rank of the process, data is send to
- * @param data data to be send
+ * @param data data to be sent
  */
 void Partitioning::isend(int destinationRank, std::vector<double> &data, MPI_Request &request) {
     MPI_Isend(
@@ -284,7 +285,7 @@ void Partitioning::wait(MPI_Request &request) {
 
 /**
  * method used to send information to the subdomain left of the current subdomain
- * @param data information to be send to the left
+ * @param data information to be sent to the left
  */
 void Partitioning::sendToLeft(std::vector<double> &data) {
     send(leftNeighbourRankNo(), data);
@@ -292,7 +293,7 @@ void Partitioning::sendToLeft(std::vector<double> &data) {
 
 /**
  * method used to send information to the subdomain right of the current subdomain
- * @param data information to be send to the right
+ * @param data information to be sent to the right
  */
 void Partitioning::sendToRight(std::vector<double> &data) {
     send(rightNeighbourRankNo(), data);
@@ -300,7 +301,7 @@ void Partitioning::sendToRight(std::vector<double> &data) {
 
 /**
  * method used to send information to the subdomain below the current subdomain
- * @param data information to be send down
+ * @param data information to be sent down
  */
 void Partitioning::sendToBottom(std::vector<double> &data) {
     send(bottomNeighbourRankNo(), data);
@@ -308,7 +309,7 @@ void Partitioning::sendToBottom(std::vector<double> &data) {
 
 /**
  * method used to send information to the subdomain above the current subdomain
- * @param data information to be send up
+ * @param data information to be sent up
  */
 void Partitioning::sendToTop(std::vector<double> &data) {
     send(topNeighbourRankNo(), data);
@@ -350,7 +351,7 @@ void Partitioning::recvFromTop(std::vector<double> &data, int count) {
 
 /**
  * method used to send information to the subdomain left of the current subdomain
- * @param data information to be send to the left
+ * @param data information to be sent to the left
  */
 void Partitioning::isendToLeft(std::vector<double> &data, MPI_Request &request) {
     isend(leftNeighbourRankNo(), data, request);
@@ -358,7 +359,7 @@ void Partitioning::isendToLeft(std::vector<double> &data, MPI_Request &request) 
 
 /**
  * method used to send information to the subdomain right of the current subdomain
- * @param data information to be send to the right
+ * @param data information to be sent to the right
  */
 void Partitioning::isendToRight(std::vector<double> &data, MPI_Request &request) {
     isend(rightNeighbourRankNo(), data, request);
@@ -366,7 +367,7 @@ void Partitioning::isendToRight(std::vector<double> &data, MPI_Request &request)
 
 /**
  * method used to send information to the subdomain below the current subdomain
- * @param data information to be send down
+ * @param data information to be sent down
  */
 void Partitioning::isendToBottom(std::vector<double> &data, MPI_Request &request) {
     isend(bottomNeighbourRankNo(), data, request);
@@ -374,7 +375,7 @@ void Partitioning::isendToBottom(std::vector<double> &data, MPI_Request &request
 
 /**
  * method used to send information to the subdomain above the current subdomain
- * @param data information to be send up
+ * @param data information to be sent up
  */
 void Partitioning::isendToTop(std::vector<double> &data, MPI_Request &request) {
     isend(topNeighbourRankNo(), data, request);
@@ -414,7 +415,7 @@ void Partitioning::irecvFromTop(std::vector<double> &data, int count, MPI_Reques
 
 /**
  * get the column position of the subdomain
- * @param rank
+ * @param rank unique number of process in the world size
  * @return column position of the subdomain
  */
 int Partitioning::computeColumn(int rank) const {
@@ -423,7 +424,7 @@ int Partitioning::computeColumn(int rank) const {
 
 /**
  * get the row position of the subdomain
- * @param rank
+ * @param rank unique number of process in the world size
  * @return row position of the subdomain
  */
 int Partitioning::computeRow(int rank) const {
@@ -432,8 +433,8 @@ int Partitioning::computeRow(int rank) const {
 
 /**
  * get the rank of a subdomain based on its position in the global grid
- * @param column
- * @param row
+ * @param column horizontal position of subdomain in global grid, where every cell is a grid entry
+ * @param row vertical position of subdomain in global grid, where every cell is a grid entry
  * @return subdomain rank
  */
 int Partitioning::computeRank(int column, int row) const {
@@ -468,7 +469,7 @@ double Partitioning::globalSum(double localValue) {
 /**
  *  get maximum of a value over multiple subdomains
  * @param localValue  local values
- * @return global maximum
+ * @return global maximum of a value
  */
 double Partitioning::globalMax(double localValue) {
     return allReduce(localValue, MPI_MAX);
@@ -477,7 +478,7 @@ double Partitioning::globalMax(double localValue) {
 /**
  *  get minimum of a value over multiple subdomains
  * @param localValue  local values
- * @return global minimum
+ * @return global minimum of a value
  */
 double Partitioning::globalMin(double localValue) {
     return allReduce(localValue, MPI_MIN);
@@ -505,12 +506,16 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
  * get the offset values for counting local nodes in x and y direction.
  * (i_local,j_local) + nodeOffset = (i_global,j_global)
  * used in OutputWriterParaviewParallel
- * @return offset
+ * @return offset of the current subdomain in relation to the global domain 
  */
 std::array<int, 2> Partitioning::nodeOffset() const {
     return nodeOffset_;
 }
 
+/**
+* Print for debugging to get the current status of processes in the run_simulation pipline 
+* @param message debugging message
+*/
 void Partitioning::log(const char* message) {
     std::cout << "RANK " << ownRankNo() << " : " << message << std::endl;
 }

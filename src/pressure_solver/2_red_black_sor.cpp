@@ -4,7 +4,7 @@
  * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
  * @param discretization pointer to the implementation of the discretization
  * @param epsilon error tolerance below which we consider the solver to be converged
- * @param maximumNumberOfIterations
+ * @param maximumNumberOfIterations if not converged when this number is reached, solver is terminated nonetheless 
  */
 
 RedBlackSOR::RedBlackSOR(std::shared_ptr<Discretization> discretization,
@@ -49,6 +49,8 @@ void RedBlackSOR::solve() {
             }
         }
         //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 1" << std::endl;
+
+        // communication
         pGhostLayer();
 
         // red half step

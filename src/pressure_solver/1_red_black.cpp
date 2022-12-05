@@ -1,10 +1,10 @@
 #include "pressure_solver/1_red_black.h"
 
 /**
- * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
+ * Implementation of the red-black solver for Gauss-Seidel, a parallelisized version of the Gauss-Seidel solver.
  * @param discretization pointer to the implementation of the discretization
  * @param epsilon error tolerance below which we consider the solver to be converged
- * @param maximumNumberOfIterations
+ * @param maximumNumberOfIterations if not converged when this number is reached, solver is terminated nonetheless
  */
 
 RedBlack::RedBlack(std::shared_ptr<Discretization> discretization,
@@ -95,7 +95,7 @@ void RedBlack::computeResidualNorm() {
 }
 
 /**
- *  Implementation of horizontal communication of pressure values between neighbouring subdomains
+ *  Implementation of the communication of pressure values between neighbouring subdomains
  */
 void RedBlack::pGhostLayer() {
     int p_columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();

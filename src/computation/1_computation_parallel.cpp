@@ -62,7 +62,7 @@ void ComputationParallel::initialize(string filename)
 }
 
 /**
- * Run the whole simulation until tend
+ * Run the whole simulation until tend. While loop contains the algorithm for one time step. 
  */
 void ComputationParallel::runSimulation() {
     int t_iter = 0;
