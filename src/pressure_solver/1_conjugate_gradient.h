@@ -4,14 +4,14 @@
 #include <iostream>
 #include <vector>
 #include "mpi.h"
-#include "pressure_solver/0_pressure_solver.h"
+#include "pressure_solver/0_pressure_solver_parallel.h"
 #include "partitioning/partitioning.h"
 
 /**
  * Parallel red black solver for solving a linear system of equations.
  */
 
-class ConjugateGradient : public PressureSolver {
+class ConjugateGradient : public PressureSolverParallel {
 public:
     /**
     * constructor
@@ -30,8 +30,6 @@ public:
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
     void solve() override;
-    
-    void pGhostLayer();
 
 protected:
     virtual void computeResidualNorm();
