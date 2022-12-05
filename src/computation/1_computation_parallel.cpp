@@ -126,9 +126,9 @@ void ComputationParallel::runSimulation() {
 }
 
 /**
- * Set the boundary values of the velocities (u, v)
- * 
- * Left and right boundaries should overwrite bottom and top boundaries
+ * Set the boundary values of the velocities (u, v). 
+ * Includes the setting, i.e. communication, of ghost layer values at inner subdomain boundaries for u and v
+ * Left and right boundaries should overwrite bottom and top boundaries in the global domain
  */
 void ComputationParallel::applyBoundaryValues() {
     int u_columnCount = discretization_->uInteriorJEnd() - discretization_->uInteriorJBegin();
@@ -323,6 +323,8 @@ void ComputationParallel::applyBoundaryValues() {
 
 /**
  * Compute the time step width dt based on the maximum velocities
+ * The local maximal time step values fullfilling the constraints must be communicated between all processes
+ * to get an equal time step width in each process.  
  */
 void ComputationParallel::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
