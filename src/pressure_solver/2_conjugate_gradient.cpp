@@ -55,8 +55,9 @@ void ConjugateGradient::solve() {
             local_alpha += (*residual_)(i, j) * (*q_)(i, j); // α₀ = r₀ᵀ q₀
         }
     }
-    // UNTIL NOW WE CAN NOT MAKE SURE THAT THE GLOBAL SUM IS CREATED AFTER THE WHOLE LOOP IS COMPLETED IN EACH PROCESSOR (MAYBE OUTSOURCE TO A FUNCTION?)
     double alpha = partitioning_->globalSum(local_alpha);
+
+    std::cout << " local alpha "<< local_alpha << " , global alpha " << alpha <<std::endl;
 
     do {
         // Calculate auxillary variable Aq
