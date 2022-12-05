@@ -1,7 +1,7 @@
 #include "pressure_solver/2_red_black_sor.h"
 
 /**
- * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
+ * Implementation of the red-black solver for SOR, a parallelisized version of the SOR solver.
  * @param discretization pointer to the implementation of the discretization
  * @param epsilon error tolerance below which we consider the solver to be converged
  * @param maximumNumberOfIterations if not converged when this number is reached, solver is terminated nonetheless 
