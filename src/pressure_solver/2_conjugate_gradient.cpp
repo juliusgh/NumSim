@@ -15,6 +15,7 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
 {
     residual_ = std::make_unique<Array2D>(discretization_->pSize());
     q_ = std::make_unique<Array2D>(discretization_->pSize()); // Search direction qₖ
+    z_ = std::make_unique<Array2D>(discretization_->pSize()); // preconditioned search direction zₖ
     Aq_ = std::make_unique<Array2D>(discretization_->pSize()); //precomputed matrix-vector product between the system matrix and the search direction Aqₖ
 
 }
@@ -30,56 +31,86 @@ void ConjugateGradient::solve() {
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
 
-    double alpha = 0;
-    double beta = 0;
     int iteration = 0;
-
-    // Calculate initial residuum r(i,j) = rhs(i,j) - (Ap)(i,j) = rhs(i,j) - (D2pDx2 + D2pDy2) and set inital search direction q(i,j) = r(i,j)
+    // Initialization Loop
     for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
+            // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
-            (*q_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pJBegin, j - pJBegin);
+            
+            // precondition initial defect: "z = M^{-1} r" for M = diag(A)
+            (*z_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin) * ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));   
+            
+            // set search direction to preconditioned defect q = z
+            (*q_)(i - pIBegin, j - pJBegin) = (*z_)(i - pIBegin, j - pJBegin);
         }
     }
 
-    do {
-        //Reset local quantities
-        double local_residual_product = 0;      //local scalar product of the residual with itself rₖᵀ rₖ
-        double local_newResidual_product = 0;   //local scalar product of the new residual with itself rₖ₊₁ᵀ rₖ₊₁
-        double local_search_product = 0;        //local scalar product between the search direction with the precomputed matrix-vector product qₖᵀAqₖ
-        iteration++;
+    double local_alpha = 0.0;  
+    // Calculate initial alpha value
+    for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
+        for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+            local_alpha += (*residual_)(i, j) * (*q_)(i, j); // α₀ = r₀ᵀ q₀
+        }
+    }
+    // UNTIL NOW WE CAN NOT MAKE SURE THAT THE GLOBAL SUM IS CREATED AFTER THE WHOLE LOOP IS COMPLETED IN EACH PROCESSOR (MAYBE OUTSOURCE TO A FUNCTION?)
+    double alpha = partitioning_->globalSum(local_alpha);
 
+    do {
+        // Calculate auxillary variable Aq
         for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
             for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
-                (*Aq_)(i, j) = (D2qDx2 + D2qDy2);
-
-                local_search_product += (*q_)(i, j) * (*Aq_)(i, j);             // qₖᵀAqₖ
-                local_residual_product += pow((*residual_)(i, j), 2);      // rₖᵀ rₖ
+                (*Aq_)(i, j) = D2qDx2 + D2qDy2;
             }
         }
-        double global_residual_product = partitioning_->globalSum(local_residual_product);
-        double global_search_product = partitioning_->globalSum(local_search_product);
 
-        alpha = global_residual_product / global_search_product;        // α = rₖᵀ rₖ / qₖᵀAqₖ
+        double local_lambda = 0.0;        // λ = αₖ / qₖᵀAqₖ 
+        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
+            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+                local_lambda += (*q_)(i, j) * (*Aq_)(i, j);             // qₖᵀAqₖ
+            }
+        }
+        double lambda = alpha / partitioning_->globalSum(local_lambda);
+        iteration++;
 
+        // Update variables in the search direction
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                discretization_->p(i, j)= discretization_->p(i ,j) + alpha * (*q_)(i - pIBegin, j - pJBegin); // pₖ₊₁ = pₖ + α qₖ
-                (*residual_)(i - pIBegin, j - pJBegin) -= alpha * (*Aq_)(i - pIBegin ,j - pJBegin);   // rₖ₊₁ = rₖ - α Aqₖ
-                local_newResidual_product += pow((*residual_)(i - pIBegin, j - pJBegin), 2);     // rₖ₊₁ᵀ rₖ₊₁
+                
+                // pₖ₊₁ = pₖ + α qₖ
+                discretization_->p(i, j)= discretization_->p(i ,j) + lambda * (*q_)(i - pIBegin, j - pJBegin); 
+                
+                // rₖ₊₁ = rₖ - α Aqₖ
+                (*residual_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin) - lambda * (*Aq_)(i - pIBegin ,j - pJBegin);
             }
         }
-        double global_newResidual_product = partitioning_->globalSum(local_newResidual_product);
 
-        beta = global_newResidual_product / global_residual_product;
+        // Preconditioned search direction
+        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
+            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+                (*z_)(i, j) = (*residual_)(i, j) * ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
+            }
+        }
+
+        double alphaold = alpha;
+        local_alpha = 0.0;
+        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
+            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+                local_alpha += (*residual_)(i, j) * (*z_)(i, j); // αₖ₊₁ = rₖ₊₁ᵀ zₖ₊₁
+            }
+        }
+        alpha = partitioning_->globalSum(local_alpha);
+
+        // βₖ₊₁ = αₖ₊₁ / αₖ
+        double beta = alpha / alphaold;
 
         for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
             for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
-                (*q_)(i, j) = (*residual_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
+                (*q_)(i, j) = (*z_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = zₖ₊₁ + β qₖ
             }
         }
         computeResidualNorm();
