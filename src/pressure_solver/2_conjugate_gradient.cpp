@@ -39,8 +39,8 @@ void ConjugateGradient::solve() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
-            (*residual_)(i, j) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
-            (*q_)(i, j) = (*residual_)(i, j);
+            (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
+            (*q_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pJBegin, j - pJBegin);
         }
     }
 
@@ -92,36 +92,6 @@ void ConjugateGradient::solve() {
 
 
 /**
- * evaluate field variable p in an element (i,j)
- * @param i: position in x direction in discretized grid
- * @param j: position in y direction in discretized grid
- * @return field variable p in an element (i,j)
- */
-/*double ConjugateGradient::q(int i, int j) const
-{
-#ifndef NDEBUG
-    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
-    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
-#endif
-    return q_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
-};*/
-
-/**
- * evaluate field variable p in an element (i,j)
- * @param i: position in x direction in discretized grid
- * @param j: position in y direction in discretized grid
- * @return field variable p in an element (i,j)
- */
-/*double &ConjugateGradient::q(int i, int j)
-{
-#ifndef NDEBUG
-    assert((pIBegin() <= i) && (i <= pIEnd()));
-    assert((pJBegin() <= j) && (j <= pJEnd()));
-#endif
-    return p_(i - pIBegin(), j - pJBegin());
-};*/
-
-/**
  * Calculation of the global residual norm using the squared Euclidean norm
  */
 void ConjugateGradient::computeResidualNorm() {
@@ -136,7 +106,6 @@ void ConjugateGradient::computeResidualNorm() {
     }
 
     double residual_norm2_global = partitioning_->globalSum(residual_norm2);
-    std::cout << "residual: " << residual_norm2_global << std::endl;
     residual_norm2_ = residual_norm2_global / N;
 }
 
