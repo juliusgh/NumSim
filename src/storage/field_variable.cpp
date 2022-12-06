@@ -86,45 +86,27 @@ double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
     int j = (y - origin_[1]) / meshWidth_[1] + 1;
 
-    bool GhostCellLeft = false;
-    bool GhostCellRight = false;
-    bool GhostCellBottom = false;
-    bool GhostCellTop = false;
-
     bool u = ((origin_[0] == meshWidth_[0]) && (origin_[1] == meshWidth_[1] / 2.));
     bool v = ((origin_[0] == meshWidth_[0] / 2.) && (origin_[1] == meshWidth_[1]));
-
-    if (!partitioning->ownPartitionContainsLeftBoundary() && u){
-        GhostCellLeft = true;
-    }
-    if (!partitioning->ownPartitionContainsRightBoundary() && u){
-        GhostCellRight = true;
-    }
-    if (!partitioning->ownPartitionContainsBottomBoundary() && v){
-        GhostCellBottom = true;
-    }
-    if (!partitioning->ownPartitionContainsTopBoundary() && v){
-        GhostCellTop = true;
-    }
-    // std::cout << GhostCellLeft <<GhostCellRight <<GhostCellBottom <<GhostCellTop <<std::endl;
 
     int i_test = i;
     int j_test = j;
     int x_size = size_[0];
     int y_size = size_[1];
 
-    if (GhostCellLeft){
+    // Determines if GhostLayers exists and shifts the index if necessary and adjusts the boundary index
+    if (!partitioning->ownPartitionContainsLeftBoundary() && u){
         i_test++;
         x_size--;
     }
-    if (GhostCellRight){
+    if (!partitioning->ownPartitionContainsRightBoundary() && u){
         x_size--;
     }
-    if (GhostCellBottom){
+    if (!partitioning->ownPartitionContainsBottomBoundary() && v){
         j_test++;
         y_size--;
     }
-    if (GhostCellTop){
+    if (!partitioning->ownPartitionContainsTopBoundary() && v){
         y_size--;
     }
 
@@ -133,16 +115,12 @@ double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<
         i--;
     if (j == y_size - 1)
         j--;
-        // Special case: If we are on the upper of right boundary, use the cell in the interior
+    // Special case: If we are on the upper of right boundary, use the cell in the interior
     if (i_test == size_[0] - 1)
         i_test--;
     if (j_test == size_[1] - 1)
         j_test--;
 
-    
-
-    // std::cout << " i: [0/"<<size_[0] << "] current value:"<<i;
-    // std::cout << "   j: [0/"<<size_[1] << "] current value:"<<j << std::endl;
 
     // Obtain the values of the four neighbouring interpolation points
     double valueLeftBottom = (*this)(i_test, j_test);
