@@ -31,6 +31,9 @@ void ConjugateGradient::solve() {
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
 
+    double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
+    MInv = 1.0;
+
     int iteration = 0;
     // Initialization Loop
     for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
@@ -41,7 +44,7 @@ void ConjugateGradient::solve() {
             (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
             
             // precondition initial defect: "z = M^{-1} r" for M = diag(A)
-            (*z_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin) * ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));   
+            (*z_)(i - pIBegin, j - pJBegin) = MInv * (*residual_)(i - pIBegin, j - pJBegin);   
             
             // set search direction to preconditioned defect q = z
             (*q_)(i - pIBegin, j - pJBegin) = (*z_)(i - pIBegin, j - pJBegin);
@@ -63,7 +66,7 @@ void ConjugateGradient::solve() {
     // Calculate initial alpha value
     for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
         for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
-            local_alpha += (*residual_)(i, j) * (*q_)(i, j); // α₀ = r₀ᵀ q₀
+            local_alpha += (*residual_)(i, j) * (*z_)(i, j); // α₀ = r₀ᵀ z₀
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
@@ -91,10 +94,10 @@ void ConjugateGradient::solve() {
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
                 
-                // pₖ₊₁ = pₖ + α qₖ
+                // pₖ₊₁ = pₖ + λ qₖ
                 discretization_->p(i, j)= discretization_->p(i ,j) + lambda * (*q_)(i - pIBegin, j - pJBegin); 
                 
-                // rₖ₊₁ = rₖ - α Aqₖ
+                // rₖ₊₁ = rₖ - λ Aqₖ
                 (*residual_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin) - lambda * (*Aq_)(i - pIBegin ,j - pJBegin);
             }
         }
@@ -102,7 +105,7 @@ void ConjugateGradient::solve() {
         // Preconditioned search direction
         for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
             for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
-                (*z_)(i, j) = (*residual_)(i, j) * ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
+                (*z_)(i, j) =  MInv * (*residual_)(i, j);
             }
         }
 
