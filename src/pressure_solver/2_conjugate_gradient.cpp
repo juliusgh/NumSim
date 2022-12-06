@@ -48,6 +48,17 @@ void ConjugateGradient::solve() {
         }
     }
 
+
+        
+    std::cout << "\n" <<std::endl;
+    for (int i = discretization_->pIBegin() - pIBegin; i < discretization_->pIEnd() - pIBegin; i++) {
+        for (int j = discretization_->pJBegin() - pJBegin; j < discretization_->pJEnd() - pJBegin; j++) {
+            std::cout <<"("<< i <<","<< j<< ")" <<(*residual_)(i ,j) << "  ";
+        }
+        std::cout << " " << std::endl;
+    }
+    
+
     double local_alpha = 0.0;  
     // Calculate initial alpha value
     for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
@@ -56,8 +67,6 @@ void ConjugateGradient::solve() {
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
-
-    std::cout << " local alpha "<< local_alpha << " , global alpha " << alpha <<std::endl;
 
     do {
         // Calculate auxillary variable Aq
