@@ -117,6 +117,7 @@ void ComputationParallel::runSimulation() {
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
 #endif
+        
         outputWriterParaview_->writeFile(time);
 
     }
