@@ -55,6 +55,10 @@ void OutputWriterParaviewParallel::gatherData()
   v_.setToZero();
   p_.setToZero();
 
+  // partitioning_->log(" Processor");
+  // std::cout << iEnd << " , " << discretization_->uSize()[0] << " , Begin/End " << discretization_->uIBegin() << "/" << discretization_->uIEnd() << " , InteriorB/E " << discretization_->uInteriorIBegin() << "/"<< discretization_->uInteriorIEnd() << std::endl;
+  // std::cout << jEnd << " , " << discretization_->uSize()[1] << " , Begin/End " << discretization_->uJBegin() << "/" << discretization_->uJEnd() << " , InteriorB/E " << discretization_->uInteriorJBegin() << "/"<< discretization_->uInteriorJEnd() << std::endl;
+
   for (int j = 0; j < jEnd; j++)
   {
     for (int i = 0; i < iEnd; i++)
@@ -66,11 +70,17 @@ void OutputWriterParaviewParallel::gatherData()
       int iGlobal = nodeOffset[0] + i;
       int jGlobal = nodeOffset[1] + j;
 
-      u_(iGlobal,jGlobal) = discretization_->u().interpolateAt(x,y);
-      v_(iGlobal,jGlobal) = discretization_->v().interpolateAt(x,y);
-      p_(iGlobal,jGlobal) = discretization_->p().interpolateAt(x,y);
+      u_(iGlobal,jGlobal) = discretization_->u().interpolateAtParallel(x,y,partitioning_);
+      v_(iGlobal,jGlobal) = discretization_->v().interpolateAtParallel(x,y,partitioning_);
+      p_(iGlobal,jGlobal) = discretization_->p().interpolateAtParallel(x,y,partitioning_);
+
+
+      // if (((i==0) && (j==0)) || ((i==0) && (j==jEnd-1)) || ((i==iEnd -1) && (j==0)) || ((i==iEnd -1) && (j==jEnd-1))){
+      //   u_(iGlobal,jGlobal) = 0.5;
+      // }
     }
   }
+
 
   // sum up values from all ranks, not set values are zero
   MPI_Reduce(u_.data(), uGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);

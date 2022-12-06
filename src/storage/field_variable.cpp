@@ -73,6 +73,103 @@ double FieldVariable::interpolateAt(double x, double y) const
 
     return interp;
 }
+
+double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<Partitioning> partitioning) const
+{
+    // Assert that the specified point is part of the domain
+    #ifndef NDEBUG
+    assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
+    assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
+    #endif
+
+    // Determine i and j indices of the corresponding cell (shifted by origin)
+    int i = (x - origin_[0]) / meshWidth_[0] + 1;
+    int j = (y - origin_[1]) / meshWidth_[1] + 1;
+
+    bool GhostCellLeft = false;
+    bool GhostCellRight = false;
+    bool GhostCellBottom = false;
+    bool GhostCellTop = false;
+
+    bool u = ((origin_[0] == meshWidth_[0]) && (origin_[1] == meshWidth_[1] / 2.));
+    bool v = ((origin_[0] == meshWidth_[0] / 2.) && (origin_[1] == meshWidth_[1]));
+
+    if (!partitioning->ownPartitionContainsLeftBoundary() && u){
+        GhostCellLeft = true;
+    }
+    if (!partitioning->ownPartitionContainsRightBoundary() && u){
+        GhostCellRight = true;
+    }
+    if (!partitioning->ownPartitionContainsBottomBoundary() && v){
+        GhostCellBottom = true;
+    }
+    if (!partitioning->ownPartitionContainsTopBoundary() && v){
+        GhostCellTop = true;
+    }
+    // std::cout << GhostCellLeft <<GhostCellRight <<GhostCellBottom <<GhostCellTop <<std::endl;
+
+    int i_test = i;
+    int j_test = j;
+    int x_size = size_[0];
+    int y_size = size_[1];
+
+    if (GhostCellLeft){
+        i_test++;
+        x_size--;
+    }
+    if (GhostCellRight){
+        x_size--;
+    }
+    if (GhostCellBottom){
+        j_test++;
+        y_size--;
+    }
+    if (GhostCellTop){
+        y_size--;
+    }
+
+    // Special case: If we are on the upper of right boundary, use the cell in the interior
+    if (i == x_size - 1)
+        i--;
+    if (j == y_size - 1)
+        j--;
+        // Special case: If we are on the upper of right boundary, use the cell in the interior
+    if (i_test == size_[0] - 1)
+        i_test--;
+    if (j_test == size_[1] - 1)
+        j_test--;
+
+    
+
+    // std::cout << " i: [0/"<<size_[0] << "] current value:"<<i;
+    // std::cout << "   j: [0/"<<size_[1] << "] current value:"<<j << std::endl;
+
+    // Obtain the values of the four neighbouring interpolation points
+    double valueLeftBottom = (*this)(i_test, j_test);
+    double valueLeftTop = (*this)(i_test, j_test + 1);
+    double valueRightBottom = (*this)(i_test + 1, j_test);
+    double valueRightTop = (*this)(i_test + 1, j_test + 1);
+
+    // Determine the coordinates of the four neighbouring interpolation points
+    double xLeft = origin_[0] + (i - 1) * meshWidth_[0];
+    double xRight = xLeft + meshWidth_[0];
+    double yBottom = origin_[1] + (j - 1) * meshWidth_[1];
+    double yTop = yBottom + meshWidth_[1];
+
+    /*
+     * Bilinear interpolation:
+     * We implement it as a repeated linear interpolation (first along x axis, then along y axis)
+     * See also https://en.wikipedia.org/wiki/Bilinear_interpolation#Repeated_linear_interpolation
+     */
+    // 1) Use linear interpolation in x between left and right edge (each on the bottom and top edge)
+    double interpBottom = ((xRight - x) * valueLeftBottom + (x - xLeft) * valueRightBottom) / (xRight - xLeft);
+    double interpTop = ((xRight - x) * valueLeftTop + (x - xLeft) * valueRightTop) / (xRight - xLeft);
+    // 2) Use linear interpolation in y between bottom and top edge
+    double interp = ((yTop - y) * interpBottom + (y - yBottom) * interpTop) / (yTop - yBottom);
+
+    return interp;
+}
+
 /**
  * Compute absolute maximal value needed in computation to determine optimal time step
  * @return maximal absolute value of the field variable given

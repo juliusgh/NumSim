@@ -31,7 +31,7 @@ private:
 
   vtkSmartPointer<vtkXMLImageDataWriter> vtkWriter_;   //< vtk writer to write ImageData
 
-    std::shared_ptr<Partitioning> partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
+  std::shared_ptr<Partitioning> partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
 
   std::array<int,2> nCellsGlobal_;   //< global number of cells
   std::array<int,2> nPointsGlobal_;  //< global number of points
