@@ -145,3 +145,10 @@ find_package(Boost COMPONENTS filesystem system)
 target_include_directories(compare_output PUBLIC ${BOOST_INCLUDE_DIRS})
 target_link_libraries(compare_output ${Boost_LIBRARIES})
 
+	
+
+option(PROFILE "Add flags to profile the program with gprof." OFF)
+if(PROFILE)
+  SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pg -g")
+  SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -pg -g")
+endif()
