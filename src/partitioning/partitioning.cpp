@@ -23,8 +23,10 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     // Partition the domain
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
 
-    if (ownRankNo_ == 0)
-        std::cout << "number of processes: " << nRanks_ << std::endl;
+    if (ownRankNo() == 0) {
+        std::cout << "RANK " << ownRankNo() << " | nDomains[0]: " << nDomains_[0] << ", nDomains[1]: " << nDomains_[1] << std::endl;
+        std::cout << "RANK " << ownRankNo() << " | number of processes: " << nRanks_ << std::endl;
+    }
 #else
     nRanks_ = 1;
     ownRankNo_ = 0;
@@ -33,31 +35,34 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 
     domainColumn_ = computeColumn(ownRankNo_);
     domainRow_ = computeRow(ownRankNo_);
+    std::cout << "RANK " << ownRankNo() << " | domainColumn_: " << domainColumn_ << ", domainRow_: " << domainRow_ << std::endl;
 
     // Compute nCells_, nCellsGlobal_
     nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
     int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
     int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
-    if (domainColumn_ < cellsColumnRemainder)
-        nCellsLocal_[0]++;
-    if (domainRow_ < cellsRowRemainder)
-        nCellsLocal_[1]++;
 
     int columnOffset = 0;
     for (int i = columnsBegin(); i < domainColumn_; i++) {
         columnOffset += nCellsLocal_[0];
-        if (i < cellsColumnRemainder)
+        if (i <= cellsColumnRemainder)
             columnOffset++;
     }
 
     int rowOffset = 0;
     for (int j = rowsBegin(); j < domainRow_; j++) {
         rowOffset += nCellsLocal_[1];
-        if (j < cellsRowRemainder)
+        if (j <= cellsRowRemainder)
             rowOffset++;
     }
+    if (domainColumn_ <= cellsColumnRemainder)
+        nCellsLocal_[0]++;
+    if (domainRow_ <= cellsRowRemainder)
+        nCellsLocal_[1]++;
 
     nodeOffset_ = {columnOffset, rowOffset};
+    std::cout << "RANK " << ownRankNo() << " | nCellsLocal_[0]: " << nCellsLocal_[0] << ", nCellsLocal_[1]: " << nCellsLocal_[1] << std::endl;
+    std::cout << "RANK " << ownRankNo() << " | nodeOffset_[0]: " << nodeOffset_[0] << ", nodeOffset_[1]: " << nodeOffset_[1] << std::endl;
 }
 
 /**

@@ -31,7 +31,7 @@ void ConjugateGradient::solve() {
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
 
-    double  MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
+    double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
     MInv = 1.0;
 
     int iteration = 0;
