@@ -17,7 +17,7 @@ rm -rf build
 mkdir build
 cd build
 
-cmake -DPROFILE=ON -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j
 
 cd ..

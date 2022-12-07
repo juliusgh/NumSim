@@ -6,6 +6,8 @@
 #include "output_writer/output_writer_text_parallel.h"
 #include "output_writer/output_writer_paraview_parallel.h"
 #include "pressure_solver/2_red_black_sor.h"
+#include <chrono>
+using namespace std::chrono;
 
 /**
  * Initialize the ComputationParallel object for a parallel simulation
@@ -66,6 +68,7 @@ void ComputationParallel::runSimulation() {
 #ifdef NDEBUG
     double time_steps_print = 1;
     double time_last_printed = -time_steps_print;
+    auto start = high_resolution_clock::now();
 #endif
     while (time < settings_.endTime){
         t_iter++;
@@ -127,8 +130,15 @@ void ComputationParallel::runSimulation() {
             time_last_printed += time_steps_print;
         }
 #endif 
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<seconds>(stop-start);
+
+        if (duration >= 600)
+            std::cout << "TERMINATED (cause: runTimeError)"<< std::endl;
+            break;
 
     }
+    std::cout << "Total computation time: "<< duration<< "s "<< std::endl;
 }
 
 /**
