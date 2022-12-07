@@ -63,6 +63,9 @@ void ComputationParallel::initialize(string filename)
 void ComputationParallel::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
+#ifdef NDEBUG
+    int time_last_printed = -1;
+#endif
     while (time < settings_.endTime){
         t_iter++;
 
@@ -116,9 +119,15 @@ void ComputationParallel::runSimulation() {
         }
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
-#endif
-        
         outputWriterParaview_->writeFile(time);
+#else   
+        
+        if (time - time_last_printed >=1){
+            outputWriterParaview_->writeFile(time);
+            time_last_printed++;
+        }
+
+#endif 
 
     }
 }
