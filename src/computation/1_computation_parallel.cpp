@@ -113,7 +113,7 @@ void ComputationParallel::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        if (partitioning_->ownRankNo() < 2) {
+        if (partitioning_->ownRankNo() == 0) {
             cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
                  ", res. " << pressureSolver_->residualNorm() << ", solver iterations: "
                  << pressureSolver_->iterations() << endl;
@@ -121,13 +121,11 @@ void ComputationParallel::runSimulation() {
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
         outputWriterParaview_->writeFile(time);
-#else   
-        
-        if (time - time_last_printed >=time_steps_print){
+#else
+        if (time - time_last_printed >= time_steps_print){
             outputWriterParaview_->writeFile(time);
             time_last_printed += time_steps_print;
         }
-
 #endif 
 
     }
@@ -139,14 +137,30 @@ void ComputationParallel::runSimulation() {
  * Left and right boundaries should overwrite bottom and top boundaries
  */
 void ComputationParallel::applyBoundaryValues() {
-    int u_columnCount = discretization_->uInteriorJEnd() - discretization_->uInteriorJBegin();
-    int u_columnOffset = discretization_->uInteriorJBegin();
-    int u_rowCount = discretization_->uInteriorIEnd() - discretization_->uInteriorIBegin();
-    int u_rowOffset = discretization_->uInteriorIBegin();
-    int v_columnCount = discretization_->vInteriorJEnd() - discretization_->vInteriorJBegin();
-    int v_columnOffset = discretization_->vInteriorJBegin();
-    int v_rowCount = discretization_->vInteriorIEnd() - discretization_->vInteriorIBegin();
-    int v_rowOffset = discretization_->vInteriorIBegin();
+    const int vIBegin = discretization_->vIBegin();
+    const int vJBegin = discretization_->vJBegin();
+    const int uIBegin = discretization_->uIBegin();
+    const int uJBegin = discretization_->uJBegin();
+    const int vIEnd = discretization_->vIEnd();
+    const int vJEnd = discretization_->vJEnd();
+    const int uIEnd = discretization_->uIEnd();
+    const int uJEnd = discretization_->uJEnd();
+    const int vInteriorIBegin = discretization_->vInteriorIBegin();
+    const int vInteriorJBegin = discretization_->vInteriorJBegin();
+    const int uInteriorIBegin = discretization_->uInteriorIBegin();
+    const int uInteriorJBegin = discretization_->uInteriorJBegin();
+    const int vInteriorIEnd = discretization_->vInteriorIEnd();
+    const int vInteriorJEnd = discretization_->vInteriorJEnd();
+    const int uInteriorIEnd = discretization_->uInteriorIEnd();
+    const int uInteriorJEnd = discretization_->uInteriorJEnd();
+    const int u_columnCount = uInteriorJEnd - uInteriorJBegin;
+    int u_columnOffset = uInteriorJBegin;
+    int u_rowCount = uInteriorIEnd - uInteriorIBegin;
+    int u_rowOffset = uInteriorIBegin;
+    int v_columnCount = vInteriorJEnd - vInteriorJBegin;
+    int v_columnOffset = vInteriorJBegin;
+    int v_rowCount = vInteriorIEnd - vInteriorIBegin;
+    int v_rowOffset = vInteriorIBegin;
 
     MPI_Request request_v_rightColumn; // send to right - receive from left
     MPI_Request request_v_leftColumn; // send to left - receive from right
@@ -171,14 +185,14 @@ void ComputationParallel::applyBoundaryValues() {
     }
     else {
         // v: send second to last row on the top to top neighbour
-        for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-            v_topRow.at(i - v_rowOffset) = discretization_->v(i, discretization_->vInteriorJEnd() - 2);
+        for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
+            v_topRow.at(i - v_rowOffset) = discretization_->v(i, vInteriorJEnd - 2);
         }
         partitioning_->isendToTop(v_topRow, request_v_topRow);
 
         // u: send last row on the top to top neighbour
-        for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-            u_topRow.at(i - u_rowOffset) = discretization_->u(i, discretization_->uInteriorJEnd() - 1);
+        for (int i = uInteriorIBegin; i < uInteriorIEnd; i++) {
+            u_topRow.at(i - u_rowOffset) = discretization_->u(i, uInteriorJEnd - 1);
         }
         partitioning_->isendToTop(u_topRow, request_u_topRow);
 
@@ -192,14 +206,14 @@ void ComputationParallel::applyBoundaryValues() {
     }
     else {
         // v: send second row on the bottom to bottom neighbour
-        for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-            v_bottomRow.at(i - v_rowOffset) = discretization_->v(i, discretization_->vInteriorJBegin() + 1);
+        for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
+            v_bottomRow.at(i - v_rowOffset) = discretization_->v(i, vInteriorJBegin + 1);
         }
         partitioning_->isendToBottom(v_bottomRow, request_v_bottomRow);
 
         // u: send first row on the bottom to bottom neighbour
-        for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-            u_bottomRow.at(i - u_rowOffset) = discretization_->u(i, discretization_->uInteriorJBegin());
+        for (int i = uInteriorIBegin; i < uInteriorIEnd; i++) {
+            u_bottomRow.at(i - u_rowOffset) = discretization_->u(i, uInteriorJBegin);
         }
         partitioning_->isendToBottom(u_bottomRow, request_u_bottomRow);
 
@@ -215,18 +229,18 @@ void ComputationParallel::applyBoundaryValues() {
     }
     else {
         // v: send last column on the right to right neighbour
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
+        for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
             //partitioning_->log("send Right: j - v_columnOffset =");
             //std::cout << j - v_columnOffset << std::endl;
-            v_rightColumn.at(j - v_columnOffset) = discretization_->v(discretization_->vInteriorIEnd() - 1, j);
+            v_rightColumn.at(j - v_columnOffset) = discretization_->v(vInteriorIEnd - 1, j);
         }
         partitioning_->isendToRight(v_rightColumn, request_v_rightColumn);
 
         // u: send second to last column on the right to right neighbour
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
+        for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
             //partitioning_->log("send Right: j - u_columnOffset =");
             //std::cout << j - u_columnOffset << std::endl;
-            u_rightColumn.at(j - u_columnOffset) = discretization_->u(discretization_->uInteriorIEnd() - 2, j);
+            u_rightColumn.at(j - u_columnOffset) = discretization_->u(uInteriorIEnd - 2, j);
         }
         partitioning_->isendToRight(u_rightColumn, request_u_rightColumn);
 
@@ -240,18 +254,18 @@ void ComputationParallel::applyBoundaryValues() {
     }
     else {
         // v: send first column on the left to left neighbour
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
+        for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
             //partitioning_->log("send Left: j - v_columnOffset =");
             //std::cout << j - v_columnOffset << std::endl;
-            v_leftColumn.at(j - v_columnOffset) = discretization_->v(discretization_->vInteriorIBegin(), j);
+            v_leftColumn.at(j - v_columnOffset) = discretization_->v(vInteriorIBegin, j);
         }
         partitioning_->isendToLeft(v_leftColumn, request_v_leftColumn);
 
         // u: send second column on the left to left neighbour
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
+        for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
             //partitioning_->log("send Left: j - u_columnOffset =");
             //std::cout << j - u_columnOffset << std::endl;
-            u_leftColumn.at(j - u_columnOffset) = discretization_->u(discretization_->uInteriorIBegin() + 1, j);
+            u_leftColumn.at(j - u_columnOffset) = discretization_->u(uInteriorIBegin + 1, j);
         }
         partitioning_->isendToLeft(u_leftColumn, request_u_leftColumn);
 
@@ -268,11 +282,11 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->wait(request_u_topRow);
 
         // write values from top neighbour to top ghost layer
-        for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-            discretization_->v(i, discretization_->vJEnd() - 1) = v_topRow.at(i - v_rowOffset);
+        for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
+            discretization_->v(i, vJEnd - 1) = v_topRow.at(i - v_rowOffset);
         }
-        for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-            discretization_->u(i, discretization_->uJEnd() - 1) = u_topRow.at(i - u_rowOffset);
+        for (int i = uInteriorIBegin; i < uInteriorIEnd; i++) {
+            discretization_->u(i, uJEnd - 1) = u_topRow.at(i - u_rowOffset);
         }
     }
 
@@ -282,11 +296,11 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->wait(request_u_bottomRow);
 
         // write values from bottom neighbour to bottom ghost layer
-        for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
-            discretization_->v(i, discretization_->vJBegin()) = v_bottomRow.at(i - v_rowOffset);
+        for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
+            discretization_->v(i, vJBegin) = v_bottomRow.at(i - v_rowOffset);
         }
-        for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
-            discretization_->u(i, discretization_->uJBegin()) = u_bottomRow.at(i - u_rowOffset);
+        for (int i = uInteriorIBegin; i < uInteriorIEnd; i++) {
+            discretization_->u(i, uJBegin) = u_bottomRow.at(i - u_rowOffset);
         }
     }
 
@@ -298,15 +312,15 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->wait(request_u_rightColumn);
 
         // write values from right neighbour to right ghost layer
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
+        for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
             //partitioning_->log("recv Right: j - v_columnOffset =");
             //std::cout << j - v_columnOffset << std::endl;
-            discretization_->v(discretization_->vIEnd() - 1, j) = v_rightColumn.at(j - v_columnOffset);
+            discretization_->v(vIEnd - 1, j) = v_rightColumn.at(j - v_columnOffset);
         }
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
+        for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
             //partitioning_->log("recv Right: j - u_columnOffset =");
             //std::cout << j - u_columnOffset << std::endl;
-            discretization_->u(discretization_->uIEnd() - 1, j) = u_rightColumn.at(j - u_columnOffset);
+            discretization_->u(uIEnd - 1, j) = u_rightColumn.at(j - u_columnOffset);
         }
     }
 
@@ -316,15 +330,15 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->wait(request_u_leftColumn);
 
         // write values from left neighbour to left ghost layer
-        for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
+        for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
             //partitioning_->log("recv Left: j - v_columnOffset =");
             //std::cout << j - v_columnOffset << std::endl;
-            discretization_->v(discretization_->vIBegin(), j) = v_leftColumn.at(j - v_columnOffset);
+            discretization_->v(vIBegin, j) = v_leftColumn.at(j - v_columnOffset);
         }
-        for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
+        for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
             //partitioning_->log("recv Left: j - u_columnOffset =");
             //std::cout << j - u_columnOffset << std::endl;
-            discretization_->u(discretization_->uIBegin(), j) = u_leftColumn.at(j - u_columnOffset);
+            discretization_->u(uIBegin, j) = u_leftColumn.at(j - u_columnOffset);
         }
     }
 }
