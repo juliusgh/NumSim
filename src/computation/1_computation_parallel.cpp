@@ -64,7 +64,8 @@ void ComputationParallel::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
 #ifdef NDEBUG
-    int time_last_printed = -1;
+    double time_steps_print = 1;
+    double time_last_printed = -time_steps_print;
 #endif
     while (time < settings_.endTime){
         t_iter++;
@@ -122,9 +123,9 @@ void ComputationParallel::runSimulation() {
         outputWriterParaview_->writeFile(time);
 #else   
         
-        if (time - time_last_printed >=1){
+        if (time - time_last_printed >=time_steps_print){
             outputWriterParaview_->writeFile(time);
-            time_last_printed++;
+            time_last_printed += time_steps_print;
         }
 
 #endif 
