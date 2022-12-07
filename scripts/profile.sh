@@ -17,7 +17,7 @@ rm -rf build
 mkdir build
 cd build
 
-cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake -DPROFILE=ON -DCMAKE_BUILD_TYPE=Release ..
 make -j
 
 cd ..
@@ -26,7 +26,7 @@ cd ..
 export CPATH=/scratch-nfs/maierbn/openmpi/install-3.1/include
 export PATH=/scratch-nfs/maierbn/openmpi/install-3.1/bin:$PATH
 
-time srun -n $1 ./build/src/numsim_parallel parameters/$2
+srun -n $1 ./build/src/numsim_parallel parameters/$2
 
 gprof ./build/src/numsim_parallel > ./build/out1.txt
 gprof -l ./build/src/numsim_parallel > ./build/out2.txt

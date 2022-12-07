@@ -133,6 +133,8 @@ void ComputationParallel::runSimulation() {
 
 
 
+
+
 #endif 
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<seconds>(stop-start);
@@ -142,6 +144,7 @@ void ComputationParallel::runSimulation() {
             break;
 
     }
+    std::cout << "Total computation time: "<< duration<< "s "<< std::endl;
 }
 
 /**
