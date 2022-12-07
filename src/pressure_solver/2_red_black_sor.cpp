@@ -30,6 +30,16 @@ void RedBlackSOR::solve() {
     int iteration = 0;
     do {
         iteration++;
+        /*for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+                double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
+                double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
+                discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
+            }
+        }
+        pGhostLayer();
+        //setBoundaryValues();
+        computeResidualNorm();*/
         //getchar();
         /*if (partitioning_->ownRankNo() == 0) {
             discretization_->p().print();
@@ -38,9 +48,17 @@ void RedBlackSOR::solve() {
             discretization_->p().print();
         }*/
 
+        int offset;
+        if (((partitioning_->nodeOffset()[0] % 2) + (partitioning_->nodeOffset()[0] % 2)) % 2 == 0)
+        {
+            offset = 0;
+        } else {
+            offset = 1;
+        }
+
         // black half step
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pJBegin()) % 2;
+            int iStart = discretization_->pInteriorIBegin() + (j + offset) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
                 //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
@@ -53,7 +71,7 @@ void RedBlackSOR::solve() {
 
         // red half step
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pInteriorJBegin()) % 2;
+            int iStart = discretization_->pInteriorIBegin() + (j + 1 + offset) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
                 //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
