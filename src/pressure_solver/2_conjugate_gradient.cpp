@@ -51,7 +51,6 @@ void ConjugateGradient::solve() {
         }
     }
 
-
         
     std::cout << "\n" <<std::endl;
     for (int i = discretization_->pIBegin() - pIBegin; i < discretization_->pIEnd() - pIBegin; i++) {

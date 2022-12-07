@@ -23,10 +23,12 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     // Partition the domain
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
 
+#ifndef NDEBUG
     if (ownRankNo() == 0) {
         std::cout << "RANK " << ownRankNo() << " | nDomains[0]: " << nDomains_[0] << ", nDomains[1]: " << nDomains_[1] << std::endl;
         std::cout << "RANK " << ownRankNo() << " | number of processes: " << nRanks_ << std::endl;
     }
+#endif
 #else
     nRanks_ = 1;
     ownRankNo_ = 0;
@@ -35,7 +37,6 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 
     domainColumn_ = computeColumn(ownRankNo_);
     domainRow_ = computeRow(ownRankNo_);
-    std::cout << "RANK " << ownRankNo() << " | domainColumn_: " << domainColumn_ << ", domainRow_: " << domainRow_ << std::endl;
 
     // Compute nCells_, nCellsGlobal_
     nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
@@ -61,8 +62,10 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
         nCellsLocal_[1]++;
 
     nodeOffset_ = {columnOffset, rowOffset};
+#ifndef NDEBUG
     std::cout << "RANK " << ownRankNo() << " | nCellsLocal_[0]: " << nCellsLocal_[0] << ", nCellsLocal_[1]: " << nCellsLocal_[1] << std::endl;
     std::cout << "RANK " << ownRankNo() << " | nodeOffset_[0]: " << nodeOffset_[0] << ", nodeOffset_[1]: " << nodeOffset_[1] << std::endl;
+#endif
 }
 
 /**
