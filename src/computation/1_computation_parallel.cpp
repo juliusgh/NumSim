@@ -6,8 +6,7 @@
 #include "output_writer/output_writer_text_parallel.h"
 #include "output_writer/output_writer_paraview_parallel.h"
 #include "pressure_solver/2_red_black_sor.h"
-#include <chrono>
-using namespace std::chrono;
+#include <ctime>
 
 /**
  * Initialize the ComputationParallel object for a parallel simulation
@@ -65,10 +64,11 @@ void ComputationParallel::initialize(string filename)
 void ComputationParallel::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
+    const clock_t sim_start_time = clock();
+    float sim_duration;
 #ifdef NDEBUG
     double time_steps_print = 1;
     double time_last_printed = -time_steps_print;
-    auto start = high_resolution_clock::now();
 #endif
     while (time < settings_.endTime){
         t_iter++;
@@ -116,7 +116,7 @@ void ComputationParallel::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        if (partitioning_->ownRankNo() == 0) {
+        if (partitioning_->ownRankNo() < 2) {
             cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
                  ", res. " << pressureSolver_->residualNorm() << ", solver iterations: "
                  << pressureSolver_->iterations() << endl;
@@ -124,22 +124,27 @@ void ComputationParallel::runSimulation() {
         //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
         outputWriterParaview_->writeFile(time);
-#else
-        if (time - time_last_printed >= time_steps_print){
+#else   
+        
+        if (time - time_last_printed >=time_steps_print){
             outputWriterParaview_->writeFile(time);
             time_last_printed += time_steps_print;
         }
-#endif 
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<seconds>(stop-start);
 
-        if (duration >= 600)
-            std::cout << "TERMINATED (cause: runTimeError)"<< std::endl;
+#endif 
+
+        sim_duration = float( clock()  - sim_start_time) / CLOCKS_PER_SEC;
+        if (sim_duration >= 600){
+            std::cout << "TERMINATED (cause: runTimeError)" << std::endl;
             break;
+        }
 
     }
-    std::cout << "Total computation time: "<< duration<< "s "<< std::endl;
+#ifndef NDEBUG
+    std::cout << "Total computation time: " << sim_duration << "s" << std::endl;
+#endif
 }
+
 
 /**
  * Set the boundary values of the velocities (u, v)
