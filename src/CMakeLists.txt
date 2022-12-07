@@ -128,3 +128,20 @@ if (NPARALLEL)
 endif()
 
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+
+
+add_executable(compare_output
+   comparison/main.cpp
+)
+
+# VTK
+find_package(VTK)
+include_directories(${VTK_INCLUDE_DIRS})
+target_link_libraries(compare_output ${VTK_LIBRARIES})
+
+# Boost
+find_package(Boost COMPONENTS filesystem system)
+target_include_directories(compare_output PUBLIC ${BOOST_INCLUDE_DIRS})
+target_link_libraries(compare_output ${Boost_LIBRARIES})
+
