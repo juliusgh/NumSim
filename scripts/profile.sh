@@ -26,4 +26,8 @@ cd ..
 export CPATH=/scratch-nfs/maierbn/openmpi/install-3.1/include
 export PATH=/scratch-nfs/maierbn/openmpi/install-3.1/bin:$PATH
 
-srun -n $1 ./build/src/numsim_parallel parameters/$2
+time srun -n $1 ./build/src/numsim_parallel parameters/$2
+
+gprof ./build/src/numsim_parallel > ./build/out1.txt
+gprof -l ./build/src/numsim_parallel > ./build/out2.txt
+
