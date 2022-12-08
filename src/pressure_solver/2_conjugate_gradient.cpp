@@ -23,18 +23,18 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */
 void ConjugateGradient::solve() {
-    const double dx2 = pow(discretization_->dx(), 2);
-    const double dy2 = pow(discretization_->dy(), 2);
-    const double eps2 = pow(epsilon_, 2);
-    const int pIBegin = discretization_->pIBegin();
-    const int pJBegin = discretization_->pJBegin();
-    const int pIEnd = discretization_->pIEnd();
-    const int pJEnd = discretization_->pJEnd();
-    const int pIIntBegin = discretization_->pInteriorIBegin();
-    const int pJIntBegin = discretization_->pInteriorJBegin();
-    const int pIIntEnd = discretization_->pInteriorIEnd();
-    const int pJIntEnd = discretization_->pInteriorJEnd();
-    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
+    static const double dx2 = pow(discretization_->dx(), 2);
+    static const double dy2 = pow(discretization_->dy(), 2);
+    static const double eps2 = pow(epsilon_, 2);
+    static const int pIBegin = discretization_->pIBegin();
+    static const int pJBegin = discretization_->pJBegin();
+    static const int pIEnd = discretization_->pIEnd();
+    static const int pJEnd = discretization_->pJEnd();
+    static const int pIIntBegin = discretization_->pInteriorIBegin();
+    static const int pJIntBegin = discretization_->pInteriorJBegin();
+    static const int pIIntEnd = discretization_->pInteriorIEnd();
+    static const int pJIntEnd = discretization_->pInteriorJEnd();
+    static const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
     pGhostLayer();
 
@@ -149,18 +149,18 @@ void ConjugateGradient::computeResidualNorm() {
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
 void ConjugateGradient::qGhostLayer() {
-    const int pInteriorIBegin = discretization_->pInteriorIBegin();
-    const int pInteriorIEnd = discretization_->pInteriorIEnd();
-    const int pInteriorJBegin = discretization_->pInteriorJBegin();
-    const int pInteriorJEnd = discretization_->pInteriorJEnd();
-    const int pIBegin = discretization_->pIBegin();
-    const int pJBegin = discretization_->pJBegin();
-    const int pIEnd = discretization_->pIEnd();
-    const int pJEnd = discretization_->pJEnd();
-    const int pIIntBegin = discretization_->pInteriorIBegin();
-    const int pJIntBegin = discretization_->pInteriorJBegin();
-    const int pIIntEnd = discretization_->pInteriorIEnd();
-    const int pJIntEnd = discretization_->pInteriorJEnd();
+    static const int pInteriorIBegin = discretization_->pInteriorIBegin();
+    static const int pInteriorIEnd = discretization_->pInteriorIEnd();
+    static const int pInteriorJBegin = discretization_->pInteriorJBegin();
+    static const int pInteriorJEnd = discretization_->pInteriorJEnd();
+    static const int pIBegin = discretization_->pIBegin();
+    static const int pJBegin = discretization_->pJBegin();
+    static const int pIEnd = discretization_->pIEnd();
+    static const int pJEnd = discretization_->pJEnd();
+    static const int pIIntBegin = discretization_->pInteriorIBegin();
+    static const int pJIntBegin = discretization_->pInteriorJBegin();
+    static const int pIIntEnd = discretization_->pInteriorIEnd();
+    static const int pJIntEnd = discretization_->pInteriorJEnd();
 
     int p_columnCount = pInteriorJEnd - pInteriorJBegin;
     int p_columnOffset = pInteriorJBegin;
@@ -176,11 +176,9 @@ void ConjugateGradient::qGhostLayer() {
     std::vector<double> p_topRow(p_rowCount, 0);
     std::vector<double> p_bottomRow(p_rowCount, 0);
     if (partitioning_->ownPartitionContainsTopBoundary()) {
-        //std::cout << "setBoundaryValuesTop" << std::endl;
         setQBoundaryValuesTop();
     }
     else {
-        //std::cout << "comm Top" << std::endl;
         // send row on the top to top neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_topRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJEnd - 1 - pJBegin);
@@ -192,11 +190,9 @@ void ConjugateGradient::qGhostLayer() {
     }
 
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
-        //std::cout << "setBoundaryValuesBottom" << std::endl;
         setQBoundaryValuesBottom();
     }
     else {
-        //std::cout << "comm Bottom" << std::endl;
         // send row on the bottom to bottom neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_bottomRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJBegin - pJBegin);
@@ -208,11 +204,9 @@ void ConjugateGradient::qGhostLayer() {
     }
 
     if (partitioning_->ownPartitionContainsRightBoundary()) {
-        //std::cout << "setBoundaryValuesRight" << std::endl;
         setQBoundaryValuesRight();
     }
     else {
-        //std::cout << "comm Right" << std::endl;
         // send to column on the right to right neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j - pJBegin);
@@ -225,15 +219,12 @@ void ConjugateGradient::qGhostLayer() {
         partitioning_->irecvFromRight(p_rightColumn, p_columnCount, request_p_rightColumn);
     }
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
-        //std::cout << "setBoundaryValuesLeft" << std::endl;
         setQBoundaryValuesLeft();
     }
     else {
-        //std::cout << "comm Left" << std::endl;
         // send to column on the left to left neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_leftColumn.at(j - p_columnOffset) = (*q_)(pInteriorIBegin - pIBegin, j - pJBegin);
-            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
         partitioning_->isendToLeft(p_leftColumn, request_p_leftColumn);
 
@@ -263,7 +254,6 @@ void ConjugateGradient::qGhostLayer() {
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
-            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left recv no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
             (*q_)(discretization_->pIBegin() - pIBegin, j - pJBegin) = p_leftColumn.at(j - p_columnOffset);
         }
     }
