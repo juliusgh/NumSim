@@ -117,7 +117,7 @@ void ComputationParallel::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        if (partitioning_->ownRankNo() < 2) {
+        if (partitioning_->ownRankNo() == 0) {
             cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
                  ", res. " << pressureSolver_->residualNorm() << ", solver iterations: "
                  << pressureSolver_->iterations() << endl;
@@ -127,7 +127,7 @@ void ComputationParallel::runSimulation() {
         outputWriterParaview_->writeFile(time);
 #else   
         
-        if (time - time_last_printed >=time_steps_print){
+        if (time - time_last_printed >= time_steps_print){
             outputWriterParaview_->writeFile(time);
             time_last_printed += time_steps_print;
         }
