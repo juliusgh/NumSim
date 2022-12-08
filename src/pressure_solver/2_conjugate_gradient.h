@@ -26,10 +26,7 @@ public:
     void solve() override;
 
 protected:
-    virtual void computeResidualNorm();
-    std::shared_ptr<Array2D> residual_;
     std::shared_ptr<Array2D> q_;
-    std::shared_ptr<Array2D> Aq_;
     void qGhostLayer();
     void setQBoundaryValuesBottom();
     void setQBoundaryValuesTop();
