@@ -30,14 +30,20 @@ void ConjugateGradient::solve() {
     const double eps2 = pow(epsilon_, 2);
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
 
     double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
     MInv = 1.0;
 
     int iteration = 0;
     // Initialization Loop
-    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+    for (int i = pIIntBegin; i < pIIntEnd; i++) {
+        for (int j = pJIntBegin; j < pJIntEnd; j++) {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
@@ -53,7 +59,7 @@ void ConjugateGradient::solve() {
 
         
     std::cout << "\n" <<std::endl;
-    for (int i = discretization_->pIBegin() - pIBegin; i < discretization_->pIEnd() - pIBegin; i++) {
+    for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
         for (int j = discretization_->pJBegin() - pJBegin; j < discretization_->pJEnd() - pJBegin; j++) {
             std::cout <<"("<< i <<","<< j<< ")" <<(*residual_)(i ,j) << "  ";
         }
@@ -63,8 +69,8 @@ void ConjugateGradient::solve() {
 
     double local_alpha = 0.0;  
     // Calculate initial alpha value
-    for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-        for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+    for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+        for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
             local_alpha += (*residual_)(i, j) * (*z_)(i, j); // α₀ = r₀ᵀ z₀
         }
     }
@@ -72,8 +78,8 @@ void ConjugateGradient::solve() {
 
     do {
         // Calculate auxillary variable Aq
-        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
                 (*Aq_)(i, j) = D2qDx2 + D2qDy2;
@@ -81,8 +87,8 @@ void ConjugateGradient::solve() {
         }
 
         double local_lambda = 0.0;        // λ = αₖ / qₖᵀAqₖ 
-        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 local_lambda += (*q_)(i, j) * (*Aq_)(i, j);             // qₖᵀAqₖ
             }
         }
@@ -90,8 +96,8 @@ void ConjugateGradient::solve() {
         iteration++;
 
         // Update variables in the search direction
-        for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+        for (int i = pIIntBegin; i < pIIntEnd; i++) {
+            for (int j = pJIntBegin; j < pJIntEnd; j++) {
                 
                 // pₖ₊₁ = pₖ + λ qₖ
                 discretization_->p(i, j)= discretization_->p(i ,j) + lambda * (*q_)(i - pIBegin, j - pJBegin); 
@@ -102,16 +108,16 @@ void ConjugateGradient::solve() {
         }
 
         // Preconditioned search direction
-        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 (*z_)(i, j) =  MInv * (*residual_)(i, j);
             }
         }
 
         double alphaold = alpha;
         local_alpha = 0.0;
-        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 local_alpha += (*residual_)(i, j) * (*z_)(i, j); // αₖ₊₁ = rₖ₊₁ᵀ zₖ₊₁
             }
         }
@@ -120,8 +126,8 @@ void ConjugateGradient::solve() {
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
 
-        for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-            for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 (*q_)(i, j) = (*z_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = zₖ₊₁ + β qₖ
             }
         }
