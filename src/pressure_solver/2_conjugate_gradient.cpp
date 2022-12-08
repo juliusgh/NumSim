@@ -26,12 +26,9 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
 void ConjugateGradient::solve() {
     const double dx2 = pow(discretization_->dx(), 2);
     const double dy2 = pow(discretization_->dy(), 2);
-    const double k = (dx2 * dy2) / (2.0 * (dx2 + dy2));
     const double eps2 = pow(epsilon_, 2);
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
-    const int pIEnd = discretization_->pIEnd();
-    const int pJEnd = discretization_->pJEnd();
     const int pIIntBegin = discretization_->pInteriorIBegin();
     const int pJIntBegin = discretization_->pInteriorJBegin();
     const int pIIntEnd = discretization_->pInteriorIEnd();
@@ -39,6 +36,8 @@ void ConjugateGradient::solve() {
 
     double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
     MInv = 1.0;
+
+    pGhostLayer();
 
     int iteration = 0;
     // Initialization Loop
@@ -48,7 +47,9 @@ void ConjugateGradient::solve() {
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
-            
+
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : res(" << i - pIBegin << )" << local_alpha << std::endl;
+
             // precondition initial defect: "z = M^{-1} r" for M = diag(A)
             (*z_)(i - pIBegin, j - pJBegin) = MInv * (*residual_)(i - pIBegin, j - pJBegin);   
             
@@ -56,16 +57,6 @@ void ConjugateGradient::solve() {
             (*q_)(i - pIBegin, j - pJBegin) = (*z_)(i - pIBegin, j - pJBegin);
         }
     }
-
-        
-    std::cout << "\n" <<std::endl;
-    for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
-        for (int j = discretization_->pJBegin() - pJBegin; j < discretization_->pJEnd() - pJBegin; j++) {
-            std::cout <<"("<< i <<","<< j<< ")" <<(*residual_)(i ,j) << "  ";
-        }
-        std::cout << " " << std::endl;
-    }
-    
 
     double local_alpha = 0.0;  
     // Calculate initial alpha value
@@ -75,14 +66,22 @@ void ConjugateGradient::solve() {
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
+    std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
+    std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
+    getchar();
 
     do {
+
+        pGhostLayer();
+
         // Calculate auxillary variable Aq
+        std::cout << "RANK " << partitioning_->ownRankNo() << " : dx2 = " << dx2 << ", dy2 =" << dy2 << std::endl;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
                 (*Aq_)(i, j) = D2qDx2 + D2qDy2;
+                std::cout << "RANK " << partitioning_->ownRankNo() << " : Aq(" << i << "," << j << ")=" << (*Aq_)(i, j) << std::endl;
             }
         }
 
@@ -93,6 +92,9 @@ void ConjugateGradient::solve() {
             }
         }
         double lambda = alpha / partitioning_->globalSum(local_lambda);
+        std::cout << "RANK " << partitioning_->ownRankNo() << " : local_lambda = " << local_lambda << std::endl;
+        std::cout << "RANK " << partitioning_->ownRankNo() << " : lambda = " << lambda << std::endl;
+        getchar();
         iteration++;
 
         // Update variables in the search direction
@@ -122,6 +124,9 @@ void ConjugateGradient::solve() {
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
+        std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
+        std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
+        getchar();
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
@@ -133,9 +138,10 @@ void ConjugateGradient::solve() {
         }
         computeResidualNorm();
 
-        pGhostLayer();
-
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
+
+    pGhostLayer();
+
     iterations_ = iteration;
 }
 
@@ -147,9 +153,13 @@ void ConjugateGradient::computeResidualNorm() {
     double residual_norm2 = 0.0;
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
     const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
-    for (int i = discretization_->pInteriorIBegin() - pIBegin; i < discretization_->pInteriorIEnd() - pIBegin; i++) {
-        for (int j = discretization_->pInteriorJBegin() - pJBegin; j < discretization_->pInteriorJEnd() - pJBegin; j++) {
+    for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+        for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
             residual_norm2 += pow((*residual_)(i, j), 2);
         }
     }
