@@ -28,10 +28,22 @@ void RedBlackSOR::solve() {
     const double k2 = omega_ * (dx2 * dy2) / (2.0 * (dx2 + dy2));
     const double eps2 = pow(epsilon_, 2);
     int iteration = 0;
+
+    const int pInteriorIBegin = discretization_->pInteriorIBegin();
+    const int pInteriorIEnd = discretization_->pInteriorIEnd();
+    const int pInteriorJBegin = discretization_->pInteriorJBegin();
+    const int pInteriorJEnd = discretization_->pInteriorJEnd();
+    int offset;
+    if (((partitioning_->nodeOffset()[0] % 2) + (partitioning_->nodeOffset()[0] % 2)) % 2 == 0)
+    {
+        offset = 0;
+    } else {
+        offset = 1;
+    }
     do {
         iteration++;
-        /*for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-            for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+        /*for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
+            for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
                 discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
@@ -48,18 +60,12 @@ void RedBlackSOR::solve() {
             discretization_->p().print();
         }*/
 
-        int offset;
-        if (((partitioning_->nodeOffset()[0] % 2) + (partitioning_->nodeOffset()[0] % 2)) % 2 == 0)
-        {
-            offset = 0;
-        } else {
-            offset = 1;
-        }
+
 
         // black half step
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            int iStart = discretization_->pInteriorIBegin() + (j + offset) % 2;
-            for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
+            int iStart = pInteriorIBegin + (j + offset) % 2;
+            for (int i = iStart; i < pInteriorIEnd; i += 2) {
                 //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
@@ -70,9 +76,9 @@ void RedBlackSOR::solve() {
         pGhostLayer();
 
         // red half step
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            int iStart = discretization_->pInteriorIBegin() + (j + 1 + offset) % 2;
-            for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
+            int iStart = pInteriorIBegin + (j + 1 + offset) % 2;
+            for (int i = iStart; i < pInteriorIEnd; i += 2) {
                 //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
