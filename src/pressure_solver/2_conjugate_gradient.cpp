@@ -15,7 +15,6 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
 {
     residual_ = std::make_unique<Array2D>(discretization_->pSize());
     q_ = std::make_unique<Array2D>(discretization_->pSize()); // Search direction qₖ
-    z_ = std::make_unique<Array2D>(discretization_->pSize()); // preconditioned search direction zₖ
     Aq_ = std::make_unique<Array2D>(discretization_->pSize()); //precomputed matrix-vector product between the system matrix and the search direction Aqₖ
 
 }
@@ -37,9 +36,6 @@ void ConjugateGradient::solve() {
     const int pJIntEnd = discretization_->pInteriorJEnd();
     const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
-    double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
-    MInv = 1.0;
-
     pGhostLayer();
 
     int iteration = 0;
@@ -50,58 +46,31 @@ void ConjugateGradient::solve() {
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
-
-            //std::cout << "RANK " << partitioning_->ownRankNo() << " : res(" << i - pIBegin << "," << j - pJBegin << ") = " << (*residual_)(i - pIBegin, j - pJBegin) << std::endl;
-
-            // precondition initial defect: "z = M^{-1} r" for M = diag(A)
-            (*z_)(i - pIBegin, j - pJBegin) = MInv * (*residual_)(i - pIBegin, j - pJBegin);   
             
             // set search direction to preconditioned defect q = z
-            (*q_)(i - pIBegin, j - pJBegin) = (*z_)(i - pIBegin, j - pJBegin);
+            (*q_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin);
         }
     }
-    pGhostLayer();
-
-    /*for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
-        for (int j = pJBegin - pJBegin; j < pJEnd - pJBegin; j++) {
-            std::cout << (*residual_)(i, j) << " | ";
-        }
-        std::cout << std::endl;
-    }*/
 
     double local_alpha = 0.0;  
     // Calculate initial alpha value
     for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
         for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-            local_alpha += (*residual_)(i, j) * (*z_)(i, j); // α₀ = r₀ᵀ z₀
+            local_alpha += (*residual_)(i, j) * (*residual_)(i, j); // α₀ = r₀ᵀ r₀
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
-    //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
-    //std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
-    //getchar();
 
     do {
 
         qGhostLayer();
-        /*std::cout << std::endl;
-        for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
-            for (int j = pJBegin - pJBegin; j < pJEnd - pJBegin; j++) {
-                std::cout << (*q_)(i, j) << " | ";
-            }
-            std::cout << std::endl;
-        }*/
+
         // Calculate auxillary variable Aq
-        //std::cout << "RANK " << partitioning_->ownRankNo() << " : dx2 = " << dx2 << ", dy2 =" << dy2 << std::endl;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                //std::cout << "RANK " << partitioning_->ownRankNo() << " : q(" << i << "," << j << ")=" << (*q_)(i, j) << std::endl;
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
-                //std::cout << "RANK " << partitioning_->ownRankNo() << " : i = " << i << ", j = " << j << " | D2qDx2 = " << D2qDx2 << " | D2qDy2 = " << D2qDy2 << std::endl;
-                //std::cout << "RANK " << partitioning_->ownRankNo() << " : i = " << i << ", j = " << j << " | D2qDx2 = " << D2qDx2 << " | D2qDy2 = " << D2qDy2 << std::endl;
                 (*Aq_)(i, j) = D2qDx2 + D2qDy2;
-                //std::cout << "RANK " << partitioning_->ownRankNo() << " : Aq(" << i << "," << j << ")=" << (*Aq_)(i, j) << std::endl;
             }
         }
 
@@ -112,9 +81,6 @@ void ConjugateGradient::solve() {
             }
         }
         double lambda = alpha / partitioning_->globalSum(local_lambda);
-        //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_lambda = " << local_lambda << std::endl;
-        //std::cout << "RANK " << partitioning_->ownRankNo() << " : lambda = " << lambda << std::endl;
-        //getchar();
         iteration++;
 
         // Update variables in the search direction
@@ -129,31 +95,21 @@ void ConjugateGradient::solve() {
             }
         }
 
-        // Preconditioned search direction
-        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
-            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                (*z_)(i, j) =  MInv * (*residual_)(i, j);
-            }
-        }
-
         double alphaold = alpha;
         local_alpha = 0.0;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                local_alpha += (*residual_)(i, j) * (*z_)(i, j); // αₖ₊₁ = rₖ₊₁ᵀ zₖ₊₁
+                local_alpha += (*residual_)(i, j) * (*residual_)(i, j); // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
-        //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
-        //std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
-        //getchar();
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
 
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                (*q_)(i, j) = (*z_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = zₖ₊₁ + β qₖ
+                (*q_)(i, j) = (*residual_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
             }
         }
         residual_norm2_ = alpha / N;
