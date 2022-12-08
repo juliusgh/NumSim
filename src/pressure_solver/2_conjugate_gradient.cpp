@@ -29,6 +29,8 @@ void ConjugateGradient::solve() {
     const double eps2 = pow(epsilon_, 2);
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
     const int pIIntBegin = discretization_->pInteriorIBegin();
     const int pJIntBegin = discretization_->pInteriorJBegin();
     const int pIIntEnd = discretization_->pInteriorIEnd();
@@ -48,7 +50,7 @@ void ConjugateGradient::solve() {
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
 
-            //std::cout << "RANK " << partitioning_->ownRankNo() << " : res(" << i - pIBegin << )" << local_alpha << std::endl;
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : res(" << i - pIBegin << "," << j - pJBegin << ") = " << (*residual_)(i - pIBegin, j - pJBegin) << std::endl;
 
             // precondition initial defect: "z = M^{-1} r" for M = diag(A)
             (*z_)(i - pIBegin, j - pJBegin) = MInv * (*residual_)(i - pIBegin, j - pJBegin);   
@@ -57,6 +59,14 @@ void ConjugateGradient::solve() {
             (*q_)(i - pIBegin, j - pJBegin) = (*z_)(i - pIBegin, j - pJBegin);
         }
     }
+    pGhostLayer();
+
+    /*for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
+        for (int j = pJBegin - pJBegin; j < pJEnd - pJBegin; j++) {
+            std::cout << (*residual_)(i, j) << " | ";
+        }
+        std::cout << std::endl;
+    }*/
 
     double local_alpha = 0.0;  
     // Calculate initial alpha value
@@ -66,22 +76,31 @@ void ConjugateGradient::solve() {
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
-    std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
-    std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
-    getchar();
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
+    //std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
+    //getchar();
 
     do {
 
-        pGhostLayer();
-
+        qGhostLayer();
+        /*std::cout << std::endl;
+        for (int i = pIBegin - pIBegin; i < pIEnd - pIBegin; i++) {
+            for (int j = pJBegin - pJBegin; j < pJEnd - pJBegin; j++) {
+                std::cout << (*q_)(i, j) << " | ";
+            }
+            std::cout << std::endl;
+        }*/
         // Calculate auxillary variable Aq
-        std::cout << "RANK " << partitioning_->ownRankNo() << " : dx2 = " << dx2 << ", dy2 =" << dy2 << std::endl;
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : dx2 = " << dx2 << ", dy2 =" << dy2 << std::endl;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
+                //std::cout << "RANK " << partitioning_->ownRankNo() << " : q(" << i << "," << j << ")=" << (*q_)(i, j) << std::endl;
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
+                //std::cout << "RANK " << partitioning_->ownRankNo() << " : i = " << i << ", j = " << j << " | D2qDx2 = " << D2qDx2 << " | D2qDy2 = " << D2qDy2 << std::endl;
+                //std::cout << "RANK " << partitioning_->ownRankNo() << " : i = " << i << ", j = " << j << " | D2qDx2 = " << D2qDx2 << " | D2qDy2 = " << D2qDy2 << std::endl;
                 (*Aq_)(i, j) = D2qDx2 + D2qDy2;
-                std::cout << "RANK " << partitioning_->ownRankNo() << " : Aq(" << i << "," << j << ")=" << (*Aq_)(i, j) << std::endl;
+                //std::cout << "RANK " << partitioning_->ownRankNo() << " : Aq(" << i << "," << j << ")=" << (*Aq_)(i, j) << std::endl;
             }
         }
 
@@ -92,9 +111,9 @@ void ConjugateGradient::solve() {
             }
         }
         double lambda = alpha / partitioning_->globalSum(local_lambda);
-        std::cout << "RANK " << partitioning_->ownRankNo() << " : local_lambda = " << local_lambda << std::endl;
-        std::cout << "RANK " << partitioning_->ownRankNo() << " : lambda = " << lambda << std::endl;
-        getchar();
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_lambda = " << local_lambda << std::endl;
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : lambda = " << lambda << std::endl;
+        //getchar();
         iteration++;
 
         // Update variables in the search direction
@@ -124,9 +143,9 @@ void ConjugateGradient::solve() {
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
-        std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
-        std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
-        getchar();
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : local_alpha = " << local_alpha << std::endl;
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : alpha = " << alpha << std::endl;
+        //getchar();
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
@@ -168,3 +187,155 @@ void ConjugateGradient::computeResidualNorm() {
     residual_norm2_ = residual_norm2_global / N;
 }
 
+
+/**
+ *  Implementation of horizontal communication of pressure values between neighbouring subdomains
+ */
+void ConjugateGradient::qGhostLayer() {
+    const int pInteriorIBegin = discretization_->pInteriorIBegin();
+    const int pInteriorIEnd = discretization_->pInteriorIEnd();
+    const int pInteriorJBegin = discretization_->pInteriorJBegin();
+    const int pInteriorJEnd = discretization_->pInteriorJEnd();
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
+
+    int p_columnCount = pInteriorJEnd - pInteriorJBegin;
+    int p_columnOffset = pInteriorJBegin;
+    int p_rowCount = pInteriorIEnd - pInteriorIBegin;
+    int p_rowOffset = pInteriorIBegin;
+
+    MPI_Request request_p_rightColumn;
+    MPI_Request request_p_leftColumn;
+    MPI_Request request_p_topRow;
+    MPI_Request request_p_bottomRow;
+    std::vector<double> p_rightColumn(p_columnCount, 0);
+    std::vector<double> p_leftColumn(p_columnCount, 0);
+    std::vector<double> p_topRow(p_rowCount, 0);
+    std::vector<double> p_bottomRow(p_rowCount, 0);
+    if (partitioning_->ownPartitionContainsTopBoundary()) {
+        //std::cout << "setBoundaryValuesTop" << std::endl;
+        setQBoundaryValuesTop();
+    }
+    else {
+        //std::cout << "comm Top" << std::endl;
+        // send row on the top to top neighbour
+        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
+            p_topRow.at(i - p_rowOffset) = (*q_)(i, pInteriorJEnd - 1 - pJBegin);
+        }
+        partitioning_->isendToTop(p_topRow, request_p_topRow);
+
+        // receive ghost layer row on the top from top neighbour
+        partitioning_->irecvFromTop(p_topRow, p_rowCount, request_p_topRow);
+    }
+
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
+        //std::cout << "setBoundaryValuesBottom" << std::endl;
+        setQBoundaryValuesBottom();
+    }
+    else {
+        //std::cout << "comm Bottom" << std::endl;
+        // send row on the bottom to bottom neighbour
+        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
+            p_bottomRow.at(i - p_rowOffset) = (*q_)(i, pInteriorJBegin - pJBegin);
+        }
+        partitioning_->isendToBottom(p_bottomRow, request_p_bottomRow);
+
+        // receive ghost layer row on the bottom from bottom neighbour
+        partitioning_->irecvFromBottom(p_bottomRow, p_rowCount, request_p_bottomRow);
+    }
+
+    if (partitioning_->ownPartitionContainsRightBoundary()) {
+        //std::cout << "setBoundaryValuesRight" << std::endl;
+        setQBoundaryValuesRight();
+    }
+    else {
+        //std::cout << "comm Right" << std::endl;
+        // send to column on the right to right neighbour
+        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+            p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j);
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
+        }
+
+        partitioning_->isendToRight(p_rightColumn, request_p_rightColumn);
+
+        // receive ghost layer column on the right from right neighbour
+        partitioning_->irecvFromRight(p_rightColumn, p_columnCount, request_p_rightColumn);
+    }
+    if (partitioning_->ownPartitionContainsLeftBoundary()) {
+        //std::cout << "setBoundaryValuesLeft" << std::endl;
+        setQBoundaryValuesLeft();
+    }
+    else {
+        //std::cout << "comm Left" << std::endl;
+        // send to column on the left to left neighbour
+        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+            p_leftColumn.at(j - p_columnOffset) = (*q_)(pInteriorIBegin - pIBegin, j);
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
+        }
+        partitioning_->isendToLeft(p_leftColumn, request_p_leftColumn);
+
+        // receive ghost layer column on the left from left neighbour
+        partitioning_->irecvFromLeft(p_leftColumn, p_columnCount, request_p_leftColumn);
+    }
+
+    if (!partitioning_->ownPartitionContainsTopBoundary()) {
+        partitioning_->wait(request_p_topRow);
+        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
+            (*q_)(i, discretization_->pJEnd() - 1 - pJBegin) = p_topRow.at(i - p_rowOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsBottomBoundary()) {
+        partitioning_->wait(request_p_bottomRow);
+        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
+            (*q_)(i, discretization_->pJBegin() - pJBegin) = p_bottomRow.at(i - p_rowOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsRightBoundary()) {
+        partitioning_->wait(request_p_rightColumn);
+        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right recv no. " << j << " = " << p_rightColumn.at(j - p_columnOffset) << std::endl;
+            (*q_)(discretization_->pIEnd() - 1 - pIBegin, j) = p_rightColumn.at(j - p_columnOffset);
+        }
+    }
+    if (!partitioning_->ownPartitionContainsLeftBoundary()) {
+        partitioning_->wait(request_p_leftColumn);
+        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : left recv no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
+            (*q_)(discretization_->pIBegin() - pIBegin, j) = p_leftColumn.at(j - p_columnOffset);
+        }
+    }
+}
+
+void ConjugateGradient::setQBoundaryValuesBottom() {
+    for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
+        // copy values to bottom boundary
+        (*q_)(i, 0) = (*q_)(i, 1);
+    }
+}
+
+void ConjugateGradient::setQBoundaryValuesTop() {
+    for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
+        // copy values to top boundary
+        (*q_)(i, discretization_->pJEnd() - 1 - discretization_->pJBegin()) = (*q_)(i, discretization_->pInteriorJEnd() - 1 - discretization_->pJBegin());
+    }
+}
+
+void ConjugateGradient::setQBoundaryValuesLeft() {
+    for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
+        // copy values to left boundary
+        (*q_)(0, j) = (*q_)(1, j);
+    }
+}
+
+void ConjugateGradient::setQBoundaryValuesRight() {
+    for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
+        // copy values to right boundary
+        (*q_)(discretization_->pIEnd() - 1 - discretization_->pIBegin(), j) = (*q_)(discretization_->pInteriorIEnd() - 1 - discretization_->pIBegin(), j);
+    }
+}
