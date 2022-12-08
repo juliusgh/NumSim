@@ -39,6 +39,7 @@ void ComputationParallel::initialize(string filename)
 
 
     // Initialize solver
+    settings_.pressureSolver = "CG";
     if (settings_.pressureSolver == "SOR") {
         pressureSolver_ = std::make_unique<RedBlackSOR>(discretization_, settings_.epsilon,
                                                 settings_.maximumNumberOfIterations, settings_.omega, partitioning_);
