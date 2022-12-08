@@ -155,7 +155,7 @@ void ConjugateGradient::solve() {
                 (*q_)(i, j) = (*z_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = zₖ₊₁ + β qₖ
             }
         }
-        computeResidualNorm();
+        residual_norm2_ = alpha / N;
 
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
 
