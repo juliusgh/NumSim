@@ -23,18 +23,18 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */
 void ConjugateGradient::solve() {
-    static const double dx2 = pow(discretization_->dx(), 2);
-    static const double dy2 = pow(discretization_->dy(), 2);
-    static const double eps2 = pow(epsilon_, 2);
-    static const int pIBegin = discretization_->pIBegin();
-    static const int pJBegin = discretization_->pJBegin();
-    static const int pIEnd = discretization_->pIEnd();
-    static const int pJEnd = discretization_->pJEnd();
-    static const int pIIntBegin = discretization_->pInteriorIBegin();
-    static const int pJIntBegin = discretization_->pInteriorJBegin();
-    static const int pIIntEnd = discretization_->pInteriorIEnd();
-    static const int pJIntEnd = discretization_->pInteriorJEnd();
-    static const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
+    const double dx2 = pow(discretization_->dx(), 2);
+    const double dy2 = pow(discretization_->dy(), 2);
+    const double eps2 = pow(epsilon_, 2);
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
     pGhostLayer();
 
@@ -149,18 +149,18 @@ void ConjugateGradient::computeResidualNorm() {
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
 void ConjugateGradient::qGhostLayer() {
-    static const int pInteriorIBegin = discretization_->pInteriorIBegin();
-    static const int pInteriorIEnd = discretization_->pInteriorIEnd();
-    static const int pInteriorJBegin = discretization_->pInteriorJBegin();
-    static const int pInteriorJEnd = discretization_->pInteriorJEnd();
-    static const int pIBegin = discretization_->pIBegin();
-    static const int pJBegin = discretization_->pJBegin();
-    static const int pIEnd = discretization_->pIEnd();
-    static const int pJEnd = discretization_->pJEnd();
-    static const int pIIntBegin = discretization_->pInteriorIBegin();
-    static const int pJIntBegin = discretization_->pInteriorJBegin();
-    static const int pIIntEnd = discretization_->pInteriorIEnd();
-    static const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int pInteriorIBegin = discretization_->pInteriorIBegin();
+    const int pInteriorIEnd = discretization_->pInteriorIEnd();
+    const int pInteriorJBegin = discretization_->pInteriorJBegin();
+    const int pInteriorJEnd = discretization_->pInteriorJEnd();
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
 
     int p_columnCount = pInteriorJEnd - pInteriorJBegin;
     int p_columnOffset = pInteriorJBegin;
