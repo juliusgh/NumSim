@@ -13,10 +13,7 @@ module load openmpi/3.1.6-gcc-10.2
 module load vtk/9.0.1
 module load cmake/3.18.2
 
-rm -rf build
-mkdir build
 cd build
-
 cmake -DPROFILE=ON -DCMAKE_BUILD_TYPE=Release ..
 make -j
 
