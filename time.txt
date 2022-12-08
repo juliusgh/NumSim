@@ -1,0 +1,40 @@
+time 1 process(es)
+
+real	0m1.070s
+user	0m0.424s
+sys	0m0.054s
+time 2 process(es)
+
+real	0m0.509s
+user	0m0.587s
+sys	0m0.063s
+time 4 process(es)
+
+real	0m0.539s
+user	0m1.220s
+sys	0m0.107s
+time 6 process(es)
+
+real	0m0.550s
+user	0m1.837s
+sys	0m0.140s
+time 8 process(es)
+
+real	0m0.600s
+user	0m2.614s
+sys	0m0.203s
+time 10 process(es)
+
+real	0m0.607s
+user	0m3.236s
+sys	0m0.252s
+time 12 process(es)
+
+real	0m0.575s
+user	0m3.377s
+sys	0m0.248s
+time 16 process(es)
+
+real	0m0.555s
+user	0m3.168s
+sys	0m0.357s

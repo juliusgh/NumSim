@@ -6,4 +6,4 @@
 - [ ] Pressure Solver: Red Black
 - [x] Computation Parallel
 - [ ] Pressure Solver: CG???
-- [x] Time-step widht
+- [x] Time-step width
