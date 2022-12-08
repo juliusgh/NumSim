@@ -31,4 +31,9 @@ protected:
     std::shared_ptr<Array2D> q_;
     std::shared_ptr<Array2D> Aq_;
     std::shared_ptr<Array2D> z_;
+    void qGhostLayer();
+    void setQBoundaryValuesBottom();
+    void setQBoundaryValuesTop();
+    void setQBoundaryValuesLeft();
+    void setQBoundaryValuesRight();
 };
