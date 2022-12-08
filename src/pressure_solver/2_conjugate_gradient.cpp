@@ -225,8 +225,8 @@ void ConjugateGradient::qGhostLayer() {
     else {
         //std::cout << "comm Top" << std::endl;
         // send row on the top to top neighbour
-        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
-            p_topRow.at(i - p_rowOffset) = (*q_)(i, pInteriorJEnd - 1 - pJBegin);
+        for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
+            p_topRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJEnd - 1 - pJBegin);
         }
         partitioning_->isendToTop(p_topRow, request_p_topRow);
 
@@ -241,8 +241,8 @@ void ConjugateGradient::qGhostLayer() {
     else {
         //std::cout << "comm Bottom" << std::endl;
         // send row on the bottom to bottom neighbour
-        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
-            p_bottomRow.at(i - p_rowOffset) = (*q_)(i, pInteriorJBegin - pJBegin);
+        for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
+            p_bottomRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJBegin - pJBegin);
         }
         partitioning_->isendToBottom(p_bottomRow, request_p_bottomRow);
 
@@ -257,8 +257,8 @@ void ConjugateGradient::qGhostLayer() {
     else {
         //std::cout << "comm Right" << std::endl;
         // send to column on the right to right neighbour
-        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
-            p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j);
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
+            p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j - pJBegin);
             //std::cout << "RANK " << partitioning_->ownRankNo() << " : right send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
 
@@ -274,8 +274,8 @@ void ConjugateGradient::qGhostLayer() {
     else {
         //std::cout << "comm Left" << std::endl;
         // send to column on the left to left neighbour
-        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
-            p_leftColumn.at(j - p_columnOffset) = (*q_)(pInteriorIBegin - pIBegin, j);
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
+            p_leftColumn.at(j - p_columnOffset) = (*q_)(pInteriorIBegin - pIBegin, j - pJBegin);
             //std::cout << "RANK " << partitioning_->ownRankNo() << " : left send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
         partitioning_->isendToLeft(p_leftColumn, request_p_leftColumn);
@@ -286,28 +286,28 @@ void ConjugateGradient::qGhostLayer() {
 
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         partitioning_->wait(request_p_topRow);
-        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
-            (*q_)(i, discretization_->pJEnd() - 1 - pJBegin) = p_topRow.at(i - p_rowOffset);
+        for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
+            (*q_)(i - pIBegin, discretization_->pJEnd() - 1 - pJBegin) = p_topRow.at(i - p_rowOffset);
         }
     }
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         partitioning_->wait(request_p_bottomRow);
-        for (int i = pInteriorIBegin - pIBegin; i < pInteriorIEnd - pIBegin; i++) {
-            (*q_)(i, discretization_->pJBegin() - pJBegin) = p_bottomRow.at(i - p_rowOffset);
+        for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
+            (*q_)(i - pIBegin, discretization_->pJBegin() - pJBegin) = p_bottomRow.at(i - p_rowOffset);
         }
     }
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         partitioning_->wait(request_p_rightColumn);
-        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             //std::cout << "RANK " << partitioning_->ownRankNo() << " : right recv no. " << j << " = " << p_rightColumn.at(j - p_columnOffset) << std::endl;
-            (*q_)(discretization_->pIEnd() - 1 - pIBegin, j) = p_rightColumn.at(j - p_columnOffset);
+            (*q_)(discretization_->pIEnd() - 1 - pIBegin, j - pJBegin) = p_rightColumn.at(j - p_columnOffset);
         }
     }
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);
-        for (int j = pInteriorJBegin - pJBegin; j < pInteriorJEnd - pJBegin; j++) {
+        for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             //std::cout << "RANK " << partitioning_->ownRankNo() << " : left recv no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
-            (*q_)(discretization_->pIBegin() - pIBegin, j) = p_leftColumn.at(j - p_columnOffset);
+            (*q_)(discretization_->pIBegin() - pIBegin, j - pJBegin) = p_leftColumn.at(j - p_columnOffset);
         }
     }
 }
