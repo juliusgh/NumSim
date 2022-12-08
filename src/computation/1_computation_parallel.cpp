@@ -19,9 +19,10 @@ void ComputationParallel::initialize(string filename)
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);
-    // Print settings
+    
 #ifndef NDEBUG
-    //settings_.printSettings();
+    // Print settings
+    settings_.printSettings();
 #endif
 
     partitioning_ = std::make_shared<Partitioning>(settings_.nCells);
@@ -39,7 +40,7 @@ void ComputationParallel::initialize(string filename)
 
 
     // Initialize solver
-    settings_.pressureSolver = "CG";
+#ifndef NDEBUG
     if (settings_.pressureSolver == "SOR") {
         pressureSolver_ = std::make_unique<RedBlackSOR>(discretization_, settings_.epsilon,
                                                 settings_.maximumNumberOfIterations, settings_.omega, partitioning_);
@@ -53,9 +54,17 @@ void ComputationParallel::initialize(string filename)
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
+#else
+    pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+                                                     settings_.maximumNumberOfIterations, partitioning_);
+#endif
 
+
+    
     // Initialize output writers
+#ifndef NDEBUG
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
+#endif
     outputWriterParaview_ = std::make_unique<OutputWriterParaviewParallel>(discretization_, partitioning_);
 }
 
@@ -65,9 +74,10 @@ void ComputationParallel::initialize(string filename)
 void ComputationParallel::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
+#ifndef NDEBUG
     const clock_t sim_start_time = clock();
     float sim_duration;
-#ifdef NDEBUG
+#else 
     double time_steps_print = 1;
     double time_last_printed = -time_steps_print;
 #endif
@@ -122,9 +132,13 @@ void ComputationParallel::runSimulation() {
                  ", res. " << pressureSolver_->residualNorm() << ", solver iterations: "
                  << pressureSolver_->iterations() << endl;
         }
-        //outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
         outputWriterParaview_->writeFile(time);
+        sim_duration = float( clock()  - sim_start_time) / CLOCKS_PER_SEC;
+        if (sim_duration >= 600){
+            std::cout << "TERMINATED (cause: runTimeError)" << std::endl;
+            break;
+        }
 #else   
         
         if (time - time_last_printed >= time_steps_print){
@@ -133,12 +147,6 @@ void ComputationParallel::runSimulation() {
         }
 
 #endif 
-
-        sim_duration = float( clock()  - sim_start_time) / CLOCKS_PER_SEC;
-        if (sim_duration >= 600){
-            std::cout << "TERMINATED (cause: runTimeError)" << std::endl;
-            break;
-        }
 
     }
 #ifndef NDEBUG
@@ -246,16 +254,13 @@ void ComputationParallel::applyBoundaryValues() {
     else {
         // v: send last column on the right to right neighbour
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
-            //partitioning_->log("send Right: j - v_columnOffset =");
-            //std::cout << j - v_columnOffset << std::endl;
             v_rightColumn.at(j - v_columnOffset) = discretization_->v(vInteriorIEnd - 1, j);
         }
         partitioning_->isendToRight(v_rightColumn, request_v_rightColumn);
 
         // u: send second to last column on the right to right neighbour
         for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
-            //partitioning_->log("send Right: j - u_columnOffset =");
-            //std::cout << j - u_columnOffset << std::endl;
+
             u_rightColumn.at(j - u_columnOffset) = discretization_->u(uInteriorIEnd - 2, j);
         }
         partitioning_->isendToRight(u_rightColumn, request_u_rightColumn);
@@ -271,8 +276,7 @@ void ComputationParallel::applyBoundaryValues() {
     else {
         // v: send first column on the left to left neighbour
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
-            //partitioning_->log("send Left: j - v_columnOffset =");
-            //std::cout << j - v_columnOffset << std::endl;
+
             v_leftColumn.at(j - v_columnOffset) = discretization_->v(vInteriorIBegin, j);
         }
         partitioning_->isendToLeft(v_leftColumn, request_v_leftColumn);
@@ -329,13 +333,11 @@ void ComputationParallel::applyBoundaryValues() {
 
         // write values from right neighbour to right ghost layer
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
-            //partitioning_->log("recv Right: j - v_columnOffset =");
-            //std::cout << j - v_columnOffset << std::endl;
+
             discretization_->v(vIEnd - 1, j) = v_rightColumn.at(j - v_columnOffset);
         }
         for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
-            //partitioning_->log("recv Right: j - u_columnOffset =");
-            //std::cout << j - u_columnOffset << std::endl;
+
             discretization_->u(uIEnd - 1, j) = u_rightColumn.at(j - u_columnOffset);
         }
     }
@@ -347,13 +349,11 @@ void ComputationParallel::applyBoundaryValues() {
 
         // write values from left neighbour to left ghost layer
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
-            //partitioning_->log("recv Left: j - v_columnOffset =");
-            //std::cout << j - v_columnOffset << std::endl;
+
             discretization_->v(vIBegin, j) = v_leftColumn.at(j - v_columnOffset);
         }
         for (int j = uInteriorJBegin; j < uInteriorJEnd; j++) {
-            //partitioning_->log("recv Left: j - u_columnOffset =");
-            //std::cout << j - u_columnOffset << std::endl;
+
             discretization_->u(uIBegin, j) = u_leftColumn.at(j - u_columnOffset);
         }
     }
@@ -371,12 +371,9 @@ void ComputationParallel::computeTimeStepWidth() {
 
     // Compute maximal time step width regarding the convection u
     double u_absMax_local = discretization_->u().absMax();
-    //partitioning_->log("u_absMax_local:");
-    //std::cout << u_absMax_local << std::endl;
-    //discretization_->u().print();
+
     double u_absMax = partitioning_->globalMax(u_absMax_local);
-    //partitioning_->log("u_absMax:");
-    //std::cout << u_absMax << std::endl;
+
     double dt_conv_u = std::numeric_limits<double>::max();
     if (u_absMax > 0.0)
         dt_conv_u = dx / u_absMax;
@@ -384,11 +381,9 @@ void ComputationParallel::computeTimeStepWidth() {
 
     // Compute maximal time step width regarding the convection v
     double v_absMax_local = discretization_->v().absMax();
-    //partitioning_->log("v_absMax_local:");
-    //std::cout << v_absMax_local << std::endl;
+
     double v_absMax = partitioning_->globalMax(v_absMax_local);
-    //partitioning_->log("v_absMax:");
-    //std::cout << v_absMax << std::endl;
+
     double dt_conv_v = std::numeric_limits<double>::max();
     if (v_absMax > 0.0)
         dt_conv_v = dy / v_absMax;
