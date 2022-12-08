@@ -13,7 +13,10 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
          std::shared_ptr<Partitioning> partitioning) :
 PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning)
 {
+    residual_ = std::make_unique<Array2D>(discretization_->pSize());
     q_ = std::make_unique<Array2D>(discretization_->pSize()); // Search direction qₖ
+    Aq_ = std::make_unique<Array2D>(discretization_->pSize()); //precomputed matrix-vector product between the system matrix and the search direction Aqₖ
+
 }
 
 /**
@@ -34,8 +37,6 @@ void ConjugateGradient::solve() {
     const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
     pGhostLayer();
-    Array2D residual_ = Array2D(discretization_->pSize());
-    Array2D Aq_ = Array2D(discretization_->pSize()); 
 
     int iteration = 0;
     // Initialization Loop
@@ -44,10 +45,10 @@ void ConjugateGradient::solve() {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
             double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
-            residual_(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
+            (*residual_)(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
             
             // set search direction to preconditioned defect q = z
-            (*q_)(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin);
+            (*q_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin);
         }
     }
 
@@ -55,7 +56,7 @@ void ConjugateGradient::solve() {
     // Calculate initial alpha value
     for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
         for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-            local_alpha += residual_(i, j) * residual_(i, j); // α₀ = r₀ᵀ r₀
+            local_alpha += (*residual_)(i, j) * (*residual_)(i, j); // α₀ = r₀ᵀ r₀
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
@@ -69,14 +70,14 @@ void ConjugateGradient::solve() {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
-                Aq_(i, j) = D2qDx2 + D2qDy2;
+                (*Aq_)(i, j) = D2qDx2 + D2qDy2;
             }
         }
 
         double local_lambda = 0.0;        // λ = αₖ / qₖᵀAqₖ 
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                local_lambda += (*q_)(i, j) * Aq_(i, j);             // qₖᵀAqₖ
+                local_lambda += (*q_)(i, j) * (*Aq_)(i, j);             // qₖᵀAqₖ
             }
         }
         double lambda = alpha / partitioning_->globalSum(local_lambda);
@@ -87,10 +88,10 @@ void ConjugateGradient::solve() {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
                 
                 // pₖ₊₁ = pₖ + λ qₖ
-                discretization_->p(i, j)+= + lambda * (*q_)(i - pIBegin, j - pJBegin); 
+                discretization_->p(i, j)= discretization_->p(i ,j) + lambda * (*q_)(i - pIBegin, j - pJBegin); 
                 
                 // rₖ₊₁ = rₖ - λ Aqₖ
-                residual_(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin) - lambda * Aq_(i - pIBegin ,j - pJBegin);
+                (*residual_)(i - pIBegin, j - pJBegin) = (*residual_)(i - pIBegin, j - pJBegin) - lambda * (*Aq_)(i - pIBegin ,j - pJBegin);
             }
         }
 
@@ -98,7 +99,7 @@ void ConjugateGradient::solve() {
         local_alpha = 0.0;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                local_alpha += residual_(i, j) * residual_(i, j); // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
+                local_alpha += (*residual_)(i, j) * (*residual_)(i, j); // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
@@ -108,7 +109,7 @@ void ConjugateGradient::solve() {
 
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                (*q_)(i, j) = residual_(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
+                (*q_)(i, j) = (*residual_)(i, j) + beta * (*q_)(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
             }
         }
         residual_norm2_ = alpha / N;
@@ -119,6 +120,30 @@ void ConjugateGradient::solve() {
 
     iterations_ = iteration;
 }
+
+
+/**
+ * Calculation of the global residual norm using the squared Euclidean norm
+ */
+void ConjugateGradient::computeResidualNorm() {
+    double residual_norm2 = 0.0;
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
+    for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+        for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
+            residual_norm2 += pow((*residual_)(i, j), 2);
+        }
+    }
+
+    double residual_norm2_global = partitioning_->globalSum(residual_norm2);
+    residual_norm2_ = residual_norm2_global / N;
+}
+
 
 /**
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
