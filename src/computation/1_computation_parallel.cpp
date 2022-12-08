@@ -362,8 +362,11 @@ void ComputationParallel::applyBoundaryValues() {
  * Compute the time step width dt based on the maximum velocities
  */
 void ComputationParallel::computeTimeStepWidth() {
+    const double dx =  discretization_->dx();
+    const double dy =  discretization_->dy();
+
     // Compute maximal time step width regarding the diffusion
-    double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
+    double dt_diff = settings_.re / 2 / (1 / (dx * dx) + 1 / (dy * dy) );
 
     // Compute maximal time step width regarding the convection u
     double u_absMax_local = discretization_->u().absMax();
@@ -375,7 +378,7 @@ void ComputationParallel::computeTimeStepWidth() {
     //std::cout << u_absMax << std::endl;
     double dt_conv_u = std::numeric_limits<double>::max();
     if (u_absMax > 0.0)
-        dt_conv_u = discretization_->dx() / u_absMax;
+        dt_conv_u = dx / u_absMax;
 
 
     // Compute maximal time step width regarding the convection v
@@ -387,7 +390,7 @@ void ComputationParallel::computeTimeStepWidth() {
     //std::cout << v_absMax << std::endl;
     double dt_conv_v = std::numeric_limits<double>::max();
     if (v_absMax > 0.0)
-        dt_conv_v = discretization_->dy() / v_absMax;
+        dt_conv_v = dy / v_absMax;
 
     // Set the appropriate time step width by using a security factor tau
     dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});

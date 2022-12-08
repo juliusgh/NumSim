@@ -1,40 +1,193 @@
-time 1 process(es)
 
-real	0m1.070s
-user	0m0.424s
-sys	0m0.054s
-time 2 process(es)
+time 1 process(es):
 
-real	0m0.509s
-user	0m0.587s
-sys	0m0.063s
-time 4 process(es)
+real	0m1.064s
+user	0m0.632s
+sys	0m0.090s
 
-real	0m0.539s
-user	0m1.220s
-sys	0m0.107s
-time 6 process(es)
+time 2 process(es):
 
-real	0m0.550s
-user	0m1.837s
-sys	0m0.140s
-time 8 process(es)
+real	0m0.827s
+user	0m0.926s
+sys	0m0.109s
 
-real	0m0.600s
-user	0m2.614s
-sys	0m0.203s
-time 10 process(es)
+time 4 process(es):
 
-real	0m0.607s
-user	0m3.236s
-sys	0m0.252s
-time 12 process(es)
+real	0m0.660s
+user	0m1.429s
+sys	0m0.194s
 
-real	0m0.575s
-user	0m3.377s
-sys	0m0.248s
-time 16 process(es)
+time 6 process(es):
+--------------------------------------------------------------------------
+There are not enough slots available in the system to satisfy the 6
+slots that were requested by the application:
 
-real	0m0.555s
-user	0m3.168s
-sys	0m0.357s
+  ./build/src/numsim_parallel
+
+Either request fewer slots for your application, or make more slots
+available for use.
+
+A "slot" is the Open MPI term for an allocatable unit where we can
+launch a process.  The number of slots available are defined by the
+environment in which Open MPI processes are run:
+
+  1. Hostfile, via "slots=N" clauses (N defaults to number of
+     processor cores if not provided)
+  2. The --host command line parameter, via a ":N" suffix on the
+     hostname (N defaults to 1 if not provided)
+  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
+  4. If none of a hostfile, the --host command line parameter, or an
+     RM is present, Open MPI defaults to the number of processor cores
+
+In all the above cases, if you want Open MPI to default to the number
+of hardware threads instead of the number of processor cores, use the
+--use-hwthread-cpus option.
+
+Alternatively, you can use the --oversubscribe option to ignore the
+number of available slots when deciding the number of processes to
+launch.
+--------------------------------------------------------------------------
+
+real	0m0.080s
+user	0m0.010s
+sys	0m0.029s
+
+time 8 process(es):
+--------------------------------------------------------------------------
+There are not enough slots available in the system to satisfy the 8
+slots that were requested by the application:
+
+  ./build/src/numsim_parallel
+
+Either request fewer slots for your application, or make more slots
+available for use.
+
+A "slot" is the Open MPI term for an allocatable unit where we can
+launch a process.  The number of slots available are defined by the
+environment in which Open MPI processes are run:
+
+  1. Hostfile, via "slots=N" clauses (N defaults to number of
+     processor cores if not provided)
+  2. The --host command line parameter, via a ":N" suffix on the
+     hostname (N defaults to 1 if not provided)
+  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
+  4. If none of a hostfile, the --host command line parameter, or an
+     RM is present, Open MPI defaults to the number of processor cores
+
+In all the above cases, if you want Open MPI to default to the number
+of hardware threads instead of the number of processor cores, use the
+--use-hwthread-cpus option.
+
+Alternatively, you can use the --oversubscribe option to ignore the
+number of available slots when deciding the number of processes to
+launch.
+--------------------------------------------------------------------------
+
+real	0m0.087s
+user	0m0.005s
+sys	0m0.034s
+
+time 10 process(es):
+--------------------------------------------------------------------------
+There are not enough slots available in the system to satisfy the 10
+slots that were requested by the application:
+
+  ./build/src/numsim_parallel
+
+Either request fewer slots for your application, or make more slots
+available for use.
+
+A "slot" is the Open MPI term for an allocatable unit where we can
+launch a process.  The number of slots available are defined by the
+environment in which Open MPI processes are run:
+
+  1. Hostfile, via "slots=N" clauses (N defaults to number of
+     processor cores if not provided)
+  2. The --host command line parameter, via a ":N" suffix on the
+     hostname (N defaults to 1 if not provided)
+  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
+  4. If none of a hostfile, the --host command line parameter, or an
+     RM is present, Open MPI defaults to the number of processor cores
+
+In all the above cases, if you want Open MPI to default to the number
+of hardware threads instead of the number of processor cores, use the
+--use-hwthread-cpus option.
+
+Alternatively, you can use the --oversubscribe option to ignore the
+number of available slots when deciding the number of processes to
+launch.
+--------------------------------------------------------------------------
+
+real	0m0.105s
+user	0m0.017s
+sys	0m0.021s
+
+time 12 process(es):
+--------------------------------------------------------------------------
+There are not enough slots available in the system to satisfy the 12
+slots that were requested by the application:
+
+  ./build/src/numsim_parallel
+
+Either request fewer slots for your application, or make more slots
+available for use.
+
+A "slot" is the Open MPI term for an allocatable unit where we can
+launch a process.  The number of slots available are defined by the
+environment in which Open MPI processes are run:
+
+  1. Hostfile, via "slots=N" clauses (N defaults to number of
+     processor cores if not provided)
+  2. The --host command line parameter, via a ":N" suffix on the
+     hostname (N defaults to 1 if not provided)
+  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
+  4. If none of a hostfile, the --host command line parameter, or an
+     RM is present, Open MPI defaults to the number of processor cores
+
+In all the above cases, if you want Open MPI to default to the number
+of hardware threads instead of the number of processor cores, use the
+--use-hwthread-cpus option.
+
+Alternatively, you can use the --oversubscribe option to ignore the
+number of available slots when deciding the number of processes to
+launch.
+--------------------------------------------------------------------------
+
+real	0m0.088s
+user	0m0.021s
+sys	0m0.017s
+
+time 16 process(es):
+--------------------------------------------------------------------------
+There are not enough slots available in the system to satisfy the 16
+slots that were requested by the application:
+
+  ./build/src/numsim_parallel
+
+Either request fewer slots for your application, or make more slots
+available for use.
+
+A "slot" is the Open MPI term for an allocatable unit where we can
+launch a process.  The number of slots available are defined by the
+environment in which Open MPI processes are run:
+
+  1. Hostfile, via "slots=N" clauses (N defaults to number of
+     processor cores if not provided)
+  2. The --host command line parameter, via a ":N" suffix on the
+     hostname (N defaults to 1 if not provided)
+  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
+  4. If none of a hostfile, the --host command line parameter, or an
+     RM is present, Open MPI defaults to the number of processor cores
+
+In all the above cases, if you want Open MPI to default to the number
+of hardware threads instead of the number of processor cores, use the
+--use-hwthread-cpus option.
+
+Alternatively, you can use the --oversubscribe option to ignore the
+number of available slots when deciding the number of processes to
+launch.
+--------------------------------------------------------------------------
+
+real	0m0.090s
+user	0m0.018s
+sys	0m0.022s
