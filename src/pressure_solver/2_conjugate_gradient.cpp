@@ -35,6 +35,7 @@ void ConjugateGradient::solve() {
     const int pJIntBegin = discretization_->pInteriorJBegin();
     const int pIIntEnd = discretization_->pInteriorIEnd();
     const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
     double MInv = ((dx2 * dy2) / (-2 * dy2 - 2 * dx2));
     MInv = 1.0;
