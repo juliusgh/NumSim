@@ -3,6 +3,12 @@
 
 /**
  *  calculate derivatives needed for pressure calculations using the central differences approach
+ * @param nCells
+ * @param meshWidth
+ */
+
+/**
+ *  calculate derivatives needed for pressure calculations using the central differences approach
  * @param nCells: number of inner cells
  * @param meshWidth: width of cells in all directions
  */

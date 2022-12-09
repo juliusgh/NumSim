@@ -72,10 +72,7 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 #endif
 }
 
-/**
- * this method partitions the global domain in nRanks subdomains  
- * @param nRanks number of processes
-*/
+
 void Partitioning::partitionDomain(int nRanks){
     int optimalX = nRanks; 
     int optimalY = 1;
@@ -101,10 +98,6 @@ void Partitioning::partitionDomain(int nRanks){
     nDomains_={optimalX,optimalY};
 }
 
-/**
- * this method partitions the global domain in nRanks subdomains  
- * @param nRanks number of processes
-*/
 void Partitioning::partitionDomainEqual(int nRanks){
     int optimalX = nRanks; 
     int optimalY = 1;
@@ -350,10 +343,6 @@ void Partitioning::irecv(int sourceRank, std::vector<double> &data, int count, M
     );
 }
 
-/**
- * Implementation of call of the MPI-wait command
- * @param request request the program should wait for before continuing
-*/
 void Partitioning::wait(MPI_Request &request) {
     MPI_Wait(&request, MPI_STATUS_IGNORE);
 }
@@ -499,7 +488,7 @@ int Partitioning::computeColumn(int rank) const {
 
 /**
  * get the row position of the subdomain
- * @param rank unique number of process
+ * @param rank
  * @return row position of the subdomain
  */
 int Partitioning::computeRow(int rank) const {
@@ -508,10 +497,8 @@ int Partitioning::computeRow(int rank) const {
 
 /**
  * get the rank of a subdomain based on its position in the global grid
- * @param column positions of subdomain in horizontal direction 
- *               on the grid compared to other subdomains
- * @param row positions of subdomain in vertical direction 
-*             on the grid compared to other subdomains
+ * @param column
+ * @param row
  * @return subdomain rank
  */
 int Partitioning::computeRank(int column, int row) const {
@@ -583,15 +570,12 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
  * get the offset values for counting local nodes in x and y direction.
  * (i_local,j_local) + nodeOffset = (i_global,j_global)
  * used in OutputWriterParaviewParallel
- * @return offset of current subdomain indices compared to the global position
+ * @return offset
  */
 std::array<int, 2> Partitioning::nodeOffset() const {
     return nodeOffset_;
 }
 
-/**
- * Method for debugging to print out what a process is currently doing
-*/
 void Partitioning::log(const char* message) {
     std::cout << "RANK " << ownRankNo() << " : " << message << std::endl;
 }

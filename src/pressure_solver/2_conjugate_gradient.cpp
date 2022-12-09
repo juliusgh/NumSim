@@ -1,11 +1,10 @@
 #include "pressure_solver/2_conjugate_gradient.h"
 
 /**
- * Implementation of a parallelisized version of the Conjugated Gradients (CG) solver.
+ * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
  * @param discretization pointer to the implementation of the discretization
  * @param epsilon error tolerance below which we consider the solver to be converged
- * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
- * @param partitioning information about subdomain
+ * @param maximumNumberOfIterations
  */
 
 ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretization,
@@ -114,7 +113,7 @@ void ConjugateGradient::solve() {
 }
 
 /**
- *  Implementation of communication of pressure values between neighbouring subdomains
+ *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
 void ConjugateGradient::qGhostLayer() {
     const int pInteriorIBegin = discretization_->pInteriorIBegin();
@@ -135,20 +134,14 @@ void ConjugateGradient::qGhostLayer() {
     int p_rowCount = pInteriorIEnd - pInteriorIBegin;
     int p_rowOffset = pInteriorIBegin;
 
-    MPI_Request request_p_rightColumn; // send to right - receive from left
-    MPI_Request request_p_leftColumn; // send to left - receive from right
-    MPI_Request request_p_topRow; // send to top - receive from bottom
-    MPI_Request request_p_bottomRow; // send to bottom - receive from top
+    MPI_Request request_p_rightColumn;
+    MPI_Request request_p_leftColumn;
+    MPI_Request request_p_topRow;
+    MPI_Request request_p_bottomRow;
     std::vector<double> p_rightColumn(p_columnCount, 0);
     std::vector<double> p_leftColumn(p_columnCount, 0);
     std::vector<double> p_topRow(p_rowCount, 0);
     std::vector<double> p_bottomRow(p_rowCount, 0);
-
-    /*
-    * pressure p communication: send to and receive from subdomain directly above 
-    * current subdomain if current subdomain is not on upper boundary. 
-    * If subdomain touches upper domain boundary, boundary conditions are applied.
-    */
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         setQBoundaryValuesTop();
     }
@@ -163,11 +156,6 @@ void ConjugateGradient::qGhostLayer() {
         partitioning_->irecvFromTop(p_topRow, p_rowCount, request_p_topRow);
     }
 
-    /*
-    * pressure p communication: send to and receive from subdomain directly below 
-    * current subdomain if current subdomain is not on upper boundary. 
-    * If subdomain touches lower domain boundary, boundary conditions are applied.
-    */
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         setQBoundaryValuesBottom();
     }
@@ -181,11 +169,7 @@ void ConjugateGradient::qGhostLayer() {
         // receive ghost layer row on the bottom from bottom neighbour
         partitioning_->irecvFromBottom(p_bottomRow, p_rowCount, request_p_bottomRow);
     }
-#    /*
-    * pressure p communication: send to and receive from subdomain directly right of 
-    * current subdomain if current subdomain is not on upper boundary. 
-    * If subdomain touches right domain boundary, boundary conditions are applied.
-    */
+
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         setQBoundaryValuesRight();
     }
@@ -193,6 +177,7 @@ void ConjugateGradient::qGhostLayer() {
         // send to column on the right to right neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j - pJBegin);
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right send no. " << j << " = " << p_leftColumn.at(j - p_columnOffset) << std::endl;
         }
 
         partitioning_->isendToRight(p_rightColumn, request_p_rightColumn);
@@ -200,12 +185,6 @@ void ConjugateGradient::qGhostLayer() {
         // receive ghost layer column on the right from right neighbour
         partitioning_->irecvFromRight(p_rightColumn, p_columnCount, request_p_rightColumn);
     }
-
-    /*
-    * pressure p communication: send to and receive from subdomain directly left of 
-    * current subdomain if current subdomain is not on upper boundary. 
-    * If subdomain touches left domain boundary, boundary conditions are applied.
-    */
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         setQBoundaryValuesLeft();
     }
@@ -219,39 +198,26 @@ void ConjugateGradient::qGhostLayer() {
         // receive ghost layer column on the left from left neighbour
         partitioning_->irecvFromLeft(p_leftColumn, p_columnCount, request_p_leftColumn);
     }
-    /* 
-    * Set subdomain ghost layer at top for pressure
-    */
+
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         partitioning_->wait(request_p_topRow);
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             (*q_)(i - pIBegin, discretization_->pJEnd() - 1 - pJBegin) = p_topRow.at(i - p_rowOffset);
         }
     }
-
-    /* 
-    * Set subdomain ghost layer at bottom for pressure
-    */
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         partitioning_->wait(request_p_bottomRow);
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             (*q_)(i - pIBegin, discretization_->pJBegin() - pJBegin) = p_bottomRow.at(i - p_rowOffset);
         }
     }
-
-    /* 
-    * Set subdomain ghost layer at right for pressure
-    */
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         partitioning_->wait(request_p_rightColumn);
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
+            //std::cout << "RANK " << partitioning_->ownRankNo() << " : right recv no. " << j << " = " << p_rightColumn.at(j - p_columnOffset) << std::endl;
             (*q_)(discretization_->pIEnd() - 1 - pIBegin, j - pJBegin) = p_rightColumn.at(j - p_columnOffset);
         }
     }
-
-    /* 
-    * Set subdomain ghost layer at left for pressure
-    */
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
@@ -260,18 +226,13 @@ void ConjugateGradient::qGhostLayer() {
     }
 }
 
-/**
- * set boundary values at the bottom of the subdomain for the search direction
-*/
 void ConjugateGradient::setQBoundaryValuesBottom() {
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to bottom boundary
         (*q_)(i, 0) = (*q_)(i, 1);
     }
 }
-/**
- * set boundary values at the top of the subdomain for the search direction
-*/
+
 void ConjugateGradient::setQBoundaryValuesTop() {
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to top boundary
@@ -279,9 +240,6 @@ void ConjugateGradient::setQBoundaryValuesTop() {
     }
 }
 
-/**
- * set boundary values at the left of the subdomain for the search direction
-*/
 void ConjugateGradient::setQBoundaryValuesLeft() {
     for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
         // copy values to left boundary
@@ -289,9 +247,6 @@ void ConjugateGradient::setQBoundaryValuesLeft() {
     }
 }
 
-/**
- * set boundary values at the right of the subdomain for the search direction
-*/
 void ConjugateGradient::setQBoundaryValuesRight() {
     for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
         // copy values to right boundary

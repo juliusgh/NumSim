@@ -4,17 +4,17 @@
 #include "1_pressure_solver_parallel.h"
 
 /**
- * Implementation of the red-black solver, a parallelisized version of the SOR solver.
+ * Parallel red black solver for solving a linear system of equations.
  */
 
 class RedBlackSOR : public PressureSolverParallel {
 public:
     /**
     * constructor
-    * @param discretization pointer to the implementation of the discretization
-    * @param epsilon error tolerance below which we consider the solver to be converged
-    * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
-    * @param partitioning information about subdomain
+    * @param discretization
+    * @param epsilon
+    * @param maximumNumberOfIterations
+    * @param omega
     */
     RedBlackSOR(std::shared_ptr <Discretization> discretization,
         double epsilon,

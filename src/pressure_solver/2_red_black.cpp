@@ -4,8 +4,7 @@
  * Implementation of the red-black solver, a parallelisized version of the Gauss-Seidel solver.
  * @param discretization pointer to the implementation of the discretization
  * @param epsilon error tolerance below which we consider the solver to be converged
- * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
- * @param partitioning information about subdomain
+ * @param maximumNumberOfIterations
  */
 
 RedBlack::RedBlack(std::shared_ptr<Discretization> discretization,
@@ -28,6 +27,13 @@ void RedBlack::solve() {
     int iteration = 0;
     do {
         iteration++;
+        //getchar();
+        /*if (partitioning_->ownRankNo() == 0) {
+            discretization_->p().print();
+        }
+        if (getchar() == '1' && partitioning_->ownRankNo() == 1) {
+            discretization_->p().print();
+        }*/
 
         // black half step
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
@@ -39,7 +45,7 @@ void RedBlack::solve() {
                 discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
             }
         }
-        
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 1" << std::endl;
         pGhostLayer();
 
         // red half step
@@ -53,8 +59,11 @@ void RedBlack::solve() {
             }
         }
 
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : start pGhostLayer 2" << std::endl;
         pGhostLayer();
         computeResidualNorm();
+        //partitioning_->log("residual norm final:");
+        //std::cout << "RANK " << partitioning_->ownRankNo() << " : " << residualNorm() << std::endl;
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
     iterations_ = iteration;
 }
