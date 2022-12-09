@@ -39,6 +39,7 @@ void ConjugateGradient::solve() {
 
     int iteration = 0;
     // Initialization Loop
+    double local_alpha = 0.0;  
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
@@ -48,57 +49,48 @@ void ConjugateGradient::solve() {
             
             // set search direction to preconditioned defect q = z
             (*q_)(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin);
+
+
+            local_alpha += pow(residual_(i- pIBegin, j- pJBegin), 2);
         }
     }
 
-    double local_alpha = 0.0;  
-    // Calculate initial alpha value
-    for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
-        for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-            local_alpha += residual_(i, j) * residual_(i, j); // α₀ = r₀ᵀ r₀
-        }
-    }
     double alpha = partitioning_->globalSum(local_alpha);
 
     do {
 
         qGhostLayer();
-
+        double local_lambda = 0.0; 
         // Calculate auxillary variable Aq
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
                 Aq_(i, j) = D2qDx2 + D2qDy2;
+                
+                // qₖᵀAqₖ
+                local_lambda += (*q_)(i, j) * Aq_(i, j);
             }
         }
 
-        double local_lambda = 0.0;        // λ = αₖ / qₖᵀAqₖ 
-        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
-            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                local_lambda += (*q_)(i, j) * Aq_(i, j);             // qₖᵀAqₖ
-            }
-        }
+        // λ = αₖ / qₖᵀAqₖ 
         double lambda = alpha / partitioning_->globalSum(local_lambda);
         iteration++;
 
-        // Update variables in the search direction
-        for (int i = pIIntBegin; i < pIIntEnd; i++) {
-            for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                
-                // pₖ₊₁ = pₖ + λ qₖ
-                discretization_->p(i, j)+= + lambda * (*q_)(i - pIBegin, j - pJBegin); 
-                
-                // rₖ₊₁ = rₖ - λ Aqₖ
-                residual_(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin) - lambda * Aq_(i - pIBegin ,j - pJBegin);
-            }
-        }
-
         double alphaold = alpha;
         local_alpha = 0.0;
-        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
-            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                local_alpha += residual_(i, j) * residual_(i, j); // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
+        // Update variables in the search direction
+        for (int i = pIIntBegin- pIBegin; i < pIIntEnd- pIBegin; i++) {
+            for (int j = pJIntBegin- pJBegin; j < pJIntEnd- pJBegin; j++) {
+                
+                // pₖ₊₁ = pₖ + λ qₖ
+                discretization_->p(i + pIBegin, j + pIBegin)+= lambda * (*q_)(i, j); 
+                
+                // rₖ₊₁ = rₖ - λ Aqₖ
+                residual_(i , j) -= lambda * Aq_(i ,j);
+                
+                // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
+                local_alpha += pow(residual_(i, j) ,2); 
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
