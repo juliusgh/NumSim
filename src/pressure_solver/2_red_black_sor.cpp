@@ -54,7 +54,7 @@ void RedBlackSOR::solve() {
                 discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
             }
         }
-        GhostLayer();
+        pGhostLayer();
 
         // red half step
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
