@@ -189,21 +189,26 @@ void ComputationParallel::applyBoundaryValues() {
     MPI_Request request_v_rightColumn; // send to right - receive from left
     MPI_Request request_v_leftColumn; // send to left - receive from right
     MPI_Request request_v_topRow; // send to top - receive from bottom
-    MPI_Request request_v_bottomRow; //senf to bottom - reiceive from top
+    MPI_Request request_v_bottomRow; //send to bottom - reiceive from top
     std::vector<double> v_rightColumn(v_columnCount, 0);
     std::vector<double> v_leftColumn(v_columnCount, 0);
     std::vector<double> v_topRow(v_rowCount, 0);
     std::vector<double> v_bottomRow(v_rowCount, 0);
 
-    MPI_Request request_u_rightColumn;
-    MPI_Request request_u_leftColumn;
-    MPI_Request request_u_topRow;
-    MPI_Request request_u_bottomRow;
+    MPI_Request request_u_rightColumn; // send to right - receive from left
+    MPI_Request request_u_leftColumn; // send to left - receive from right
+    MPI_Request request_u_topRow; // send to top - receive from bottom
+    MPI_Request request_u_bottomRow; //send to bottom - reiceive from top
     std::vector<double> u_rightColumn(u_columnCount, 0);
     std::vector<double> u_leftColumn(u_columnCount, 0);
     std::vector<double> u_topRow(u_rowCount, 0);
     std::vector<double> u_bottomRow(u_rowCount, 0);
 
+    /*
+    * velocities u and v communication: send to and receive from subdomain directly above 
+    * current subdomain if current subdomain is not on upper boundary. 
+    * If subdomain touches upper domain boundary, boundary conditions are applied.
+    */
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         applyBoundaryValuesTop();
     }
@@ -225,6 +230,11 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromTop(u_topRow, u_rowCount, request_u_topRow);
     }
 
+    /*
+    * velocities u and v communication: send to and receive from subdomain directly below 
+    * current subdomain if current subdomain is not on upper boundary. 
+    * If subdomain touches lower domain boundary, boundary conditions are applied.
+    */
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         applyBoundaryValuesBottom();
     }
@@ -246,8 +256,14 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromBottom(u_bottomRow, u_rowCount, request_u_bottomRow);
     }
 
-    // after that set left and right boundary values (high priority)
-
+    /*
+    * after that set left and right boundary values (high priority)
+    */
+    /*
+    * velocities u and v communication: send to and receive from subdomain directly right of 
+    * current subdomain if current subdomain is not on upper boundary. 
+    * If subdomain touches right domain boundary, boundary conditions are applied.
+    */
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         applyBoundaryValuesRight();
     }
@@ -269,7 +285,11 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromRight( v_rightColumn, v_columnCount, request_v_rightColumn);
         partitioning_->irecvFromRight( u_rightColumn, u_columnCount, request_u_rightColumn);
     }
-
+    /*
+    * velocities u and v communication: send to and receive from subdomain directly left of 
+    * current subdomain if current subdomain is not on upper boundary. 
+    * If subdomain touches left domain boundary, boundary conditions are applied.
+    */
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         applyBoundaryValuesLeft();
     }
@@ -294,8 +314,12 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->irecvFromLeft(u_leftColumn, u_columnCount, request_u_leftColumn);
     }
 
-    // set top and bottom ghost layers first (low priority)
-
+    /*
+    set top and bottom ghost layers first (low priority)
+    */
+   /* 
+   * Set subdomain ghost layer at top for velocities
+   */
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         // wait until all MPI requests from the top neighbour are finished
         partitioning_->wait(request_v_topRow);
@@ -309,7 +333,10 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(i, uJEnd - 1) = u_topRow.at(i - u_rowOffset);
         }
     }
-
+    
+    /* 
+    * Set subdomain ghost layer at bottom for velocities
+    */
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         // wait until all MPI requests from the bottom neighbour are finished
         partitioning_->wait(request_v_bottomRow);
@@ -324,8 +351,12 @@ void ComputationParallel::applyBoundaryValues() {
         }
     }
 
-    // after that set left and right boundary values (high priority)
-
+    /*
+    * after that set left and right boundary values (high priority)
+    */
+    /* 
+    * Set subdomain ghost layer at right side for velocities
+    */
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         // wait until all MPI requests from the right neighbour are finished
         partitioning_->wait(request_v_rightColumn);
@@ -341,7 +372,9 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(uIEnd - 1, j) = u_rightColumn.at(j - u_columnOffset);
         }
     }
-
+    /* 
+    * Set subdomain ghost layer at left side for velocities
+    */
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         // wait until all MPI requests from the left neighbour are finished
         partitioning_->wait(request_v_leftColumn);
@@ -360,7 +393,8 @@ void ComputationParallel::applyBoundaryValues() {
 }
 
 /**
- * Compute the time step width dt based on the maximum velocities
+ * Compute the time step width dt based on the maximum velocities 
+ * over all subdomains 
  */
 void ComputationParallel::computeTimeStepWidth() {
     const double dx =  discretization_->dx();
