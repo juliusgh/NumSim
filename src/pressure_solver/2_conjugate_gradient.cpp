@@ -20,26 +20,25 @@ PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, parti
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */
 void ConjugateGradient::solve() {
-    static const double dx2 = pow(discretization_->dx(), 2);
-    static const double dy2 = pow(discretization_->dy(), 2);
-    static const double eps2 = pow(epsilon_, 2);
-    static const int pIBegin = discretization_->pIBegin();
-    static const int pJBegin = discretization_->pJBegin();
-    static const int pIEnd = discretization_->pIEnd();
-    static const int pJEnd = discretization_->pJEnd();
-    static const int pIIntBegin = discretization_->pInteriorIBegin();
-    static const int pJIntBegin = discretization_->pInteriorJBegin();
-    static const int pIIntEnd = discretization_->pInteriorIEnd();
-    static const int pJIntEnd = discretization_->pInteriorJEnd();
-    static const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
+    const double dx2 = pow(discretization_->dx(), 2);
+    const double dy2 = pow(discretization_->dy(), 2);
+    const double eps2 = pow(epsilon_, 2);
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
 
     pGhostLayer();
     Array2D residual_ = Array2D(discretization_->pSize());
     Array2D Aq_ = Array2D(discretization_->pSize()); 
 
     int iteration = 0;
-
-    double local_alpha = 0.0;  
+    // Initialization Loop
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
             double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
@@ -49,9 +48,14 @@ void ConjugateGradient::solve() {
             
             // set search direction to preconditioned defect q = z
             (*q_)(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin);
-            
-            // Calculate initial alpha value
-            local_alpha += pow(residual_(i - pIBegin, j - pJBegin), 2); // α₀ = r₀ᵀ r₀
+        }
+    }
+
+    double local_alpha = 0.0;  
+    // Calculate initial alpha value
+    for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+        for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
+            local_alpha += residual_(i, j) * residual_(i, j); // α₀ = r₀ᵀ r₀
         }
     }
     double alpha = partitioning_->globalSum(local_alpha);
@@ -61,36 +65,42 @@ void ConjugateGradient::solve() {
         qGhostLayer();
 
         // Calculate auxillary variable Aq
-        double local_lambda = 0.0; 
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
                 double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
                 double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
-
                 Aq_(i, j) = D2qDx2 + D2qDy2;
-                local_lambda += (*q_)(i, j) * Aq_(i, j);   // qₖᵀAqₖ
             }
         }
-        // λ = αₖ / qₖᵀAqₖ 
+
+        double local_lambda = 0.0;        // λ = αₖ / qₖᵀAqₖ 
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
+                local_lambda += (*q_)(i, j) * Aq_(i, j);             // qₖᵀAqₖ
+            }
+        }
         double lambda = alpha / partitioning_->globalSum(local_lambda);
         iteration++;
 
         // Update variables in the search direction
+        for (int i = pIIntBegin; i < pIIntEnd; i++) {
+            for (int j = pJIntBegin; j < pJIntEnd; j++) {
+                
+                // pₖ₊₁ = pₖ + λ qₖ
+                discretization_->p(i, j)+= + lambda * (*q_)(i - pIBegin, j - pJBegin); 
+                
+                // rₖ₊₁ = rₖ - λ Aqₖ
+                residual_(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin) - lambda * Aq_(i - pIBegin ,j - pJBegin);
+            }
+        }
+
         double alphaold = alpha;
         local_alpha = 0.0;
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                // pₖ₊₁ = pₖ + λ qₖ
-                discretization_->p(i + pIBegin, j + pJBegin) += lambda * (*q_)(i, j - pJBegin); 
-                
-                // rₖ₊₁ = rₖ - λ Aqₖ
-                residual_(i, j) -= lambda * Aq_(i ,j);
-                
-                // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
-                local_alpha += pow(residual_(i, j) , 2); 
+                local_alpha += residual_(i, j) * residual_(i, j); // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
             }
         }
-
         alpha = partitioning_->globalSum(local_alpha);
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
@@ -114,18 +124,18 @@ void ConjugateGradient::solve() {
  *  Implementation of horizontal communication of pressure values between neighbouring subdomains
  */
 void ConjugateGradient::qGhostLayer() {
-    static const int pInteriorIBegin = discretization_->pInteriorIBegin();
-    static const int pInteriorIEnd = discretization_->pInteriorIEnd();
-    static const int pInteriorJBegin = discretization_->pInteriorJBegin();
-    static const int pInteriorJEnd = discretization_->pInteriorJEnd();
-    static const int pIBegin = discretization_->pIBegin();
-    static const int pJBegin = discretization_->pJBegin();
-    static const int pIEnd = discretization_->pIEnd();
-    static const int pJEnd = discretization_->pJEnd();
-    static const int pIIntBegin = discretization_->pInteriorIBegin();
-    static const int pJIntBegin = discretization_->pInteriorJBegin();
-    static const int pIIntEnd = discretization_->pInteriorIEnd();
-    static const int pJIntEnd = discretization_->pInteriorJEnd();
+    const int pInteriorIBegin = discretization_->pInteriorIBegin();
+    const int pInteriorIEnd = discretization_->pInteriorIEnd();
+    const int pInteriorJBegin = discretization_->pInteriorJBegin();
+    const int pInteriorJEnd = discretization_->pInteriorJEnd();
+    const int pIBegin = discretization_->pIBegin();
+    const int pJBegin = discretization_->pJBegin();
+    const int pIEnd = discretization_->pIEnd();
+    const int pJEnd = discretization_->pJEnd();
+    const int pIIntBegin = discretization_->pInteriorIBegin();
+    const int pJIntBegin = discretization_->pInteriorJBegin();
+    const int pIIntEnd = discretization_->pInteriorIEnd();
+    const int pJIntEnd = discretization_->pInteriorJEnd();
 
     int p_columnCount = pInteriorJEnd - pInteriorJBegin;
     int p_columnOffset = pInteriorJBegin;
