@@ -22,8 +22,8 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Comm_rank(MPI_COMM_WORLD, &ownRankNo_);
 
     // Partition the domain
-    // MPI_Dims_create(nRanks_, 2, nDomains_.data());
-    partitionDomainEqual(nRanks_);
+    MPI_Dims_create(nRanks_, 2, nDomains_.data());
+    // partitionDomainEqual(nRanks_);
 
 
 

@@ -75,9 +75,9 @@ void OutputWriterParaviewParallel::gatherData()
       p_(iGlobal,jGlobal) = discretization_->p().interpolateAtParallel(x,y,partitioning_);
 
 
-      if (((i==0) && (j==0)) || ((i==0) && (j==jEnd-1)) || ((i==iEnd -1) && (j==0)) || ((i==iEnd -1) && (j==jEnd-1))){
-        p_(iGlobal,jGlobal) = 0.5;
-      }
+      // if (((i==0) && (j==0)) || ((i==0) && (j==jEnd-1)) || ((i==iEnd -1) && (j==0)) || ((i==iEnd -1) && (j==jEnd-1))){
+      //   p_(iGlobal,jGlobal) = 0.5;
+      // }
     }
   }
 
