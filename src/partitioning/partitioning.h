@@ -81,6 +81,10 @@ public:
     std::array<int, 2> nodeOffset() const;
     void log(const char* message);
 private:
+
+    void partitionDomain(int nRanks);
+    void partitionDomainEqual(int nRanks);
+
     int columnsBegin() const;
     int columnsEnd() const;
     int rowsBegin() const;

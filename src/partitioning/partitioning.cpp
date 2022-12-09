@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <cmath>
 #include "partitioning/partitioning.h"
 
 /**
@@ -21,7 +22,10 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Comm_rank(MPI_COMM_WORLD, &ownRankNo_);
 
     // Partition the domain
-    MPI_Dims_create(nRanks_, 2, nDomains_.data());
+    // MPI_Dims_create(nRanks_, 2, nDomains_.data());
+    partitionDomainEqual(nRanks_);
+
+
 
 #ifndef NDEBUG
     if (ownRankNo() == 0) {
@@ -67,6 +71,59 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     std::cout << "RANK " << ownRankNo() << " | nodeOffset_[0]: " << nodeOffset_[0] << ", nodeOffset_[1]: " << nodeOffset_[1] << std::endl;
 #endif
 }
+
+
+void Partitioning::partitionDomain(int nRanks){
+    int optimalX = nRanks; 
+    int optimalY = 1;
+
+    // Ratio between the length of the subdomains in x and y direction should be near 1
+    double best_cost = (2 * (nCellsGlobal_[0]/optimalX) + 2 * (nCellsGlobal_[1]/optimalY)) / (nCellsGlobal_[0]/optimalX) * (nCellsGlobal_[1]/optimalY);
+
+    // Iterrate over all possible combinations of partitionings
+    for (int testY = 1; testY < nRanks+1; testY++){
+
+        if ((nRanks % testY) == 0){
+            int testX = nRanks / testY;
+
+            double cost = (2 *(nCellsGlobal_[0]/testX) + 2 * (nCellsGlobal_[1]/testY)) / (nCellsGlobal_[0]/testX) * (nCellsGlobal_[1]/testY);
+
+            if (cost < best_cost){
+                best_cost = cost;
+                optimalY = testY;
+                optimalX = testX;
+            }
+        }
+    }
+    nDomains_={optimalX,optimalY};
+}
+
+void Partitioning::partitionDomainEqual(int nRanks){
+    int optimalX = nRanks; 
+    int optimalY = 1;
+
+    // Ratio between the length of the subdomains in x and y direction should be near 1
+    double best_cost = fabs((nCellsGlobal_[0]/optimalX) / (nCellsGlobal_[1]/optimalY)-1.0);
+
+    // Iterrate over all possible combinations of partitionings
+    for (int testY = 1; testY < nRanks+1; testY++){
+
+        if ((nRanks % testY) == 0){
+            int testX = nRanks / testY;
+
+            double cost = (nCellsGlobal_[0]/testX) / (nCellsGlobal_[1]/testY);
+
+            if (fabs(cost - 1.0) < best_cost){
+                best_cost = cost;
+                optimalY = testY;
+                optimalX = testX;
+            }
+        }
+    }
+
+    nDomains_={optimalX, optimalY};
+}
+
 
 /**
  * get column index of subdomain
