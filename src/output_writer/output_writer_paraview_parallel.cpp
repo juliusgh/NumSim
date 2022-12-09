@@ -76,7 +76,7 @@ void OutputWriterParaviewParallel::gatherData()
 
 
       if (((i==0) && (j==0)) || ((i==0) && (j==jEnd-1)) || ((i==iEnd -1) && (j==0)) || ((i==iEnd -1) && (j==jEnd-1))){
-        //u_(iGlobal,jGlobal) = 0.5;
+        p_(iGlobal,jGlobal) = 0.5;
       }
     }
   }
