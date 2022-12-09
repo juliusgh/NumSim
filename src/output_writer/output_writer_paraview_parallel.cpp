@@ -28,8 +28,6 @@ OutputWriterParaviewParallel::OutputWriterParaviewParallel(std::shared_ptr<Discr
 
 void OutputWriterParaviewParallel::gatherData()
 {
- // std::array<int,2> size, std::array<double,2> origin, std::array<double,2> meshWidth
-
   int nPointsGlobalTotal = nPointsGlobal_[0] * nPointsGlobal_[1];
   const double dx = discretization_->meshWidth()[0];
   const double dy = discretization_->meshWidth()[1];
@@ -55,10 +53,6 @@ void OutputWriterParaviewParallel::gatherData()
   v_.setToZero();
   p_.setToZero();
 
-  // partitioning_->log(" Processor");
-  // std::cout << iEnd << " , " << discretization_->uSize()[0] << " , Begin/End " << discretization_->uIBegin() << "/" << discretization_->uIEnd() << " , InteriorB/E " << discretization_->uInteriorIBegin() << "/"<< discretization_->uInteriorIEnd() << std::endl;
-  // std::cout << jEnd << " , " << discretization_->uSize()[1] << " , Begin/End " << discretization_->uJBegin() << "/" << discretization_->uJEnd() << " , InteriorB/E " << discretization_->uInteriorJBegin() << "/"<< discretization_->uInteriorJEnd() << std::endl;
-
   for (int j = 0; j < jEnd; j++)
   {
     for (int i = 0; i < iEnd; i++)
@@ -74,10 +68,6 @@ void OutputWriterParaviewParallel::gatherData()
       v_(iGlobal,jGlobal) = discretization_->v().interpolateAtParallel(x,y,partitioning_);
       p_(iGlobal,jGlobal) = discretization_->p().interpolateAtParallel(x,y,partitioning_);
 
-
-      // if (((i==0) && (j==0)) || ((i==0) && (j==jEnd-1)) || ((i==iEnd -1) && (j==0)) || ((i==iEnd -1) && (j==jEnd-1))){
-      //   p_(iGlobal,jGlobal) = 0.5;
-      // }
     }
   }
 

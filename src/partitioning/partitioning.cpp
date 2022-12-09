@@ -22,6 +22,11 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Comm_rank(MPI_COMM_WORLD, &ownRankNo_);
 
     // Partition the domain
+    /*
+     * The following routine is only optimal for a quadratic domain.
+     * However, for some reason we achieved better results than by using
+     * our optimization procedure partitionDomainEqual.
+     */
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
     // partitionDomainEqual(nRanks_);
 
@@ -83,7 +88,7 @@ void Partitioning::partitionDomain(int nRanks){
     // Ratio between the length of the subdomains in x and y direction should be near 1
     double best_cost = (2 * (nCellsGlobal_[0]/optimalX) + 2 * (nCellsGlobal_[1]/optimalY)) / (nCellsGlobal_[0]/optimalX) * (nCellsGlobal_[1]/optimalY);
 
-    // Iterrate over all possible combinations of partitionings
+    // Iterate over all possible combinations of partitionings
     for (int testY = 1; testY < nRanks+1; testY++){
 
         if ((nRanks % testY) == 0){
@@ -98,7 +103,7 @@ void Partitioning::partitionDomain(int nRanks){
             }
         }
     }
-    nDomains_={optimalX,optimalY};
+    nDomains_ = { optimalX, optimalY };
 }
 
 /**
@@ -128,7 +133,7 @@ void Partitioning::partitionDomainEqual(int nRanks){
         }
     }
 
-    nDomains_={optimalX, optimalY};
+    nDomains_ = { optimalX, optimalY };
 }
 
 

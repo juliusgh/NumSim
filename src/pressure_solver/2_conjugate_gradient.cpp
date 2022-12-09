@@ -114,7 +114,7 @@ void ConjugateGradient::solve() {
 }
 
 /**
- *  Implementation of communication of pressure values between neighbouring subdomains
+ *  Implementation of communication of search directions q between neighbouring subdomains
  */
 void ConjugateGradient::qGhostLayer() {
     const int pInteriorIBegin = discretization_->pInteriorIBegin();
@@ -123,12 +123,6 @@ void ConjugateGradient::qGhostLayer() {
     const int pInteriorJEnd = discretization_->pInteriorJEnd();
     const int pIBegin = discretization_->pIBegin();
     const int pJBegin = discretization_->pJBegin();
-    const int pIEnd = discretization_->pIEnd();
-    const int pJEnd = discretization_->pJEnd();
-    const int pIIntBegin = discretization_->pInteriorIBegin();
-    const int pJIntBegin = discretization_->pInteriorJBegin();
-    const int pIIntEnd = discretization_->pInteriorIEnd();
-    const int pJIntEnd = discretization_->pInteriorJEnd();
 
     int p_columnCount = pInteriorJEnd - pInteriorJBegin;
     int p_columnOffset = pInteriorJBegin;
@@ -145,7 +139,7 @@ void ConjugateGradient::qGhostLayer() {
     std::vector<double> p_bottomRow(p_rowCount, 0);
 
     /*
-    * pressure p communication: send to and receive from subdomain directly above 
+    * search directions q communication: send to and receive from subdomain directly above
     * current subdomain if current subdomain is not on upper boundary. 
     * If subdomain touches upper domain boundary, boundary conditions are applied.
     */
@@ -181,8 +175,8 @@ void ConjugateGradient::qGhostLayer() {
         // receive ghost layer row on the bottom from bottom neighbour
         partitioning_->irecvFromBottom(p_bottomRow, p_rowCount, request_p_bottomRow);
     }
-#    /*
-    * pressure p communication: send to and receive from subdomain directly right of 
+    /*
+    * search directions q communication: send to and receive from subdomain directly right of
     * current subdomain if current subdomain is not on upper boundary. 
     * If subdomain touches right domain boundary, boundary conditions are applied.
     */
@@ -220,7 +214,7 @@ void ConjugateGradient::qGhostLayer() {
         partitioning_->irecvFromLeft(p_leftColumn, p_columnCount, request_p_leftColumn);
     }
     /* 
-    * Set subdomain ghost layer at top for pressure
+    * Set subdomain ghost layer at top for search directions q
     */
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         partitioning_->wait(request_p_topRow);
@@ -230,7 +224,7 @@ void ConjugateGradient::qGhostLayer() {
     }
 
     /* 
-    * Set subdomain ghost layer at bottom for pressure
+    * Set subdomain ghost layer at bottom for search directions q
     */
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         partitioning_->wait(request_p_bottomRow);
@@ -240,7 +234,7 @@ void ConjugateGradient::qGhostLayer() {
     }
 
     /* 
-    * Set subdomain ghost layer at right for pressure
+    * Set subdomain ghost layer at right for search directions q
     */
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         partitioning_->wait(request_p_rightColumn);
@@ -250,7 +244,7 @@ void ConjugateGradient::qGhostLayer() {
     }
 
     /* 
-    * Set subdomain ghost layer at left for pressure
+    * Set subdomain ghost layer at left for search directions q
     */
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);

@@ -48,7 +48,6 @@ void RedBlackSOR::solve() {
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             int iStart = pInteriorIBegin + (j + offset) % 2;
             for (int i = iStart; i < pInteriorIEnd; i += 2) {
-                //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
                 discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));
@@ -60,7 +59,6 @@ void RedBlackSOR::solve() {
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             int iStart = pInteriorIBegin + (j + 1 + offset) % 2;
             for (int i = iStart; i < pInteriorIEnd; i += 2) {
-                //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
                 discretization_->p(i, j) = k1 * discretization_->p(i, j) + k2 * (px + py - discretization_->rhs(i, j));

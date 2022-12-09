@@ -33,7 +33,6 @@ void RedBlack::solve() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pJBegin()) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
-                //std::cout << "BLACK: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
                 discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
@@ -46,7 +45,6 @@ void RedBlack::solve() {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             int iStart = discretization_->pInteriorIBegin() + (j - discretization_->pInteriorJBegin()) % 2;
             for (int i = iStart; i < discretization_->pInteriorIEnd(); i += 2) {
-                //std::cout << "RED: i = " << i << ", j = " << j << std::endl;
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;
                 double py = (discretization_->p(i, j - 1) + discretization_->p(i, j + 1)) / dy2;
                 discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
