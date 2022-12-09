@@ -1,15 +1,21 @@
-#include "output_writer/output_writer_text.h"
+#include "output_writer/output_writer_text_parallel.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 
-void OutputWriterText::writeFile(double currentTime)
+OutputWriterTextParallel::OutputWriterTextParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning)
+: OutputWriterText(discretization), partitioning_(partitioning)
+{
+
+}
+
+void OutputWriterTextParallel::writeFile(double currentTime)
 {
   // Assemble the filename
   std::stringstream fileName;
-  fileName << "out/output_" << std::setw(4) << std::setfill('0') << fileNo_ << ".txt";
+  fileName << "out/output_" << std::setw(4) << std::setfill('0') << fileNo_ << "." << partitioning_->ownRankNo() << ".txt";
   
   // increment file no.
   fileNo_++;
@@ -172,14 +178,14 @@ void OutputWriterText::writeFile(double currentTime)
 
 }
 
-void OutputWriterText::writePressureFile()
+void OutputWriterTextParallel::writePressureFile()
 {
   // counter for files, counter value is part of the file name
   static int pressurefileNo = 0;
 
   // Assemble the filename
   std::stringstream fileName;
-  fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << ".txt";
+  fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << "." << partitioning_->ownRankNo() << ".txt";
   
   // open file
   std::ofstream file(fileName.str().c_str());

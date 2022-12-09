@@ -1,6 +1,9 @@
 #pragma once
 
-#include "storage/fieldvariable.h"
+#include <cassert>
+#include <memory>
+#include "storage/field_variable.h"
+#include "partitioning/partitioning.h"
 
 /**
  * Implement staggered grid, providing a variety of parameters
@@ -13,7 +16,7 @@ public:
     * @param nCells: number of cells
     * @param meshWidth: cell width in all directions
     */
-    StaggeredGrid(std::array<int, 2> nCells,
+    StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                   std::array<double, 2> meshWidth);
     
     /**
@@ -85,6 +88,11 @@ public:
      * evaluate field variable p in an element (i,j)
     */
      double & p(int i, int j);
+
+    /**
+     * Number of ghost layers for p in x direction (each left and right)
+    */
+     //int pIGhost() const;
     
     /**
      * first valid index for p in x direction
@@ -95,6 +103,11 @@ public:
      * one after last valid index for p in x direction
     */
      int pIEnd() const;
+
+    /**
+     * Number of ghost layers for p in y direction (each bottom and top)
+    */
+    int pJGhost() const;
     
     /**
      * first valid index for p in y direction
@@ -314,6 +327,7 @@ public:
 protected:
     const std::array<double, 2> meshWidth_;
     const std::array<int, 2> nCells_;
+    std::shared_ptr<Partitioning> partitioning_;
     FieldVariable f_;
     FieldVariable g_;
     FieldVariable p_;

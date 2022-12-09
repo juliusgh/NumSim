@@ -1,11 +1,134 @@
 #include <gtest/gtest.h>
-#include "storage/fieldvariable.h"
+#include "storage/field_variable.h"
 #include "discretization/2_central_differences.h"
+#include "discretization/2_donor_cell.h"
 #include "pressure_solver/1_sor.h"
 #include "pressure_solver/1_gauss_seidel.h"
+#include "partitioning/partitioning.h"
 #include <cmath>
 
-TEST(FieldVariableTest, InterpolationCheck1) {
+TEST(MPITest, PartitioningCheck1) {
+    auto size = std::array<int, 2>{10, 10};
+    auto partitioning = std::make_shared<Partitioning>(size);
+    std::cout << "own rank no: " << partitioning->ownRankNo() << std::endl;
+    ASSERT_EQ(4, partitioning->nRanks());
+    ASSERT_EQ(size[0] / 2, partitioning->nCellsLocal()[0]);
+    ASSERT_EQ(size[1] / 2, partitioning->nCellsLocal()[1]);
+    switch (partitioning->ownRankNo()) {
+        case 0:
+            ASSERT_EQ(1, partitioning->column());
+            ASSERT_EQ(1, partitioning->row());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 1:
+            ASSERT_EQ(2, partitioning->column());
+            ASSERT_EQ(1, partitioning->row());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 2:
+            ASSERT_EQ(1, partitioning->column());
+            ASSERT_EQ(2, partitioning->row());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+        case 3:
+            ASSERT_EQ(2, partitioning->column());
+            ASSERT_EQ(2, partitioning->row());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsLeftBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsRightBoundary());
+            ASSERT_EQ(true, partitioning->ownPartitionContainsTopBoundary());
+            ASSERT_EQ(false, partitioning->ownPartitionContainsBottomBoundary());
+            break;
+    }
+}
+
+TEST(MPITest, CommunicationCheck1) {
+    auto size = std::array<int, 2>{10, 10};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto partitioning_ = std::make_shared<Partitioning>(size);
+
+    ASSERT_EQ(4, partitioning_->nRanks());
+    ASSERT_EQ(size[0] / 2, partitioning_->nCellsLocal()[0]);
+    ASSERT_EQ(size[1] / 2, partitioning_->nCellsLocal()[1]);
+
+    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0);
+    int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
+    int columnOffset = discretization_->pInteriorJBegin();
+    int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
+    int rowOffset = discretization_->pInteriorIBegin();
+
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(i, j) = i + 10 * j + 100 * partitioning_->ownRankNo();
+        }
+    }
+
+    std::vector<double> rightColumn(columnCount, 0);
+    if (partitioning_->ownPartitionContainsLeftBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            rightColumn.at(j - columnOffset) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
+        }
+        partitioning_->sendToRight(rightColumn);
+    }
+    if (partitioning_->ownPartitionContainsRightBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        partitioning_->recvFromLeft(rightColumn, columnCount);
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(discretization_->pIBegin(), j) = rightColumn.at(j - columnOffset);
+            int i = 4;
+            ASSERT_EQ(i + 10 * j, discretization_->p(discretization_->pIBegin(), j));
+        }
+    }
+}
+
+TEST(MPITest, CommunicationCheck2) {
+    auto size = std::array<int, 2>{10, 10};
+    auto meshWidth = std::array<double, 2>{1.0, 1.0};
+    auto partitioning_ = std::make_shared<Partitioning>(size);
+
+    ASSERT_EQ(4, partitioning_->nRanks());
+    ASSERT_EQ(size[0] / 2, partitioning_->nCellsLocal()[0]);
+    ASSERT_EQ(size[1] / 2, partitioning_->nCellsLocal()[1]);
+
+    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0);
+    int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
+    int columnOffset = discretization_->pInteriorJBegin();
+    int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
+    int rowOffset = discretization_->pInteriorIBegin();
+
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(i, j) = i + 10 * j + 100 * partitioning_->ownRankNo();
+        }
+    }
+
+    MPI_Request request_p_rightColumn;
+    std::vector<double> rightColumn(columnCount, 0);
+    if (partitioning_->ownPartitionContainsLeftBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            rightColumn.at(j - columnOffset) = discretization_->p(discretization_->pInteriorIEnd() - 1, j);
+        }
+        partitioning_->isendToRight(rightColumn, request_p_rightColumn);
+    }
+    if (partitioning_->ownPartitionContainsRightBoundary() && partitioning_->ownPartitionContainsBottomBoundary()) {
+        partitioning_->irecvFromLeft(rightColumn, columnCount, request_p_rightColumn);
+        //partitioning_->wait(request_p_rightColumn);
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            discretization_->p(discretization_->pIBegin(), j) = rightColumn.at(j - columnOffset);
+            int i = 4;
+            ASSERT_EQ(i + 10 * j, discretization_->p(discretization_->pIBegin(), j));
+        }
+    }
+}
+
+/*TEST(FieldVariableTest, InterpolationCheck1) {
     auto size = std::array<int, 2>{3, 3};
     auto meshWidth = std::array<double, 2>{1.0, 1.0};
     auto origin = std::array<double, 2>{meshWidth[0], meshWidth[1]};
@@ -57,14 +180,15 @@ TEST(FieldVariableTest, InterpolationCheck) {
         }
     }
     //v_interp.print();
-}
+}*/
 
-TEST(SORTest, Test1) {
+/*TEST(SORTest, Test1) {
     auto nCells = std::array<int, 2>{3, 3};
     auto meshWidth = std::array<double, 2>{1, 1};
     auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
-    auto d = new CentralDifferences(nCells, meshWidth);
-    auto dRef = new CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    auto d = new CentralDifferences(partitioning, meshWidth);
+    auto dRef = new CentralDifferences(partitioning, meshWidth);
     for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
         for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
             dRef->p(i, j) = i + 10 * j;
@@ -96,8 +220,8 @@ TEST(SORTest, Test1) {
     double omega = 2.0 / (1.0 + sin(3.1 * meshWidth[0]));
     auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
     sor.solve();
-    /*std::cout << "Iterations "  << sor.iterations() << std::endl;
-    std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
+    std::cout << "Iterations "  << sor.iterations() << std::endl;
+    std::cout << "Norm "  << sor.residualNorm() << std::endl;
 
     //std::cout << "p = ..." << std::endl;
     d->p().print();
@@ -128,7 +252,7 @@ TEST(SORTest, Test1) {
         // check right boundary
         ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
     }
-}
+}*/
 
 
 /*TEST(GaussSeidelTest, Test1) {
@@ -196,12 +320,13 @@ TEST(SORTest, Test1) {
     }
 }*/
 
-TEST(DiscretizationTest, FirstOrder)
+/*TEST(DiscretizationTest, FirstOrder)
 {
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for p by p(x,y)=x*y
     for (int i = discr.pIBegin(); i < discr.pIEnd(); i++)
@@ -226,14 +351,15 @@ TEST(DiscretizationTest, FirstOrder)
             EXPECT_NEAR(discr.computeDpDy(i, j), x, 0.0000001);
         }
     }
-}
+}*/
 
-TEST(DiscretizationTest, SecondOrder)
+/*TEST(DiscretizationTest, SecondOrder)
 {
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -285,7 +411,8 @@ TEST(DiscretizationTest, FirstOrderSquared)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -335,7 +462,8 @@ TEST(DiscretizationTest, FirstOrderMixed)
     auto nCells = std::array<int, 2>{100, 100};
     auto meshWidth = std::array<double, 2>{0.2, 0.1};
 
-    CentralDifferences discr = CentralDifferences(nCells, meshWidth);
+    auto partitioning = std::make_shared<Partitioning>(nCells);
+    CentralDifferences discr = CentralDifferences(partitioning, meshWidth);
 
     // Assign values for v by v(x,y)=x*y
     for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
@@ -378,9 +506,303 @@ TEST(DiscretizationTest, FirstOrderMixed)
             EXPECT_NEAR(discr.computeDuvDx(i, j), 0, 0.0000001);
         }
     }
+}*/
+
+//################################################ Consistency Order ####################################################
+
+/*TEST(DiscretizationTest, ConsistencyOrder)
+{
+    double p_exact = 12;
+    int n_exact = pow(2, p_exact);
+    auto nCells_exact = std::array<int, 2>{n_exact, n_exact};
+    auto meshWidth_exact = std::array<double, 2>{1.0/n_exact, 1.0/n_exact};
+    double re = 1000.0;
+    double dt = 0.1;
+    double alpha = 0.0;
+
+    auto partitioning_exact = std::make_shared<Partitioning>(nCells_exact);
+    auto discr_exact = DonorCell(partitioning_exact, meshWidth_exact, alpha);
+    //auto discr_exact = CentralDifferences(nCells_exact, meshWidth_exact);
+
+    // Assign values for v by v(x,y)=x*y
+    for (int i = discr_exact.vIBegin(); i < discr_exact.vIEnd(); i++)
+    {
+        const double x = i * meshWidth_exact[0];
+        for (int j = discr_exact.vJBegin(); j < discr_exact.vJEnd(); j++)
+        {
+            const double y = j * meshWidth_exact[1];
+            discr_exact.v(i, j) = sin(x * 2.0 * M_PI) * cos(y * 2.0 * M_PI);
+        }
+    }
+    // Assign values for u by u(x,y)=x*y
+    for (int i = discr_exact.uIBegin(); i < discr_exact.uIEnd(); i++)
+    {
+        const double x = i * meshWidth_exact[0];
+        for (int j = discr_exact.uJBegin(); j < discr_exact.uJEnd(); j++)
+        {
+            const double y = j * meshWidth_exact[1];
+            discr_exact.u(i, j) = sin(x * 2.0 * M_PI) * cos(y * 2.0 * M_PI);
+        }
+    }
+
+    for (int i = discr_exact.uInteriorIBegin(); i < discr_exact.uInteriorIEnd(); i++) {
+        const double x = i * meshWidth_exact[0];
+        for (int j = discr_exact.uInteriorJBegin(); j < discr_exact.uInteriorJEnd(); j++) {
+            const double y = j * meshWidth_exact[1];
+            double lap_u = discr_exact.computeD2uDx2(i,j) + discr_exact.computeD2uDy2(i,j);
+            double conv_u = discr_exact.computeDu2Dx(i,j) + discr_exact.computeDuvDy(i,j);
+            // double f_num = discr_exact.u(i,j) + dt * (lap_u / re - conv_u);
+            double f_num = conv_u;
+            discr_exact.f(i,j) = f_num;
+        }
+    }
+
+    // Compute G in the interior of the domain
+    for (int i = discr_exact.vInteriorIBegin(); i < discr_exact.vInteriorIEnd(); i++) {
+        const double x = i * meshWidth_exact[0];
+        for (int j = discr_exact.vInteriorJBegin(); j < discr_exact.vInteriorJEnd(); j++) {
+            const double y = j * meshWidth_exact[1];
+            double lap_v = discr_exact.computeD2vDx2(i,j) + discr_exact.computeD2vDy2(i,j);
+            double conv_v = discr_exact.computeDv2Dy(i,j) + discr_exact.computeDuvDx(i,j);
+            double s1 = sin(2*M_PI*y);
+            double s2 = sin(2*M_PI*x);
+            double g_exact = s2*s1-pow(M_PI,2)*s2*s1/125
+                             -2*M_PI*cos(2*M_PI*x)*s2*pow(s1,2)/5-2*M_PI*cos(2*M_PI*y)*pow(s2,2)*s1/5;
+            double g_num = discr_exact.v(i,j) + dt * (lap_v / re - conv_v);
+            discr_exact.g(i,j) = g_num;
+        }
+    }
+
+    for (int p = 4; p < p_exact; p++) {
+        int n = pow(2, p);
+        auto nCells = std::array<int, 2>{n, n};
+        auto meshWidth = std::array<double, 2>{1.0/n, 1.0/n};
+
+        auto partitioning = std::make_shared<Partitioning>(nCells);
+        auto discr = DonorCell(partitioning, meshWidth, alpha);
+        // auto discr = CentralDifferences(nCells, meshWidth);
+
+        // Assign values for v by v(x,y)=x*y
+        for (int i = discr.vIBegin(); i < discr.vIEnd(); i++)
+        {
+            const double x = i * meshWidth[0];
+            for (int j = discr.vJBegin(); j < discr.vJEnd(); j++)
+            {
+                const double y = j * meshWidth[1];
+                discr.v(i, j) = sin(x * 2.0 * M_PI) * cos(y * 2.0 * M_PI);
+            }
+        }
+        // Assign values for u by u(x,y)=x*y
+        for (int i = discr.uIBegin(); i < discr.uIEnd(); i++)
+        {
+            const double x = i * meshWidth[0];
+            for (int j = discr.uJBegin(); j < discr.uJEnd(); j++)
+            {
+                const double y = j * meshWidth[1];
+                discr.u(i, j) = sin(x * 2.0 * M_PI) * cos(y * 2.0 * M_PI);
+            }
+        }
+
+        // Compute F in the interior of the domain
+        double f_error_norm2 = 0.0;
+        double f_norm2 = 0.0;
+        for (int i = discr.uInteriorIBegin(); i < discr.uInteriorIEnd(); i++) {
+            const double x = i * meshWidth[0];
+            for (int j = discr.uInteriorJBegin(); j < discr.uInteriorJEnd(); j++) {
+                const double y = j * meshWidth[1];
+                double lap_u = discr.computeD2uDx2(i,j) + discr.computeD2uDy2(i,j);
+                double conv_u = discr.computeDu2Dx(i,j) + discr.computeDuvDy(i,j);
+                double s1 = sin(2*M_PI*y);
+                double s2 = sin(2*M_PI*x);
+                double f_exact = s2*s1-pow(M_PI,2)*s2*s1/125
+                        -2*M_PI*cos(2*M_PI*x)*s2*pow(s1,2)/5-2*M_PI*cos(2*M_PI*y)*pow(s2,2)*s1/5;
+                f_exact = discr_exact.f().interpolateAt(x, y);
+                double f_num = discr.u(i,j) + dt * (lap_u / re - conv_u);
+                //double f_num = conv_u;
+                double f_error = fabs(f_exact - f_num);
+                f_error_norm2 += pow(f_error, 2);
+                f_norm2 += pow(f_exact, 2);
+                discr.f(i,j) = f_error;
+            }
+        }
+
+        // Compute G in the interior of the domain
+        double g_error_norm2 = 0.0;
+        double g_norm2 = 0.0;
+        for (int i = discr.vInteriorIBegin(); i < discr.vInteriorIEnd(); i++) {
+            const double x = i * meshWidth[0];
+            for (int j = discr.vInteriorJBegin(); j < discr.vInteriorJEnd(); j++) {
+                const double y = j * meshWidth[1];
+                double lap_v = discr.computeD2vDx2(i,j) + discr.computeD2vDy2(i,j);
+                double conv_v = discr.computeDv2Dy(i,j) + discr.computeDuvDx(i,j);
+                double s1 = sin(2*M_PI*y);
+                double s2 = sin(2*M_PI*x);
+                double g_exact = s2*s1-pow(M_PI,2)*s2*s1/125
+                                 -2*M_PI*cos(2*M_PI*x)*s2*pow(s1,2)/5-2*M_PI*cos(2*M_PI*y)*pow(s2,2)*s1/5;
+                g_exact = discr_exact.g().interpolateAt(x, y);
+                double g_num = discr.v(i,j) + dt * (lap_v / re - conv_v);
+                double g_error = fabs(g_exact - g_num);
+                g_error_norm2 += pow(g_error, 2);
+                g_norm2 += pow(g_exact, 2);
+                discr.g(i,j) = g_error;
+            }
+        }
+        double f_error_norm = sqrt(f_error_norm2) / n;
+        double f_norm = sqrt(f_norm2) / n_exact;
+        double g_error_norm = sqrt(g_error_norm2) / n;
+        double g_norm = sqrt(g_norm2) / n_exact;
+        double f_rel_error = f_error_norm / f_norm;
+        double g_rel_error = g_error_norm / g_norm;
+        std::cout << "n = " << n << ", f_error = " << f_rel_error << ", g_error = " << g_rel_error << std::endl;
+    }
+
 }
 
+//############################################ SOR TEST ##################################################################
+
+/*TEST(SORTest, Test1) {
+    auto nCells = std::array<int, 2>{3, 3};
+    auto meshWidth = std::array<double, 2>{1, 1};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    auto d = new CentralDifferences(nCells, meshWidth);
+    auto dRef = new CentralDifferences(nCells, meshWidth);
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            dRef->p(i, j) = i + 10 * j;
+        }
+    }
+#ifndef NDEBUG
+    //std::cout << "p = ..." << std::endl;
+    //pRef.print();
+
+    // std::cout << "p = ..." << std::endl;
+    // d->p().print();
+
+    // std::cout << "pref = ..." << std::endl;
+    // pRef.print();
+#endif
+
+    for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
+        for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
+            d->rhs(i, j) = (dRef->p(i + 1, j) - 2.0 * dRef->p(i, j) + dRef->p(i - 1, j)) / pow(d->dx(),2) +
+                  (dRef->p(i, j + 1) - 2.0 * dRef->p(i, j) + dRef->p(i, j - 1)) / pow(d->dy(),2);
+        }
+    }
+    // std::cout << "rhs = ..." << std::endl;
+    dRef->p().print();
+    d->rhs().print();
+
+    double epsilon = 0.001;
+    int maximumNumberOfIterations = 1000;
+    double omega = 2.0 / (1.0 + sin(3.1 * meshWidth[0]));
+    auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
+    sor.solve();*/
+    /*std::cout << "Iterations "  << sor.iterations() << std::endl;
+    std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
+    /*
+    //std::cout << "p = ..." << std::endl;
+    d->p().print();
+
+    // check interior of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            EXPECT_NEAR(d->p(i, j), dRef->p(i, j), epsilon);
+        }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin()), d->p(i, d->pInteriorJBegin()));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
+    }
+}*/
+
+//######################################## Gauss Seidel Test ############################################################
+
+/*TEST(GaussSeidelTest, Test1) {
+    auto nCells = std::array<int, 2>{5, 10};
+    auto meshWidth = std::array<double, 2>{0.1, 0.05};
+    auto origin = std::array<double, 2>{meshWidth[0] / 2.0, meshWidth[1] / 2.0};
+    auto d = new CentralDifferences(nCells, meshWidth);
+    auto pRef = FieldVariable({nCells[0] + 2, nCells[1] + 2}, origin, meshWidth);
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            pRef(i, j) = 10 * i + j ;
+        }
+    }
+#ifndef NDEBUG
+    //std::cout << "p = ..." << std::endl;
+    //pRef.print();
+    //std::cout << "p = ..." << std::endl;
+    //d->p().print();
+
+    //std::cout << "pref = ..." << std::endl;
+    //pRef.print();
+#endif
+    for (int i = d->rhsInteriorIBegin(); i < d->rhsInteriorIEnd(); i++) {
+        for (int j = d->rhsInteriorJBegin(); j < d->rhsInteriorJEnd(); j++) {
+            double rhs = (pRef(i + 1, j) - 2 * pRef(i, j) + pRef(i - 1, j)) / pow(d->dx(),2) +
+                  (pRef(i, j + 1) - 2 * pRef(i, j) + pRef(i, j - 1)) / pow(d->dy(),2);
+            // std::cout << rhs << std::endl;
+            d->rhs(i, j) = rhs;
+        }
+    }
+#ifndef NDEBUG
+    //std::cout << "rhs = ..." << std::endl;
+    //d->rhs().print();
+#endif
+
+    double epsilon = 0.001;
+    int maximumNumberOfIterations = 1000;
+    auto gs = GaussSeidel(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations);
+    gs.solve();
+    // check interior of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+            EXPECT_NEAR(d->p(i, j), pRef(i, j), epsilon);
+        }
+    }
+
+    // check boundary of the domain
+    for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
+
+        // check right boundary
+        ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
+    }
+
+    // check boundary of the domain
+    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+
+        // check left boundary
+        ASSERT_EQ(d->p(i, d->pJBegin()), d->p(i, d->pInteriorJBegin()));
+
+        // check right boundary
+        ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
+    }
+}*/
+
 int main(int argc, char **argv) {
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int status = RUN_ALL_TESTS();
+    MPI_Finalize();
+    return status;
 }
