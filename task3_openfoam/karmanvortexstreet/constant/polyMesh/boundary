@@ -19,42 +19,42 @@ FoamFile
     inlet
     {
         type            patch;
-        nFaces          20;
-        startFace       3840;
+        nFaces          40;
+        startFace       15616;
     }
     outlet
     {
         type            patch;
-        nFaces          20;
-        startFace       3860;
+        nFaces          40;
+        startFace       15656;
     }
     obstacle
     {
         type            wall;
         inGroups        List<word> 1(wall);
-        nFaces          16;
-        startFace       3880;
+        nFaces          32;
+        startFace       15696;
     }
     upperWall
     {
         type            wall;
         inGroups        List<word> 1(wall);
-        nFaces          100;
-        startFace       3896;
+        nFaces          200;
+        startFace       15728;
     }
     lowerWall
     {
         type            wall;
         inGroups        List<word> 1(wall);
-        nFaces          100;
-        startFace       3996;
+        nFaces          200;
+        startFace       15928;
     }
     frontAndBack
     {
         type            empty;
         inGroups        List<word> 1(empty);
-        nFaces          3968;
-        startFace       4096;
+        nFaces          15872;
+        startFace       16128;
     }
 )
 
