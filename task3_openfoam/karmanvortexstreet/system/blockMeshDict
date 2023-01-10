@@ -63,17 +63,17 @@ vertices
 
 blocks
 (
-    hex (0 4 5 1 20 24 25 21) (8 8 1) simpleGrading (1 1 1)
-    hex (4 8 9 5 24 28 29 25) (4 8 1) simpleGrading (1 1 1)
-    hex (8 12 13 9 28 32 33 29) (8 8 1) simpleGrading (1 1 1)
-    hex (12 16 17 13 32 36 37 33) (80 8 1) simpleGrading (1 1 1)
-    hex (1 5 6 2 21 25 26 22) (8 4 1) simpleGrading (1 1 1)
-    hex (9 13 14 10 29 33 34 30) (8 4 1) simpleGrading (1 1 1)
-    hex (13 17 18 14 33 37 38 34) (80 4 1) simpleGrading (1 1 1)
-    hex (2 6 7 3 22 26 27 23) (8 8 1) simpleGrading (1 1 1)
-    hex (6 10 11 7 26 30 31 27) (4 8 1) simpleGrading (1 1 1)
-    hex (10 14 15 11 30 34 35 31) (8 8 1) simpleGrading (1 1 1)
-    hex (14 18 19 15 34 38 39 35) (80 8 1) simpleGrading (1 1 1)
+    hex (0 4 5 1 20 24 25 21) (16 16 1) simpleGrading (1 1 1)
+    hex (4 8 9 5 24 28 29 25) (8 16 1) simpleGrading (1 1 1)
+    hex (8 12 13 9 28 32 33 29) (16 16 1) simpleGrading (1 1 1)
+    hex (12 16 17 13 32 36 37 33) (160 16 1) simpleGrading (1 1 1)
+    hex (1 5 6 2 21 25 26 22) (16 8 1) simpleGrading (1 1 1)
+    hex (9 13 14 10 29 33 34 30) (16 8 1) simpleGrading (1 1 1)
+    hex (13 17 18 14 33 37 38 34) (160 8 1) simpleGrading (1 1 1)
+    hex (2 6 7 3 22 26 27 23) (16 16 1) simpleGrading (1 1 1)
+    hex (6 10 11 7 26 30 31 27) (8 16 1) simpleGrading (1 1 1)
+    hex (10 14 15 11 30 34 35 31) (16 16 1) simpleGrading (1 1 1)
+    hex (14 18 19 15 34 38 39 35) (160 16 1) simpleGrading (1 1 1)
 );
 /*
 blocks
