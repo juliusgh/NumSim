@@ -21,8 +21,24 @@ boundaryField
 {
     inlet
     {
-        type            fixedValue;
-        value           uniform (1 0 0);
+        //type            fixedValue;
+        //value           uniform (1.0 0 0);
+        type codedFixedValue;
+        value uniform (1.0 0 0);
+
+        name parabolicVelocity;
+        code 
+        #{
+            const vectorField& Cf = patch().Cf();
+            vectorField& field = *this;
+
+            const scalar Umax = 1.0;
+            forAll(Cf, faceI)
+            {
+                const scalar y = Cf[faceI][1];
+                field[faceI] = vector(Umax*(1-(((y-0.75)/0.25)*((y-0.75)/0.25))),0,0);
+            }
+        #};
     }
 
     outlet
