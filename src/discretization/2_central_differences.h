@@ -35,13 +35,28 @@ public:
    */
   virtual double computeDuvDx(int i, int j) const;
 
-/**
- * compute the 1st derivative ∂ (uv) / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
- * @return central differences derivative approximation of the derivative stated above
- */
+    /**
+  * compute the 1st derivative ∂ (uv) / ∂y
+  * @param i: discretized position in x direcetion
+  * @param j: discretiszed position in y direction
+  * @return central differences derivative approximation of the derivative stated above
+  */
   virtual double computeDuvDy(int i, int j) const;
 
+    /**
+   * compute the 1st derivative ∂ (ut) / ∂x
+   * @param i: discretized position in x direcetion
+   * @param j: discretiszed position in y direction
+   * @return central differences derivative approximation of the derivative stated above
+   */
+    virtual double computeDutDx(int i, int j) const;
+
+    /**
+  * compute the 1st derivative ∂ (vt) / ∂y
+  * @param i: discretized position in x direcetion
+  * @param j: discretiszed position in y direction
+  * @return central differences derivative approximation of the derivative stated above
+  */
+    virtual double computeDvtDy(int i, int j) const;
   
 };
