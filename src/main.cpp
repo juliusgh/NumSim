@@ -1,9 +1,10 @@
-#include "settings.h"
-#include "computation/computation.h"
+#ifndef NPARALLEL
+    #include "computation/1_computation_parallel.h"
+#else
+    #include "computation/0_computation.h"
+#endif
 #include <iostream>
-#include <cmath>
 #include <cstdlib>
-
 using namespace std;
 
 /**
@@ -11,7 +12,7 @@ using namespace std;
  * 
  * Call with the parameter file as command line argument.
  * If no argument is given the user is asked to specify the parameter file.
- * The output files are written to ../out/*
+ * The output files are written to ../out/
  */
 int main(int argc, char *argv[]) {
     // if the number of given command line arguments is only 1 (= the program name), print out usage information and exit
@@ -25,11 +26,18 @@ int main(int argc, char *argv[]) {
         // read in the first argument
         filename = argv[1];
     }
-
+#ifndef NPARALLEL
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
+    auto computation = ComputationParallel();
+#else
     auto computation = Computation();
+#endif
     computation.initialize(filename);
     computation.runSimulation();
-
+#ifndef NPARALLEL
+    MPI_Finalize();
+#endif
     return EXIT_SUCCESS;
 }
 

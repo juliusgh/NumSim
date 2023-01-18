@@ -18,6 +18,7 @@ public:
   */
   DonorCell(std::array<int,2> nCells, std::array<double,2> meshWidth, double alpha, double gamma);
 
+
   /**
   * compute the 1st derivative ∂ u^2 / ∂x
   * @param i: discretized position in x direcetion

@@ -1,15 +1,15 @@
-#include "discretization/0_staggered_grid.h"
 #include <iostream>
-#include <cassert>
+#include "discretization/0_staggered_grid.h"
 
 /**
  * Implement staggered grid, providing a variety of parameters
  * @param nCells: number of cells
  * @param meshWidth: cell width in all directions
  */
-StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
+StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                              std::array<double, 2> meshWidth) :
-    nCells_(nCells),
+    partitioning_(partitioning),
+    nCells_(partitioning->nCellsLocal()),
     meshWidth_(meshWidth),
     f_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     g_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
@@ -19,7 +19,7 @@ StaggeredGrid::StaggeredGrid(std::array<int, 2> nCells,
     v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
     t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth)
 {
-    
+
 };
 
 /**
@@ -196,7 +196,10 @@ double &StaggeredGrid::p(int i, int j)
  */
 int StaggeredGrid::uIBegin() const
 {
-    return -1;
+    if (partitioning_->ownPartitionContainsLeftBoundary()) {
+        return -1;
+    }
+    return -2;
 };
 
 /**
@@ -205,7 +208,10 @@ int StaggeredGrid::uIBegin() const
  */
 int StaggeredGrid::uIEnd() const
 {
-    return nCells_[0];
+    if (partitioning_->ownPartitionContainsRightBoundary()) {
+        return nCells_[0];
+    }
+    return nCells_[0] + 1;
 };
 
 /**
@@ -345,7 +351,10 @@ int StaggeredGrid::vIEnd() const
  */
 int StaggeredGrid::vJBegin() const
 {
-    return -1;
+    if (partitioning_->ownPartitionContainsBottomBoundary()) {
+        return -1;
+    }
+    return -2;
 };
 
 /**
@@ -354,7 +363,10 @@ int StaggeredGrid::vJBegin() const
  */
 int StaggeredGrid::vJEnd() const
 {
-    return nCells_[1];
+    if (partitioning_->ownPartitionContainsTopBoundary()) {
+        return nCells_[1];
+    }
+    return nCells_[1] + 1;
 };
 
 /**

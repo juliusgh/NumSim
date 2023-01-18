@@ -1,6 +1,7 @@
 #pragma once
 
 #include "discretization/1_discretization.h"
+#include "partitioning/partitioning.h"
 
 #include <memory>
 
@@ -10,10 +11,9 @@ class OutputWriter
 {
 public:
   //! constructor
-  //! @param discretization shared pointer to the discretization object that will contain all the data to be written to the file
   OutputWriter(std::shared_ptr<Discretization> discretization);
 
-    //! write current velocities to file, filename is output_<count>.vti
+  //! write current velocities to file, filename is output_<count>.vti
   virtual void writeFile(double currentTime) = 0;
 
 protected:

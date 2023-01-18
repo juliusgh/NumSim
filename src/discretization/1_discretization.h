@@ -1,7 +1,9 @@
 #pragma once
 
-#include "discretization/0_staggered_grid.h"
 #include <array>
+#include <memory>
+#include "discretization/0_staggered_grid.h"
+#include "partitioning/partitioning.h"
 
 /**
  * Calculate derivatives needed for velocity calculations
@@ -18,7 +20,7 @@ public:
    * @param nCells: number of inner cells
    * @param meshWidth: width of grid cell in one direction
    */
-  Discretization(std::array<int,2> nCells, std::array<double,2> meshWidth);
+  Discretization(std::shared_ptr<Partitioning> partitioning, std::array<double,2> meshWidth);
 
   /**
   * compute the 2nd derivative ∂^2 u / ∂x^2

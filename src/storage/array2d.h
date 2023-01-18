@@ -5,8 +5,8 @@
 
 /**
  * This class represents a 2D array of double values.
- *  Internally they are stored consecutively in memory.
- *  The entries can be accessed by two indices i,j.
+ * Internally they are stored consecutively in memory.
+ * The entries can be accessed by two indices i,j.
  */
 class Array2D
 {
@@ -40,6 +40,12 @@ public:
     double operator()(int i, int j) const;
 
     void print() const;
+
+    //! set all data of 2D array to zero
+    void setToZero();
+
+    //! return data vector
+    void *data();
 
 protected:
     std::vector<double> data_;      //< storage array values, in row-major order

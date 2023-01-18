@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+#include <iostream>
 #include "discretization/1_discretization.h"
 #include "pressure_solver/0_pressure_solver.h"
 

@@ -3,18 +3,12 @@
 
 /**
  *  calculate derivatives needed for pressure calculations using the central differences approach
- * @param nCells
- * @param meshWidth
- */
-
-/**
- *  calculate derivatives needed for pressure calculations using the central differences approach
  * @param nCells: number of inner cells
  * @param meshWidth: width of cells in all directions
  */
 
-CentralDifferences::CentralDifferences(std::array<int, 2> nCells, std::array<double, 2> meshWidth) :
-    Discretization(nCells, meshWidth)
+CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth) :
+    Discretization(partitioning, meshWidth)
 {
 
 }

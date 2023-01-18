@@ -36,7 +36,11 @@ protected:
      * set the boundary values to account for homogenous Neumann boundary conditions, this has to be called after every iteration
      */
     void setBoundaryValues();
-    void computeResidualNorm();
+    void setBoundaryValuesBottom();
+    void setBoundaryValuesTop();
+    void setBoundaryValuesLeft();
+    void setBoundaryValuesRight();
+    virtual void computeResidualNorm();
     std::shared_ptr<Discretization> discretization_;
     double epsilon_;
     int maximumNumberOfIterations_;

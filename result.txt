@@ -1,0 +1,78 @@
+-- The C compiler identification is GNU 10.2.0
+-- The CXX compiler identification is GNU 10.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/local.nfs/sgs/software/argon-tesla/gcc/10.2-openmp-custom/install/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local.nfs/sgs/software/argon-tesla/gcc/10.2-openmp-custom/install/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found MPI_C: /import/sgs.local/software/openmpi/3.1.6-gcc10.2/lib/libmpi.so (found version "3.1") 
+-- Found MPI_CXX: /import/sgs.local/software/openmpi/3.1.6-gcc10.2/lib/libmpi.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Could NOT find GTest (missing: GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY) 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found X11: /usr/include   
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so - found
+-- Looking for gethostbyname
+-- Looking for gethostbyname - found
+-- Looking for connect
+-- Looking for connect - found
+-- Looking for remove
+-- Looking for remove - found
+-- Looking for shmat
+-- Looking for shmat - found
+-- Looking for IceConnectionNumber in ICE
+-- Looking for IceConnectionNumber in ICE - found
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so  found components: OpenGL GLX 
+CMAKE_BUILD_TYPE: Release
+-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0/BoostConfig.cmake (found version "1.71.0") found components: filesystem system 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/schiztn/NumSim/build
+Scanning dependencies of target compare_output
+[  3%] Building CXX object src/CMakeFiles/compare_output.dir/comparison/main.cpp.o
+Scanning dependencies of target numsim_parallel
+[ 15%] Building CXX object src/CMakeFiles/numsim_parallel.dir/main.cpp.o
+[ 15%] Building CXX object src/CMakeFiles/numsim_parallel.dir/settings.cpp.o
+[ 15%] Building CXX object src/CMakeFiles/numsim_parallel.dir/computation/0_computation.cpp.o
+[ 23%] Building CXX object src/CMakeFiles/numsim_parallel.dir/computation/1_computation_parallel.cpp.o
+[ 23%] Building CXX object src/CMakeFiles/numsim_parallel.dir/partitioning/partitioning.cpp.o
+[ 30%] Building CXX object src/CMakeFiles/numsim_parallel.dir/storage/array2d.cpp.o
+[ 30%] Building CXX object src/CMakeFiles/numsim_parallel.dir/storage/field_variable.cpp.o
+[ 34%] Building CXX object src/CMakeFiles/numsim_parallel.dir/discretization/0_staggered_grid.cpp.o
+[ 38%] Building CXX object src/CMakeFiles/numsim_parallel.dir/discretization/2_central_differences.cpp.o
+[ 42%] Building CXX object src/CMakeFiles/numsim_parallel.dir/discretization/1_discretization.cpp.o
+[ 50%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/0_pressure_solver.cpp.o
+[ 50%] Building CXX object src/CMakeFiles/numsim_parallel.dir/discretization/2_donor_cell.cpp.o
+[ 53%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/1_pressure_solver_parallel.cpp.o
+[ 57%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/1_gauss_seidel.cpp.o
+[ 61%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/1_sor.cpp.o
+[ 69%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/2_conjugate_gradient.cpp.o
+[ 69%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/2_red_black.cpp.o
+[ 73%] Building CXX object src/CMakeFiles/numsim_parallel.dir/output_writer/output_writer.cpp.o
+[ 84%] Building CXX object src/CMakeFiles/numsim_parallel.dir/output_writer/output_writer_paraview.cpp.o
+[ 84%] Building CXX object src/CMakeFiles/numsim_parallel.dir/pressure_solver/2_red_black_sor.cpp.o
+[ 84%] Building CXX object src/CMakeFiles/numsim_parallel.dir/output_writer/output_writer_text.cpp.o
+[ 88%] Building CXX object src/CMakeFiles/numsim_parallel.dir/output_writer/output_writer_text_parallel.cpp.o
+[ 92%] Building CXX object src/CMakeFiles/numsim_parallel.dir/output_writer/output_writer_paraview_parallel.cpp.o
+[ 96%] Linking CXX executable numsim_parallel
+[ 96%] Built target numsim_parallel
+[100%] Linking CXX executable compare_output
+[100%] Built target compare_output
+[sgscl1n1:67230] mca_base_component_repository_open: unable to open mca_pmix_s1: libpmi.so.0: cannot open shared object file: No such file or directory (ignored)
+[sgscl1n3:43160] mca_base_component_repository_open: unable to open mca_pmix_s1: libpmi.so.0: cannot open shared object file: No such file or directory (ignored)
+[sgscl1n4:41861] mca_base_component_repository_open: unable to open mca_pmix_s1: libpmi.so.0: cannot open shared object file: No such file or directory (ignored)
+[sgscl1n2:60725] mca_base_component_repository_open: unable to open mca_pmix_s1: libpmi.so.0: cannot open shared object file: No such file or directory (ignored)

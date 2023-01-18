@@ -1,6 +1,7 @@
 #pragma once
 
 #include "storage/array2d.h"
+#include "partitioning/partitioning.h"
 
 /**
  * A field variable is the discretization of a scalar function f(x) with x in the computational domain.
@@ -23,6 +24,9 @@ public:
     
     // interpolate at arbitrary position
     double interpolateAt(double x, double y) const;
+
+    // interpolate at arbitrary position
+    double interpolateAtParallel(double x, double y, std::shared_ptr<Partitioning> partitioning) const;
 
     double absMax() const;
 

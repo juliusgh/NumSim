@@ -1,6 +1,4 @@
 #include "pressure_solver/1_gauss_seidel.h"
-#include <cmath>
-#include <iostream>
 
 /**
  * Standard Gauss-Seidel solver for linear systems of equations.
