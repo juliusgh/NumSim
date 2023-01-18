@@ -46,7 +46,7 @@ void OutputWriterParaview::writeFile(double currentTime)
 
   // Set the number of temperature values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
   arrayTemperature->SetNumberOfTuples(dataSet->GetNumberOfPoints());
-  
+  std::cout << "write temperature" << std::endl;
   arrayTemperature->SetName("temperature");
 
   // loop over the nodes of the mesh and assign the interpolated T values in the vtk data structure
@@ -85,7 +85,7 @@ void OutputWriterParaview::writeFile(double currentTime)
   // loop over the nodes of the mesh and assign the interpolated p values in the vtk data structure
   // we only consider the cells that are the actual computational domain, not the helper values in the "halo"
 
-  int index = 0;   // index for the vtk data structure, will be incremented in the inner loop
+  index = 0;   // index for the vtk data structure, will be incremented in the inner loop
   for (int j = 0; j < nCells[1]+1; j++)
   {
     for (int i = 0; i < nCells[0]+1; i++, index++)
