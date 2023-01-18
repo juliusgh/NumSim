@@ -15,12 +15,14 @@ OutputWriterParaviewParallel::OutputWriterParaviewParallel(std::shared_ptr<Discr
   // create field variables for resulting values, only for local data as send buffer
   u_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
   v_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
-  p_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
+   p_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
+   t_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
   
   // create field variables for resulting values, after MPI communication
   uGlobal_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
   vGlobal_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
-  pGlobal_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth())
+   pGlobal_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth()),
+tGlobal_(nPointsGlobal_, std::array<double,2>{0.,0.}, discretization_->meshWidth())
 {
   // Create a vtkWriter_
   vtkWriter_ = vtkSmartPointer<vtkXMLImageDataWriter>::New();
@@ -51,7 +53,8 @@ void OutputWriterParaviewParallel::gatherData()
 
   u_.setToZero();
   v_.setToZero();
-  p_.setToZero();
+    p_.setToZero();
+    t_.setToZero();
 
   for (int j = 0; j < jEnd; j++)
   {
@@ -66,7 +69,8 @@ void OutputWriterParaviewParallel::gatherData()
 
       u_(iGlobal,jGlobal) = discretization_->u().interpolateAtParallel(x,y,partitioning_);
       v_(iGlobal,jGlobal) = discretization_->v().interpolateAtParallel(x,y,partitioning_);
-      p_(iGlobal,jGlobal) = discretization_->p().interpolateAtParallel(x,y,partitioning_);
+        p_(iGlobal,jGlobal) = discretization_->p().interpolateAtParallel(x,y,partitioning_);
+        t_(iGlobal,jGlobal) = discretization_->t().interpolateAtParallel(x,y,partitioning_);
 
     }
   }
@@ -75,7 +79,8 @@ void OutputWriterParaviewParallel::gatherData()
   // sum up values from all ranks, not set values are zero
   MPI_Reduce(u_.data(), uGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   MPI_Reduce(v_.data(), vGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  MPI_Reduce(p_.data(), pGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(p_.data(), pGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(t_.data(), pGlobal_.data(), nPointsGlobalTotal, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
 }
 
@@ -112,39 +117,69 @@ void OutputWriterParaviewParallel::writeFile(double currentTime)
 
   // set number of points in each dimension, 1 cell in z direction
   dataSet->SetDimensions(nCellsGlobal_[0]+1, nCellsGlobal_[1]+1, 1);  // we want to have points at each corner of each cell
-  
 
-  // add pressure field variable
-  // ---------------------------
-  vtkSmartPointer<vtkDoubleArray> arrayPressure = vtkDoubleArray::New();
 
-  // the pressure is a scalar which means the number of components is 1
-  arrayPressure->SetNumberOfComponents(1);
+    // add pressure field variable
+    // ---------------------------
+    vtkSmartPointer<vtkDoubleArray> arrayPressure = vtkDoubleArray::New();
 
-  // Set the number of pressure values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
-  arrayPressure->SetNumberOfTuples(dataSet->GetNumberOfPoints());
-  
-  arrayPressure->SetName("pressure");
+    // the pressure is a scalar which means the number of components is 1
+    arrayPressure->SetNumberOfComponents(1);
 
-  // loop over the nodes of the mesh and assign the interpolated p values in the vtk data structure
-  // we only consider the cells that are the actual computational domain, not the helper values in the "halo"
+    // Set the number of pressure values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
+    arrayPressure->SetNumberOfTuples(dataSet->GetNumberOfPoints());
 
-  int index = 0;   // index for the vtk data structure, will be incremented in the inner loop
-  for (int j = 0; j < nCellsGlobal_[1]+1; j++)
-  {
-    for (int i = 0; i < nCellsGlobal_[0]+1; i++, index++)
+    arrayPressure->SetName("pressure");
+
+    // loop over the nodes of the mesh and assign the interpolated p values in the vtk data structure
+    // we only consider the cells that are the actual computational domain, not the helper values in the "halo"
+
+    int index = 0;   // index for the vtk data structure, will be incremented in the inner loop
+    for (int j = 0; j < nCellsGlobal_[1]+1; j++)
     {
-      arrayPressure->SetValue(index, pGlobal_(i,j));
+        for (int i = 0; i < nCellsGlobal_[0]+1; i++, index++)
+        {
+            arrayPressure->SetValue(index, pGlobal_(i,j));
+        }
     }
-  }
 
-  // now, we should have added as many values as there are points in the vtk data structure
-  assert(index == dataSet->GetNumberOfPoints());
+    // now, we should have added as many values as there are points in the vtk data structure
+    assert(index == dataSet->GetNumberOfPoints());
 
-  // add the field variable to the data set
-  dataSet->GetPointData()->AddArray(arrayPressure);
-  
-  // add velocity field variable
+    // add the field variable to the data set
+    dataSet->GetPointData()->AddArray(arrayPressure);
+
+// add temperature field variable
+    // ---------------------------
+    vtkSmartPointer<vtkDoubleArray> arrayTemperature = vtkDoubleArray::New();
+
+    // the pressure is a scalar which means the number of components is 1
+    arrayPressure->SetNumberOfComponents(1);
+
+    // Set the number of pressure values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
+    arrayPressure->SetNumberOfTuples(dataSet->GetNumberOfPoints());
+
+    arrayPressure->SetName("temperature");
+
+    // loop over the nodes of the mesh and assign the interpolated p values in the vtk data structure
+    // we only consider the cells that are the actual computational domain, not the helper values in the "halo"
+
+    index = 0;   // index for the vtk data structure, will be incremented in the inner loop
+    for (int j = 0; j < nCellsGlobal_[1]+1; j++)
+    {
+        for (int i = 0; i < nCellsGlobal_[0]+1; i++, index++)
+        {
+            arrayTemperature->SetValue(index, tGlobal_(i,j));
+        }
+    }
+
+    // now, we should have added as many values as there are points in the vtk data structure
+    assert(index == dataSet->GetNumberOfPoints());
+
+    // add the field variable to the data set
+    dataSet->GetPointData()->AddArray(arrayTemperature);
+
+    // add velocity field variable
   // ---------------------------
   vtkSmartPointer<vtkDoubleArray> arrayVelocity = vtkDoubleArray::New();
 

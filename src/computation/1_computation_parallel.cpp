@@ -32,7 +32,7 @@ void ComputationParallel::initialize(string filename)
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha);
+        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma);
     }
     else {
         discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_);

@@ -23,12 +23,24 @@ struct Settings
     double alpha = 0.5;                //< factor for donor-cell scheme
     double gamma = alpha;                //< factor for donor-cell for temperature
 
-
+    // velocity boundary conditions
     array<double,2> dirichletBcBottom;  //< prescribed values of u,v at bottom of domain
     array<double,2> dirichletBcTop;     //< prescribed values of u,v at top of domain
     array<double,2> dirichletBcLeft;    //< prescribed values of u,v at left of domain
     array<double,2> dirichletBcRight;   //< prescribed values of u,v at right of domain
 
+    // temperature initial condition
+    double initialTemp = 293.0; // in Kelvin, 293K = 20°C
+
+    // temperature boundary conditions
+    bool setFixedTempBottom = false;
+    double tempBcBottom = 0.0;  //< prescribed values of tb or tn at bottom of domain
+    bool setFixedTempTop = false;
+    double tempBcTop = 0.0;  //< prescribed values of tb or tn at top of domain
+    bool setFixedTempLeft = false;
+    double tempBcLeft = 0.0;  //< prescribed values of tb or tn at left of domain
+    bool setFixedTempRight = false;
+    double tempBcRight = 0.0;  //< prescribed values of tb or tn at right of domain
 
     string pressureSolver = "SOR";      //< which pressure solver to use, "GaussSeidel" or "SOR"
     double omega = 1.0;                //< overrelaxation factor

@@ -59,7 +59,7 @@ TEST(MPITest, CommunicationCheck1) {
     ASSERT_EQ(size[0] / 2, partitioning_->nCellsLocal()[0]);
     ASSERT_EQ(size[1] / 2, partitioning_->nCellsLocal()[1]);
 
-    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0);
+    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0, 0.0);
     int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int columnOffset = discretization_->pInteriorJBegin();
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();
@@ -97,7 +97,7 @@ TEST(MPITest, CommunicationCheck2) {
     ASSERT_EQ(size[0] / 2, partitioning_->nCellsLocal()[0]);
     ASSERT_EQ(size[1] / 2, partitioning_->nCellsLocal()[1]);
 
-    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0);
+    auto discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth, 0.0, 0.0);
     int columnCount = discretization_->pInteriorJEnd() - discretization_->pInteriorJBegin();
     int columnOffset = discretization_->pInteriorJBegin();
     int rowCount = discretization_->pInteriorIEnd() - discretization_->pInteriorIBegin();

@@ -26,7 +26,7 @@ public:
 
 private:
 
-  //! gather u,v and p values from all ranks to rank 0 and store them in the global field variables
+  //! gather u,v,p and t values from all ranks to rank 0 and store them in the global field variables
   void gatherData();
 
   vtkSmartPointer<vtkXMLImageDataWriter> vtkWriter_;   //< vtk writer to write ImageData
@@ -38,9 +38,11 @@ private:
 
   FieldVariable u_;    // field variable for u with global size, contains only the local values, other entries are 0
   FieldVariable v_;    // field variable for v with global size, contains only the local values, other entries are 0
-  FieldVariable p_;    // field variable for p with global size, contains only the local values, other entries are 0
+    FieldVariable p_;    // field variable for p with global size, contains only the local values, other entries are 0
+    FieldVariable t_;    // field variable for t with global size, contains only the local values, other entries are 0
 
   FieldVariable uGlobal_;    // on rank 0: field variable for u that gathers values from all ranks, on other ranks: nullptr
   FieldVariable vGlobal_;    // on rank 0: field variable for v that gathers values from all ranks, on other ranks: nullptr
-  FieldVariable pGlobal_;    // on rank 0: field variable for p that gathers values from all ranks, on other ranks: nullptr
+    FieldVariable pGlobal_;    // on rank 0: field variable for p that gathers values from all ranks, on other ranks: nullptr
+    FieldVariable tGlobal_;    // on rank 0: field variable for t that gathers values from all ranks, on other ranks: nullptr
 };
