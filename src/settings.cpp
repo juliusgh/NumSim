@@ -26,33 +26,6 @@ void Settings::loadFromFile(string filename) {
         if (file.eof())
             break;
 
-        /*string parameterName;
-        string value;
-        // skip line if it starts with "#" or does not include "=" or line is empty
-        if (line[0] != '#' && line.find("=") && line.length()!=0) {
-            std::string info = line;
-            // remove comments from the line
-            info.erase(line.find("#"),std::string::npos);
-
-            parameterName = info.substr(0,info.find("="));
-            if (parameterName.find_first_of(" \t") != std::string::npos)
-            {
-                parameterName.erase(parameterName.find_first_of(" \t"));
-            }
-
-            value = info.substr(info.find("=")+1,std::string::npos);
-            value.erase(0,value.find_first_not_of(" \t"));
-            if (value.find_first_of(" \t") != std::string::npos)
-            {
-                value.erase(value.find_first_of(" \t"));
-            }
-
-            std::cout << "Parameter \""<< parameterName << "\" has the value: \"" << value << "\""<< std::endl;
-        }*/
-
-        // print line
-        //cout << "line " << lineNo << ": " << line << endl;
-
         // remove whitespace at beginning of line (if there is any)
         if (line.find_first_of(" \t") != string::npos)
         {
@@ -111,6 +84,10 @@ void Settings::loadFromFile(string filename) {
             re = atof(value.c_str());
             continue;
         }
+        if (parameterName == "beta") {
+            beta = atof(value.c_str());
+            continue;
+        }
         if (parameterName == "endTime") {
             endTime = atof(value.c_str());
             continue;
@@ -137,6 +114,10 @@ void Settings::loadFromFile(string filename) {
         }
         if (parameterName == "alpha") {
             alpha = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "gamma") {
+            gamma = atof(value.c_str());
             continue;
         }
         if (parameterName == "dirichletBottomX") {
@@ -194,11 +175,11 @@ void Settings::printSettings()
 {
     cout << "Settings: " << endl
               << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x " << nCells[1] << endl
-              << "  endTime: " << endTime << " s, re: " << re << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
+              << "  endTime: " << endTime << " s, re: " << re << " beta: " << beta << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
               << "  dirichletBC: bottom: (" << dirichletBcBottom[0] << "," << dirichletBcBottom[1]  << ")"
               << ", top: ("  << dirichletBcTop[0] << "," << dirichletBcTop[1]  << ")"
               << ", left: ("  << dirichletBcLeft[0] << "," << dirichletBcLeft[1] << ")"
               << ", right: ("  << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << endl
-              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << endl
+              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << ", gamma: " << gamma << endl
               << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon << ", maximumNumberOfIterations: " << maximumNumberOfIterations << endl;
 }
