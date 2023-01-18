@@ -76,6 +76,11 @@ protected:
      */
     virtual void computeVelocities();
 
+    /**
+     * Compute new temperature t
+     */
+    virtual void computeTemperature();
+
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;
     std::shared_ptr<Partitioning> partitioning_;
