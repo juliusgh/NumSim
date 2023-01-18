@@ -11,8 +11,8 @@ struct Settings
     array<int,2> nCells;          //< number of cells in x and y direction
     array<double,2> physicalSize; //< physical size of the domain
     double re = 1000;                  //< Reynolds number
-    double pr = 0.7;                   //< Prandtl number
-    double beta = 0.2;                  //< volume expansion coefficient
+    double pr = 1;                   //< Prandtl number
+    double beta = 0.0;                  //< volume expansion coefficient
     double endTime = 10.0;             //< end time of the simulation
     double tau = 0.5;                  //< safety factor for time step width
     double maximumDt = 0.1;            //< maximum time step width
@@ -21,7 +21,7 @@ struct Settings
 
     bool useDonorCell = false;         //< if the donor cell scheme should be used
     double alpha = 0.5;                //< factor for donor-cell scheme
-    double gamma = 0.5;                //< factor for donor-cell for temperature
+    double gamma = alpha;                //< factor for donor-cell for temperature
 
 
     array<double,2> dirichletBcBottom;  //< prescribed values of u,v at bottom of domain

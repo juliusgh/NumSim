@@ -75,6 +75,11 @@ void Computation::runSimulation() {
         time += dt_;
 
         /*
+         * 2.5) Compute Temperature t
+         */
+        computeTemperature();
+
+        /*
         * 3) Compute preliminary velocities (F, G)
         */
         computePreliminaryVelocities();
@@ -228,7 +233,9 @@ void Computation::computePreliminaryVelocities(){
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
             double lap_u = discretization_->computeD2uDx2(i,j) + discretization_->computeD2uDy2(i,j);
             double conv_u = discretization_->computeDu2Dx(i,j) + discretization_->computeDuvDy(i,j);
-            discretization_->f(i,j) = discretization_->u(i,j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
+            double f_tilde = discretization_->u(i,j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
+            double t_interp_right = (discretization_->t(i,j) - discretization_->t(i+1,j)) / 2.0;
+            discretization_->f(i,j) = f_tilde - dt_ + settings_.beta * settings_.g[0]  * t_interp_right;
         }
     }
 
@@ -237,7 +244,9 @@ void Computation::computePreliminaryVelocities(){
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             double lap_v = discretization_->computeD2vDx2(i,j) + discretization_->computeD2vDy2(i,j);
             double conv_v = discretization_->computeDv2Dy(i,j) + discretization_->computeDuvDx(i,j);
-            discretization_->g(i,j) = discretization_->v(i,j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
+            double g_tilde = discretization_->v(i,j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
+            double t_interp_up = (discretization_->t(i,j) - discretization_->t(i,j + 1)) / 2.0;
+            discretization_->g(i,j) = g_tilde - dt_ + settings_.beta * settings_.g[1]  * t_interp_up;
         }
     }
 };
@@ -268,7 +277,7 @@ void Computation::computeRightHandSide() {
  */
 void Computation::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
-    double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
+    double dt_diff = settings_.re * settings_.pr / 2 / (1 / (discretization_->dx() * discretization_->dx()) + 1 / (discretization_->dy() * discretization_->dy()) );
 
     // Compute maximal time step width regarding the convection u
     double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
@@ -277,7 +286,8 @@ void Computation::computeTimeStepWidth() {
     double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
 
     // Set the appropriate time step width by using a security factor tau
-    dt_ = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
+    double computed_dt = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
+    dt_ = std::min({settings_.maximumDt, computed_dt});
 };
 
 /**
@@ -295,6 +305,14 @@ void Computation::computeVelocities() {
     for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
             discretization_->v(i, j) = discretization_->g(i, j) - dt_ * discretization_->computeDpDy(i, j);
+        }
+    }
+};
+
+void Computation::computeTemperature() {
+    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
+        for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
+            discretization_->t(i, j) = discretization_->t(i, j) - dt_ * (1 / (settings_.pr * settings_.re) * (discretization_->computeD2tD2x(i,j)+ discretization_->computeD2tD2y(i,j)) - discretization_->computeDutDx(i,j) - discretization_->computeDvtDy(i,j) + discretization_->q(i,j))  ;
         }
     }
 };
