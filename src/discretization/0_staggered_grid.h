@@ -320,9 +320,69 @@ public:
      double & rhs(int i, int j);
 
     /**
-    * get a reference to field variable u
+    * get a reference to field variable rhs
     */
      const FieldVariable & rhs() const;
+
+    /**
+    * get reference to field variable t
+    */
+    const FieldVariable & t() const;
+
+    /**
+     * evaluate field variable t in an element (i,j)
+    */
+    double t(int i, int j) const;
+
+    /**
+     * evaluate field variable t in an element (i,j)
+    */
+    double & t(int i, int j);
+
+    /**
+     * first valid index for t in x direction
+    */
+    int tIBegin() const;
+
+    /**
+     * one after last valid index for t in x direction
+    */
+    int tIEnd() const;
+
+    /**
+     * first valid index for t in y direction
+    */
+    int tJBegin() const;
+
+    /**
+     * one after last valid index for t in y direction
+    */
+    int tJEnd() const;
+
+    /**
+     * get size of FieldVariable t
+    */
+    std::array<int, 2> tSize() const;
+
+    /**
+     * first valid Interior index for t in x direction
+   */
+    int tInteriorIBegin() const;
+
+    /**
+     * one after last valid Interior index for t in x direction
+    */
+    int tInteriorIEnd() const;
+
+    /**
+     * first valid Interior index for t in y direction
+    */
+    int tInteriorJBegin() const;
+
+    /**
+     * one after last valid Interior index for t in y direction
+    */
+    int tInteriorJEnd() const;
 
 protected:
     const std::array<double, 2> meshWidth_;
@@ -334,4 +394,5 @@ protected:
     FieldVariable rhs_;
     FieldVariable u_;
     FieldVariable v_;
+    FieldVariable t_;
 };

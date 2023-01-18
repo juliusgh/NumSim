@@ -84,6 +84,10 @@ void Settings::loadFromFile(string filename) {
             re = atof(value.c_str());
             continue;
         }
+        if (parameterName == "beta") {
+            beta = atof(value.c_str());
+            continue;
+        }
         if (parameterName == "endTime") {
             endTime = atof(value.c_str());
             continue;
@@ -110,6 +114,10 @@ void Settings::loadFromFile(string filename) {
         }
         if (parameterName == "alpha") {
             alpha = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "gamma") {
+            gamma = atof(value.c_str());
             continue;
         }
         if (parameterName == "dirichletBottomX") {
@@ -167,11 +175,11 @@ void Settings::printSettings()
 {
     cout << "Settings: " << endl
               << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x " << nCells[1] << endl
-              << "  endTime: " << endTime << " s, re: " << re << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
+              << "  endTime: " << endTime << " s, re: " << re << " beta: " << beta << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
               << "  dirichletBC: bottom: (" << dirichletBcBottom[0] << "," << dirichletBcBottom[1]  << ")"
               << ", top: ("  << dirichletBcTop[0] << "," << dirichletBcTop[1]  << ")"
               << ", left: ("  << dirichletBcLeft[0] << "," << dirichletBcLeft[1] << ")"
               << ", right: ("  << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << endl
-              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << endl
+              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << ", gamma: " << gamma << endl
               << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon << ", maximumNumberOfIterations: " << maximumNumberOfIterations << endl;
 }

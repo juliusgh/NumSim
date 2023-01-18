@@ -67,3 +67,21 @@ double Discretization::computeDpDx(int i, int j) const {
 double Discretization::computeDpDy(int i, int j) const {
     return (p(i,j+1) - p(i,j)) / dy();
 };
+/**
+* compute the 2nd derivative ∂²t / ∂x²
+* @param i: discretized position in x direcetion
+* @param j: discretized position in y direction
+* @return derivative approximation of the derivative stated above
+*/
+double Discretization::computeD2tD2x(int i, int j) const {
+    return (t(i+1,j) -  2.0 * t(i,j) + t(i-1,j)) / (dx() * dx());
+};
+/**
+* compute the 2nd derivative ∂²t / ∂y²
+* @param i: discretized position in x direcetion
+* @param j: discretized position in y direction
+* @return derivative approximation of the derivative stated above
+*/
+double Discretization::computeD2tD2y(int i, int j) const {
+    return (t(i,j+1) -  2.0 * t(i,j) + t(i,j-1)) / (dy() * dy());
+};

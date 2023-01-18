@@ -70,3 +70,30 @@ double CentralDifferences::computeDuvDy(int i, int j) const {
 
     return (u_interp_up * v_interp_right - u_interp_down * vDown_interp_right) / dy();
 }
+
+/**
+ * compute the 1st derivative ∂ (ut) / ∂x
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return central differences derivative approximation of the derivative stated above
+ */
+double CentralDifferences::computeDutDx(int i, int j) const {
+    const double t_interp_right = (t(i+1,j) + t(i,j)) / 2.0;
+    const double t_interp_left = (t(i,j) + t(i-1,j)) / 2.0;
+
+    return (u(i,j) * t_interp_right - u(i-1,j) * t_interp_left) / dx();
+}
+
+/**
+ * compute the 1st derivative ∂ (vt) / ∂y
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return central differences derivative approximation of the derivative stated above
+ */
+double CentralDifferences::computeDvtDy(int i, int j) const {
+    const double t_interp_up = (t(i,j+1) + t(i,j)) / 2.0;
+    const double t_interp_down = (t(i,j) + t(i,j-1)) / 2.0;
+
+    return (v(i,j) * t_interp_up- v(i,j-1) * t_interp_down) / dy();
+}
+

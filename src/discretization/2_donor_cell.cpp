@@ -8,9 +8,10 @@
    * @param alpha: donor cell weight parameter
    */
 
-DonorCell::DonorCell(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth, double alpha) :
-    Discretization(partitioning, meshWidth),
-    alpha_(alpha)
+DonorCell::DonorCell(std::array<int, 2> nCells, std::array<double, 2> meshWidth, double alpha, double gamma) :
+    Discretization(nCells, meshWidth),
+    alpha_(alpha),
+    gamma_(gamma)
 {
     
 }
@@ -95,4 +96,42 @@ double DonorCell::computeDuvDy(int i, int j) const {
     const double B = (u_interp_up_donor * fabs(v_interp_right) -  u_interp_down_donor * fabs(vDown_interp_right)) / dy();
 
     return A + alpha_ * B;
+}
+
+/**
+ * compute the 1st derivative ∂ (ut) / ∂x
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return central differences derivative approximation of the derivative stated above
+ */
+double DonorCell::computeDutDx(int i, int j) const {
+    const double t_interp_right = (t(i+1,j) + t(i,j)) / 2.0;
+    const double t_interp_left = (t(i,j) + t(i-1,j)) / 2.0;
+
+    const double t_interp_right_donor = (t(i,j) - t(i+1,j)) / 2.0;
+    const double t_interp_left_donor = (t(i-1,j) - t(i,j)) / 2.0;
+
+    const double A = (u(i,j) * t_interp_right - u(i-1,j) * t_interp_left) / dx();
+    const double B = (fabs(u(i,j)) * t_interp_right_donor - fabs(u(i-1,j)) * t_interp_left_donor) / dx();
+
+    return A + gamma_ * B;
+}
+
+/**
+ * compute the 1st derivative ∂ (vt) / ∂y
+ * @param i: discretized position in x direcetion
+ * @param j: discretiszed position in y direction
+ * @return central differences derivative approximation of the derivative stated above
+ */
+double DonorCell::computeDvtDy(int i, int j) const {
+    const double t_interp_up = (t(i, j + 1) + t(i, j)) / 2.0;
+    const double t_interp_down = (t(i, j) + t(i, j - 1)) / 2.0;
+
+    const double t_interp_up_donor = (t(i, j) - t(i, j+1)) / 2.0;
+    const double t_interp_down_donor = (t(i, j-1) - t(i, j)) / 2.0;
+
+    const double A = (v(i, j) * t_interp_up - v(i, j - 1) * t_interp_down) / dy();
+    const double B = (fabs(v(i,j)) * t_interp_up_donor - fabs(v(i,j-1)) * t_interp_down_donor) / dy();
+
+    return A + gamma_ * B;
 }
