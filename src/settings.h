@@ -10,7 +10,8 @@ struct Settings
 {
     array<int,2> nCells;          //< number of cells in x and y direction
     array<double,2> physicalSize; //< physical size of the domain
-    double re = 1000;                  //< reynolds number
+    double re = 1000;                  //< Reynolds number
+    double pr = 0.7;                   //< Prandtl number
     double beta = 0.2;                  //< volume expansion coefficient
     double endTime = 10.0;             //< end time of the simulation
     double tau = 0.5;                  //< safety factor for time step width

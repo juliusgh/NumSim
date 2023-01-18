@@ -17,7 +17,8 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
     rhs_(rhsSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
     u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
     v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
-    t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth)
+    t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+    q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth)
 {
 
 };
@@ -800,4 +801,128 @@ double &StaggeredGrid::t(int i, int j)
     assert((tJBegin() <= j) && (j <= tJEnd()));
 #endif
     return t_(i - tIBegin(), j - tJBegin());
+};
+
+/**
+ * sources and sinks for the heat equation q
+ */
+
+/**
+ * get first valid index for q in x direction
+ * @return first valid index for q in x direction
+ */
+int StaggeredGrid::qIBegin() const
+{
+    return -1;
+};
+
+/**
+ * get one after last valid index for q in x direction
+ * @return one after last valid index for q in x direction
+ */
+int StaggeredGrid::qIEnd() const
+{
+    return nCells_[0] + 1;
+};
+
+/**
+ * get first valid index for q in y direction
+ * @return first valid index for q in y direction
+ */
+int StaggeredGrid::qJBegin() const
+{
+    return -1;
+};
+
+/**
+ * get one after last valid index for q in y direction
+ * @return one after last valid index for q in y direction
+ */
+int StaggeredGrid::qJEnd() const
+{
+    return nCells_[1] + 1;
+};
+
+/**
+ * get size of FieldVariable t
+ * @return size of FieldVariable t
+ */
+std::array<int, 2> StaggeredGrid::qSize() const
+{
+    return {qIEnd() - qIBegin(), qJEnd() - qJBegin()};
+}
+
+/**
+ * get first valid Interior index for q in x direction
+ * @return first valid Interior index for q in x direction
+ */
+int StaggeredGrid::qInteriorIBegin() const
+{
+    return qIBegin() + 1;
+};
+
+/**
+ * get one after last valid Interior index for q in x direction
+ * @return one after last valid Interior index for q in x direction
+ */
+int StaggeredGrid::qInteriorIEnd() const
+{
+    return qIEnd() - 1;
+};
+
+/**
+ * get first valid Interior index for q in y direction
+ * @return first valid Interior index for q in y direction
+ */
+int StaggeredGrid::qInteriorJBegin() const
+{
+    return qJBegin() + 1;
+};
+
+/**
+ * get first valid Interior index for q in y direction
+ * @return first valid Interior index for q in y direction
+ */
+int StaggeredGrid::qInteriorJEnd() const
+{
+    return qJEnd() - 1;
+};
+
+/**
+ * get reference to field variable t
+ * @return reference to field variable t
+ */
+const FieldVariable &StaggeredGrid::q() const
+{
+    return q_;
+};
+
+/**
+ * evaluate field variable q in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable q in an element (i,j)
+ */
+double StaggeredGrid::q(int i, int j) const
+{
+#ifndef NDEBUG
+    assert((qIBegin() <= i) && (i <= qIEnd()));
+    assert((qJBegin() <= j) && (j <= qJEnd()));
+#endif
+    return q_(i - qIBegin(), j - qJBegin());
+};
+
+/**
+ * evaluate field variable q in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable q in an element (i,j)
+ */
+double &StaggeredGrid::q(int i, int j)
+{
+#ifndef NDEBUG
+    assert((qIBegin() <= i) && (i <= qIEnd()));
+    assert((qJBegin() <= j) && (j <= qJEnd()));
+#endif
+    return q_(i - qIBegin(), j - qJBegin());
 };

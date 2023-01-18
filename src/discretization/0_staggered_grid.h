@@ -384,6 +384,67 @@ public:
     */
     int tInteriorJEnd() const;
 
+    /**
+    * get reference to field variable q
+    */
+    const FieldVariable & q() const;
+
+    /**
+     * evaluate field variable q in an element (i,j)
+    */
+    double q(int i, int j) const;
+
+    /**
+     * evaluate field variable q in an element (i,j)
+    */
+    double & q(int i, int j);
+
+    /**
+     * first valid index for q in x direction
+    */
+    int qIBegin() const;
+
+    /**
+     * one after last valid index for q in x direction
+    */
+    int qIEnd() const;
+
+    /**
+     * first valid index for q in y direction
+    */
+    int qJBegin() const;
+
+    /**
+     * one after last valid index for q in y direction
+    */
+    int qJEnd() const;
+
+    /**
+     * get size of FieldVariable q
+    */
+    std::array<int, 2> qSize() const;
+
+    /**
+     * first valid Interior index for q in x direction
+   */
+    int qInteriorIBegin() const;
+
+    /**
+     * one after last valid Interior index for q in x direction
+    */
+    int qInteriorIEnd() const;
+
+    /**
+     * first valid Interior index for q in y direction
+    */
+    int qInteriorJBegin() const;
+
+    /**
+     * one after last valid Interior index for q in y direction
+    */
+    int qInteriorJEnd() const;
+
+
 protected:
     const std::array<double, 2> meshWidth_;
     const std::array<int, 2> nCells_;
@@ -395,4 +456,5 @@ protected:
     FieldVariable u_;
     FieldVariable v_;
     FieldVariable t_;
+    FieldVariable q_;
 };

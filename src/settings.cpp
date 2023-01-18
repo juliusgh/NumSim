@@ -84,6 +84,10 @@ void Settings::loadFromFile(string filename) {
             re = atof(value.c_str());
             continue;
         }
+        if (parameterName == "pr") {
+            pr = atof(value.c_str());
+            continue;
+        }
         if (parameterName == "beta") {
             beta = atof(value.c_str());
             continue;
