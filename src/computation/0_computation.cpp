@@ -10,6 +10,7 @@
  */
 void Computation::initialize(string filename)
 {
+    std::cout << "I am not parallel" << std::endl;
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);
@@ -53,6 +54,9 @@ void Computation::initialize(string filename)
  * Run the whole simulation until tend
  */
 void Computation::runSimulation() {
+#ifndef NDEBUG
+        std::cout << "Running simulation ..." << std::endl;
+#endif
     int t_iter = 0;
     double time = 0.0;
     setInitialValues();
@@ -63,7 +67,14 @@ void Computation::runSimulation() {
         * 1) Apply boundary values (for u, v, F, G)
         */
         applyBoundaryValues();
+#ifndef NDEBUG
+        std::cout << "Boundary values applied" << std::endl;
+#endif
         applyPreliminaryBoundaryValues();
+#ifndef NDEBUG
+        std::cout << "Preliminary Boundary values applied" << std::endl;
+#endif
+
 
         /*
         * 2) Compute the next time step width
@@ -133,7 +144,7 @@ void Computation::setInitialValues() {
  */
 void Computation::applyBoundaryValues() {
     for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
-        for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); i++) {
+        for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); j++) {
             discretization_->t(i, j) = settings_.initialTemp;
         }
     }
