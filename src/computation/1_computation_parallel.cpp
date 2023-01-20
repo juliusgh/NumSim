@@ -16,6 +16,7 @@
  */
 void ComputationParallel::initialize(string filename)
 {
+    std::cout << "I am parallel" << std::endl;
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);

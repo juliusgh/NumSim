@@ -782,8 +782,8 @@ const FieldVariable &StaggeredGrid::t() const
 double StaggeredGrid::t(int i, int j) const
 {
 #ifndef NDEBUG
-    assert((tIBegin() <= i) && (i <= tIEnd()));
-    assert((tJBegin() <= j) && (j <= tJEnd()));
+    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed in const");
+    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed in const");
 #endif
     return t_(i - tIBegin(), j - tJBegin());
 };
@@ -797,8 +797,8 @@ double StaggeredGrid::t(int i, int j) const
 double &StaggeredGrid::t(int i, int j)
 {
 #ifndef NDEBUG
-    assert((tIBegin() <= i) && (i <= tIEnd()));
-    assert((tJBegin() <= j) && (j <= tJEnd()));
+    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed" );
+    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed" );
 #endif
     return t_(i - tIBegin(), j - tJBegin());
 };
@@ -906,8 +906,8 @@ const FieldVariable &StaggeredGrid::q() const
 double StaggeredGrid::q(int i, int j) const
 {
 #ifndef NDEBUG
-    assert((qIBegin() <= i) && (i <= qIEnd()));
-    assert((qJBegin() <= j) && (j <= qJEnd()));
+    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed in const" );
+    assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed in const");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
 };
@@ -921,8 +921,8 @@ double StaggeredGrid::q(int i, int j) const
 double &StaggeredGrid::q(int i, int j)
 {
 #ifndef NDEBUG
-    assert((qIBegin() <= i) && (i <= qIEnd()));
-    assert((qJBegin() <= j) && (j <= qJEnd()));
+    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed" );
+    assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
 };

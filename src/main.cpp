@@ -34,7 +34,13 @@ int main(int argc, char *argv[]) {
     auto computation = Computation();
 #endif
     computation.initialize(filename);
+#ifndef NDEBUG
+    std::cout << "Initialization completed" << std::endl;
+#endif
     computation.runSimulation();
+#ifndef NDEBUG
+    std::cout << "Simulation completed" << std::endl;
+#endif
 #ifndef NPARALLEL
     MPI_Finalize();
 #endif
