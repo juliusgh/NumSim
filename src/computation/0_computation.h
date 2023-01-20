@@ -29,12 +29,13 @@ public:
     virtual void runSimulation();
 
 protected:
+    virtual void setInitialTemperatureValues();
     /**
      * Set the boundary values of the velocities (u, v)
      * 
      * Left and right boundaries should overwrite bottom and top boundaries
      */
-    virtual void applyBoundaryValues();
+
 
     void applyBoundaryValuesTop();
 

@@ -60,16 +60,15 @@ void Computation::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
     setInitialValues();
+#ifndef NDEBUG
+    std::cout << "initialized" << std::endl;
+#endif
     while (time < settings_.endTime){
         t_iter++;
 
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
-        applyBoundaryValues();
-#ifndef NDEBUG
-        std::cout << "Boundary values applied" << std::endl;
-#endif
         applyPreliminaryBoundaryValues();
 #ifndef NDEBUG
         std::cout << "Preliminary Boundary values applied" << std::endl;
@@ -135,6 +134,8 @@ void Computation::setInitialValues() {
     // set boundary values for u at left and right side (higher priority)
     applyBoundaryValuesLeft();
     applyBoundaryValuesRight();
+
+    setInitialTemperatureValues();
 };
 
 /**
@@ -142,7 +143,7 @@ void Computation::setInitialValues() {
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
-void Computation::applyBoundaryValues() {
+void Computation::setInitialTemperatureValues() {
     for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
         for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); j++) {
             discretization_->t(i, j) = settings_.initialTemp;
