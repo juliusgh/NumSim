@@ -156,6 +156,46 @@ void Settings::loadFromFile(string filename) {
             dirichletBcRight[1] = atof(value.c_str());
             continue;
         }
+        if (parameterName == "beta") {
+            beta = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "initialTemp") {
+            initialTemp = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "setFixedTempBottom") {
+            istringstream(value.c_str()) >> boolalpha >> setFixedTempBottom;
+            continue;
+        }
+        if (parameterName == "tempBcBottom") {
+            tempBcBottom = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "setFixedTempTop") {
+            istringstream(value.c_str()) >> boolalpha >> setFixedTempTop;
+            continue;
+        }
+        if (parameterName == "tempBcTop") {
+            tempBcTop = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "setFixedTempLeft") {
+            istringstream(value.c_str()) >> boolalpha >> setFixedTempLeft;
+            continue;
+        }
+        if (parameterName == "tempBcLeft") {
+            tempBcLeft = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "setFixedTempRight") {
+            istringstream(value.c_str()) >> boolalpha >> setFixedTempRight;
+            continue;
+        }
+        if (parameterName == "tempBcRight") {
+            tempBcRight = atof(value.c_str());
+            continue;
+        }
         if (parameterName == "pressureSolver") {
             pressureSolver = value;
             continue;
