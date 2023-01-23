@@ -11,8 +11,8 @@ struct Settings
     array<int,2> nCells;          //< number of cells in x and y direction
     array<double,2> physicalSize; //< physical size of the domain
     double re = 1000;                  //< Reynolds number
-    double pr = 6.99;                   //< Prandtl number
-    double beta = 0.2;                  //< volume expansion coefficient
+    double pr = 1;                   //< Prandtl number
+    double beta = 0;                  //< volume expansion coefficient
     double endTime = 10.0;             //< end time of the simulation
     double tau = 0.5;                  //< safety factor for time step width
     double maximumDt = 0.1;            //< maximum time step width
@@ -30,7 +30,7 @@ struct Settings
     array<double,2> dirichletBcRight;   //< prescribed values of u,v at right of domain
 
     // temperature initial condition
-    double initialTemp = 293.0; // in Kelvin, 293K = 20°C
+    double initialTemp = 0; // in Kelvin, 293K = 20°C
 
     // temperature boundary conditions
     bool setFixedTempBottom = false;
