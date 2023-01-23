@@ -355,6 +355,7 @@ void Computation::computeTimeStepWidth() {
 
     // Set the appropriate time step width by using a security factor tau
     double computed_dt = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
+    std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
     dt_ = std::min({settings_.maximumDt, computed_dt});
 };
 
