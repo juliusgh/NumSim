@@ -12,8 +12,7 @@
  * @param nCellsGlobal total number of cells in the global domain
  */
 Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
-: nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>())
-{
+        : nCellsGlobal_(nCellsGlobal), nDomains_(std::array<int, 2>()) {
 #ifndef NPARALLEL
     // Get the number of processes
     MPI_Comm_size(MPI_COMM_WORLD, &nRanks_);
@@ -34,7 +33,8 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 
 #ifndef NDEBUG
     if (ownRankNo() == 0) {
-        std::cout << "RANK " << ownRankNo() << " | nDomains[0]: " << nDomains_[0] << ", nDomains[1]: " << nDomains_[1] << std::endl;
+        std::cout << "RANK " << ownRankNo() << " | nDomains[0]: " << nDomains_[0] << ", nDomains[1]: " << nDomains_[1]
+                  << std::endl;
         std::cout << "RANK " << ownRankNo() << " | number of processes: " << nRanks_ << std::endl;
     }
 #endif
@@ -48,7 +48,7 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     domainRow_ = computeRow(ownRankNo_);
 
     // Compute nCells_, nCellsGlobal_
-    nCellsLocal_ = std::array<int, 2>{ nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1] };
+    nCellsLocal_ = std::array<int, 2>{nCellsGlobal_[0] / nDomains_[0], nCellsGlobal_[1] / nDomains_[1]};
     int cellsColumnRemainder = nCellsGlobal_[0] % nDomains_[0];
     int cellsRowRemainder = nCellsGlobal_[1] % nDomains_[1];
 
@@ -72,8 +72,10 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
 
     nodeOffset_ = {columnOffset, rowOffset};
 #ifndef NDEBUG
-    std::cout << "RANK " << ownRankNo() << " | nCellsLocal_[0]: " << nCellsLocal_[0] << ", nCellsLocal_[1]: " << nCellsLocal_[1] << std::endl;
-    std::cout << "RANK " << ownRankNo() << " | nodeOffset_[0]: " << nodeOffset_[0] << ", nodeOffset_[1]: " << nodeOffset_[1] << std::endl;
+    std::cout << "RANK " << ownRankNo() << " | nCellsLocal_[0]: " << nCellsLocal_[0] << ", nCellsLocal_[1]: "
+              << nCellsLocal_[1] << std::endl;
+    std::cout << "RANK " << ownRankNo() << " | nodeOffset_[0]: " << nodeOffset_[0] << ", nodeOffset_[1]: "
+              << nodeOffset_[1] << std::endl;
 #endif
 }
 
@@ -81,51 +83,55 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
  * this method partitions the global domain in nRanks subdomains  
  * @param nRanks number of processes
 */
-void Partitioning::partitionDomain(int nRanks){
-    int optimalX = nRanks; 
+void Partitioning::partitionDomain(int nRanks) {
+    int optimalX = nRanks;
     int optimalY = 1;
 
     // Ratio between the length of the subdomains in x and y direction should be near 1
-    double best_cost = (2 * (nCellsGlobal_[0]/optimalX) + 2 * (nCellsGlobal_[1]/optimalY)) / (nCellsGlobal_[0]/optimalX) * (nCellsGlobal_[1]/optimalY);
+    double best_cost =
+            (2 * (nCellsGlobal_[0] / optimalX) + 2 * (nCellsGlobal_[1] / optimalY)) / (nCellsGlobal_[0] / optimalX) *
+            (nCellsGlobal_[1] / optimalY);
 
     // Iterate over all possible combinations of partitionings
-    for (int testY = 1; testY < nRanks+1; testY++){
+    for (int testY = 1; testY < nRanks + 1; testY++) {
 
-        if ((nRanks % testY) == 0){
+        if ((nRanks % testY) == 0) {
             int testX = nRanks / testY;
 
-            double cost = (2 *(nCellsGlobal_[0]/testX) + 2 * (nCellsGlobal_[1]/testY)) / (nCellsGlobal_[0]/testX) * (nCellsGlobal_[1]/testY);
+            double cost =
+                    (2 * (nCellsGlobal_[0] / testX) + 2 * (nCellsGlobal_[1] / testY)) / (nCellsGlobal_[0] / testX) *
+                    (nCellsGlobal_[1] / testY);
 
-            if (cost < best_cost){
+            if (cost < best_cost) {
                 best_cost = cost;
                 optimalY = testY;
                 optimalX = testX;
             }
         }
     }
-    nDomains_ = { optimalX, optimalY };
+    nDomains_ = {optimalX, optimalY};
 }
 
 /**
  * this method partitions the global domain in nRanks subdomains  
  * @param nRanks number of processes
 */
-void Partitioning::partitionDomainEqual(int nRanks){
-    int optimalX = nRanks; 
+void Partitioning::partitionDomainEqual(int nRanks) {
+    int optimalX = nRanks;
     int optimalY = 1;
 
     // Ratio between the length of the subdomains in x and y direction should be near 1
-    double best_cost = fabs((nCellsGlobal_[0]/optimalX) / (nCellsGlobal_[1]/optimalY)-1.0);
+    double best_cost = fabs((nCellsGlobal_[0] / optimalX) / (nCellsGlobal_[1] / optimalY) - 1.0);
 
     // Iterrate over all possible combinations of partitionings
-    for (int testY = 1; testY < nRanks+1; testY++){
+    for (int testY = 1; testY < nRanks + 1; testY++) {
 
-        if ((nRanks % testY) == 0){
+        if ((nRanks % testY) == 0) {
             int testX = nRanks / testY;
 
-            double cost = (nCellsGlobal_[0]/testX) / (nCellsGlobal_[1]/testY);
+            double cost = (nCellsGlobal_[0] / testX) / (nCellsGlobal_[1] / testY);
 
-            if (fabs(cost - 1.0) < best_cost){
+            if (fabs(cost - 1.0) < best_cost) {
                 best_cost = cost;
                 optimalY = testY;
                 optimalX = testX;
@@ -133,7 +139,7 @@ void Partitioning::partitionDomainEqual(int nRanks){
         }
     }
 
-    nDomains_ = { optimalX, optimalY };
+    nDomains_ = {optimalX, optimalY};
 }
 
 
@@ -428,7 +434,6 @@ void Partitioning::recvFromTop(std::vector<double> &data, int count) {
 }
 
 
-
 /**
  * method used to send information to the subdomain left of the current subdomain
  * @param data information to be send to the left
@@ -508,7 +513,7 @@ int Partitioning::computeColumn(int rank) const {
  * @return row position of the subdomain
  */
 int Partitioning::computeRow(int rank) const {
-    return (int)(rank / nDomains_[0]) + 1;
+    return (int) (rank / nDomains_[0]) + 1;
 }
 
 /**
@@ -584,6 +589,7 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
     );
     return globalValue;
 }
+
 /**
  * get the offset values for counting local nodes in x and y direction.
  * (i_local,j_local) + nodeOffset = (i_global,j_global)
@@ -597,6 +603,6 @@ std::array<int, 2> Partitioning::nodeOffset() const {
 /**
  * Method for debugging to print out what a process is currently doing
 */
-void Partitioning::log(const char* message) {
+void Partitioning::log(const char *message) {
     std::cout << "RANK " << ownRankNo() << " : " << message << std::endl;
 }

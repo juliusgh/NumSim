@@ -9,11 +9,10 @@
  */
 
 RedBlack::RedBlack(std::shared_ptr<Discretization> discretization,
-         double epsilon,
-         int maximumNumberOfIterations,
-         std::shared_ptr<Partitioning> partitioning) :
-PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning)
-{
+                   double epsilon,
+                   int maximumNumberOfIterations,
+                   std::shared_ptr<Partitioning> partitioning) :
+        PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning) {
 
 }
 
@@ -38,7 +37,7 @@ void RedBlack::solve() {
                 discretization_->p(i, j) = k * (px + py - discretization_->rhs(i, j));
             }
         }
-        
+
         pGhostLayer();
 
         // red half step

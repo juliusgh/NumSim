@@ -10,15 +10,15 @@
  * @param omega
  */
 
-SOR::SOR(std::shared_ptr <Discretization> discretization,
+SOR::SOR(std::shared_ptr<Discretization> discretization,
          double epsilon,
          int maximumNumberOfIterations,
          double omega) :
         PressureSolver(discretization, epsilon, maximumNumberOfIterations),
-        omega_(omega)
-{
+        omega_(omega) {
 
 }
+
 /**
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */

@@ -8,12 +8,11 @@
  */
 
 PressureSolverParallel::PressureSolverParallel(std::shared_ptr<Discretization> discretization,
-                               double epsilon,
-                               int maximumNumberOfIterations,
-                               std::shared_ptr<Partitioning> partitioning) :
-PressureSolver(discretization, epsilon, maximumNumberOfIterations),
-partitioning_(partitioning)
-{
+                                               double epsilon,
+                                               int maximumNumberOfIterations,
+                                               std::shared_ptr<Partitioning> partitioning) :
+        PressureSolver(discretization, epsilon, maximumNumberOfIterations),
+        partitioning_(partitioning) {
 
 }
 
@@ -46,8 +45,7 @@ void PressureSolverParallel::pGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         setBoundaryValuesTop();
-    }
-    else {
+    } else {
         // send row on the top to top neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_topRow.at(i - p_rowOffset) = discretization_->p(i, pInteriorJEnd - 1);
@@ -65,8 +63,7 @@ void PressureSolverParallel::pGhostLayer() {
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         //std::cout << "setBoundaryValuesBottom" << std::endl;
         setBoundaryValuesBottom();
-    }
-    else {
+    } else {
         // send row on the bottom to bottom neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_bottomRow.at(i - p_rowOffset) = discretization_->p(i, pInteriorJBegin);
@@ -83,8 +80,7 @@ void PressureSolverParallel::pGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         setBoundaryValuesRight();
-    }
-    else {
+    } else {
         // send to column on the right to right neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_rightColumn.at(j - p_columnOffset) = discretization_->p(pInteriorIEnd - 1, j);
@@ -102,8 +98,7 @@ void PressureSolverParallel::pGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         setBoundaryValuesLeft();
-    }
-    else {
+    } else {
         // send to column on the left to left neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_leftColumn.at(j - p_columnOffset) = discretization_->p(pInteriorIBegin, j);
@@ -113,37 +108,37 @@ void PressureSolverParallel::pGhostLayer() {
         // receive ghost layer column on the left from left neighbour
         partitioning_->irecvFromLeft(p_leftColumn, p_columnCount, request_p_leftColumn);
     }
-   /* 
-   * Set subdomain ghost layer at top for pressure
-   */
+    /*
+    * Set subdomain ghost layer at top for pressure
+    */
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         partitioning_->wait(request_p_topRow);
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             discretization_->p(i, discretization_->pJEnd() - 1) = p_topRow.at(i - p_rowOffset);
         }
     }
-   
-   /* 
-   * Set subdomain ghost layer at bottom for pressure
-   */
+
+    /*
+    * Set subdomain ghost layer at bottom for pressure
+    */
     if (!partitioning_->ownPartitionContainsBottomBoundary()) {
         partitioning_->wait(request_p_bottomRow);
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             discretization_->p(i, discretization_->pJBegin()) = p_bottomRow.at(i - p_rowOffset);
         }
     }
-   /* 
-   * Set subdomain ghost layer at right for pressure
-   */
+    /*
+    * Set subdomain ghost layer at right for pressure
+    */
     if (!partitioning_->ownPartitionContainsRightBoundary()) {
         partitioning_->wait(request_p_rightColumn);
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             discretization_->p(discretization_->pIEnd() - 1, j) = p_rightColumn.at(j - p_columnOffset);
         }
     }
-   /* 
-   * Set subdomain ghost layer at left for pressure
-   */
+    /*
+    * Set subdomain ghost layer at left for pressure
+    */
     if (!partitioning_->ownPartitionContainsLeftBoundary()) {
         partitioning_->wait(request_p_leftColumn);
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
@@ -162,13 +157,15 @@ void PressureSolverParallel::computeResidualNorm() {
     const int pInteriorJEnd = discretization_->pInteriorJEnd();
 
     double residual_norm2 = 0.0;
-    const double dx2 = pow(discretization_->dx(),2);
-    const double dy2 = pow(discretization_->dy(),2);
+    const double dx2 = pow(discretization_->dx(), 2);
+    const double dy2 = pow(discretization_->dy(), 2);
     const int N = partitioning_->nCellsGlobal()[0] * partitioning_->nCellsGlobal()[1];
     for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
-            double pxx = (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
-            double pyy = (discretization_->p(i, j + 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j - 1)) / dy2;
+            double pxx =
+                    (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
+            double pyy =
+                    (discretization_->p(i, j + 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j - 1)) / dy2;
             residual_norm2 += pow(pxx + pyy - discretization_->rhs(i, j), 2);
         }
     }

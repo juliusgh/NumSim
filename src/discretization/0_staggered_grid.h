@@ -8,8 +8,7 @@
 /**
  * Implement staggered grid, providing a variety of parameters
  */
-class StaggeredGrid
-{
+class StaggeredGrid {
 public:
     /**
     * constructor
@@ -18,7 +17,7 @@ public:
     */
     StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                   std::array<double, 2> meshWidth);
-    
+
     /**
      * get mesh width in x-direction
      */
@@ -42,292 +41,292 @@ public:
      * @param j: position in y direction in discretized grid
      * @return
      */
-    double & f(int i, int j);
+    double &f(int i, int j);
 
     /**
      * get a reference to field variable F
      */
-    const FieldVariable & f() const;
+    const FieldVariable &f() const;
 
     /**
      * evaluate value of G in an element (i,j)
     */
-     double g(int i, int j) const;
+    double g(int i, int j) const;
 
     /**
      * get a reference to field variable G
     */
-     const FieldVariable & g() const;
+    const FieldVariable &g() const;
 
     /**
      * evaluate value of G in an element (i,j)
     */
-     double & g(int i, int j);
+    double &g(int i, int j);
 
     /**
      * get the mesh width
     */
-     const std::array<double, 2> meshWidth() const;
+    const std::array<double, 2> meshWidth() const;
 
     /**
      * get number of cells
     */
-     const std::array<int, 2> nCells() const;
+    const std::array<int, 2> nCells() const;
 
     /**
      * get reference to field variable p
     */
-     const FieldVariable & p() const;
+    const FieldVariable &p() const;
 
     /**
      * evaluate field variable p in an element (i,j)
     */
-     double p(int i, int j) const;
+    double p(int i, int j) const;
 
     /**
      * evaluate field variable p in an element (i,j)
     */
-     double & p(int i, int j);
+    double &p(int i, int j);
 
     /**
      * Number of ghost layers for p in x direction (each left and right)
     */
-     //int pIGhost() const;
-    
+    //int pIGhost() const;
+
     /**
      * first valid index for p in x direction
     */
-     int pIBegin() const;
-    
+    int pIBegin() const;
+
     /**
      * one after last valid index for p in x direction
     */
-     int pIEnd() const;
+    int pIEnd() const;
 
     /**
      * Number of ghost layers for p in y direction (each bottom and top)
     */
     int pJGhost() const;
-    
+
     /**
      * first valid index for p in y direction
     */
-     int pJBegin() const;
+    int pJBegin() const;
 
     /**
      * one after last valid index for p in y direction
     */
-     int pJEnd() const;
+    int pJEnd() const;
 
     /**
      * get size of FieldVariable p
     */
-     std::array<int, 2> pSize() const;
+    std::array<int, 2> pSize() const;
 
-     /**
-      * first valid Interior index for p in x direction
-    */
-      int pInteriorIBegin() const;
-    
+    /**
+     * first valid Interior index for p in x direction
+   */
+    int pInteriorIBegin() const;
+
     /**
      * one after last valid Interior index for p in x direction
     */
-     int pInteriorIEnd() const;
-    
+    int pInteriorIEnd() const;
+
     /**
      * first valid Interior index for p in y direction
     */
-     int pInteriorJBegin() const;
-    
+    int pInteriorJBegin() const;
+
     /**
      * one after last valid Interior index for p in y direction
     */
-     int pInteriorJEnd() const;
-    
+    int pInteriorJEnd() const;
+
     /**
      * get a reference to field variable u
     */
-     const FieldVariable & u() const;
-    
+    const FieldVariable &u() const;
+
     /**
      * access value of u in element (i,j)
     */
-     double u(int i, int j) const;
-    
+    double u(int i, int j) const;
+
     /**
      * access value of u in element (i,j)
     */
-     double & u(int i, int j);
-    
+    double &u(int i, int j);
+
     /**
      * first valid index for u in x direction
     */
-     int uIBegin() const;
-    
+    int uIBegin() const;
+
     /**
      * one after last valid index for u in x direction
     */
-     int uIEnd() const;
-    
+    int uIEnd() const;
+
     /**
      * first valid index for u in y direction
     */
-     int uJBegin() const;
-    
+    int uJBegin() const;
+
     /**
      * one after last valid index for u in y direction
     */
-     int uJEnd() const;
+    int uJEnd() const;
 
     /**
      * get size of FieldVariable u
     */
-     std::array<int, 2> uSize() const;
-    
+    std::array<int, 2> uSize() const;
+
     /**
      * first valid field index for u in x direction
     */
-     int uInteriorIBegin() const;
-    
+    int uInteriorIBegin() const;
+
     /**
      * one after last valid Interior index for u in x direction
     */
-     int uInteriorIEnd() const;
-    
+    int uInteriorIEnd() const;
+
     /**
      * first valid Interior index for u in y direction
     */
-     int uInteriorJBegin() const;
-    
+    int uInteriorJBegin() const;
+
     /**
      * one after last valid Interior index for u in y direction
     */
-     int uInteriorJEnd() const;
+    int uInteriorJEnd() const;
 
     /**
      * get a reference to Interior variable v
     */
-     const FieldVariable & v() const;
-    
+    const FieldVariable &v() const;
+
     /**
      * access value of v in element (i,j)
     */
-     double v(int i, int j) const;
-    
+    double v(int i, int j) const;
+
     /**
      * access value of v in element (i,j)
     */
-     double & v(int i, int j);
+    double &v(int i, int j);
 
     /**
      * first valid index for v in x direction
     */
-     int vIBegin() const;
+    int vIBegin() const;
 
     /**
      * one after last valid index for v in x direction
     */
-     int vIEnd() const;
+    int vIEnd() const;
 
     /**
      * first valid index for v in y direction
     */
-     int vJBegin() const;
+    int vJBegin() const;
 
     /**
      * one after last valid index for v in y direction
     */
-     int vJEnd() const;
+    int vJEnd() const;
 
     /**
      * get size of FieldVariable v
     */
-     std::array<int, 2> vSize() const;
+    std::array<int, 2> vSize() const;
 
     /**
      * first valid Interior index for v in x direction
     */
-     int vInteriorIBegin() const;
+    int vInteriorIBegin() const;
 
     /**
      * one after last valid Interior index for v in x direction
     */
-     int vInteriorIEnd() const;
+    int vInteriorIEnd() const;
 
     /**
      * first valid Interior index for v in y direction
     */
-     int vInteriorJBegin() const;
+    int vInteriorJBegin() const;
 
     /**
      * one after last valid Interior index for v in y direction
     */
-     int vInteriorJEnd() const;
+    int vInteriorJEnd() const;
 
     /**
      * first valid index for rhs in x direction
     */
-     int rhsIBegin() const;
+    int rhsIBegin() const;
 
     /**
      * one after last valid index for rhs in x direction
     */
-     int rhsIEnd() const;
+    int rhsIEnd() const;
 
     /**
      * first valid index for rhs in y direction
     */
-     int rhsJBegin() const;
+    int rhsJBegin() const;
 
     /**
      * one after last valid index for rhs in y direction
     */
-     int rhsJEnd() const;
+    int rhsJEnd() const;
 
     /**
      * first valid Interior index for v in x direction
     */
-     int rhsInteriorIBegin() const;
+    int rhsInteriorIBegin() const;
 
     /**
      * one after last valid Interior index for v in x direction
     */
-     int rhsInteriorIEnd() const;
+    int rhsInteriorIEnd() const;
 
     /**
      * first valid Interior index for v in y direction
     */
-     int rhsInteriorJBegin() const;
+    int rhsInteriorJBegin() const;
 
     /**
      * one after last valid Interior index for v in y direction
     */
-     int rhsInteriorJEnd() const;
+    int rhsInteriorJEnd() const;
 
     /**
      * get size of FieldVariable rhs
     */
-     std::array<int, 2> rhsSize() const;
+    std::array<int, 2> rhsSize() const;
 
     /**
      * access value of rhs in element (i,j)
     */
-     double rhs(int i, int j) const;
+    double rhs(int i, int j) const;
 
     /**
      * access value of rhs in element (i,j)
     */
-     double & rhs(int i, int j);
+    double &rhs(int i, int j);
 
     /**
     * get a reference to field variable rhs
     */
-     const FieldVariable & rhs() const;
+    const FieldVariable &rhs() const;
 
     /**
     * get reference to field variable t
     */
-    const FieldVariable & t() const;
+    const FieldVariable &t() const;
 
     /**
      * evaluate field variable t in an element (i,j)
@@ -337,7 +336,7 @@ public:
     /**
      * evaluate field variable t in an element (i,j)
     */
-    double & t(int i, int j);
+    double &t(int i, int j);
 
     /**
      * first valid index for t in x direction
@@ -387,7 +386,7 @@ public:
     /**
     * get reference to field variable q
     */
-    const FieldVariable & q() const;
+    const FieldVariable &q() const;
 
     /**
      * evaluate field variable q in an element (i,j)
@@ -397,7 +396,7 @@ public:
     /**
      * evaluate field variable q in an element (i,j)
     */
-    double & q(int i, int j);
+    double &q(int i, int j);
 
     /**
      * first valid index for q in x direction

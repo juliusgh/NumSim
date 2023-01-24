@@ -9,13 +9,12 @@
  */
 
 RedBlackSOR::RedBlackSOR(std::shared_ptr<Discretization> discretization,
-         double epsilon,
-         int maximumNumberOfIterations,
-         double omega,
-         std::shared_ptr<Partitioning> partitioning) :
-PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning),
-omega_(omega)
-{
+                         double epsilon,
+                         int maximumNumberOfIterations,
+                         double omega,
+                         std::shared_ptr<Partitioning> partitioning) :
+        PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning),
+        omega_(omega) {
 
 }
 
@@ -35,8 +34,7 @@ void RedBlackSOR::solve() {
     const int pInteriorJBegin = discretization_->pInteriorJBegin();
     const int pInteriorJEnd = discretization_->pInteriorJEnd();
     int offset;
-    if (((partitioning_->nodeOffset()[0] % 2) + (partitioning_->nodeOffset()[0] % 2)) % 2 == 0)
-    {
+    if (((partitioning_->nodeOffset()[0] % 2) + (partitioning_->nodeOffset()[0] % 2)) % 2 == 0) {
         offset = 0;
     } else {
         offset = 1;

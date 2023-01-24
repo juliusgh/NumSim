@@ -12,8 +12,7 @@
  * @param meshWidth: width of cells in both directions
  */
 
-class FieldVariable : public Array2D
-{
+class FieldVariable : public Array2D {
 public:
     /*
      * constructor
@@ -21,7 +20,7 @@ public:
     FieldVariable(std::array<int, 2> size,
                   std::array<double, 2> origin,
                   std::array<double, 2> meshWidth);
-    
+
     // interpolate at arbitrary position
     double interpolateAt(double x, double y) const;
 
