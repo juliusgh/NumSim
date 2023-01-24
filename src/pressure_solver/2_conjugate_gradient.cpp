@@ -9,11 +9,10 @@
  */
 
 ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretization,
-         double epsilon,
-         int maximumNumberOfIterations,
-         std::shared_ptr<Partitioning> partitioning) :
-PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning)
-{
+                                     double epsilon,
+                                     int maximumNumberOfIterations,
+                                     std::shared_ptr<Partitioning> partitioning) :
+        PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning) {
     q_ = std::make_unique<Array2D>(discretization_->pSize()); // Search direction qₖ
 }
 
@@ -36,23 +35,25 @@ void ConjugateGradient::solve() {
 
     pGhostLayer();
     Array2D residual_ = Array2D(discretization_->pSize());
-    Array2D Aq_ = Array2D(discretization_->pSize()); 
+    Array2D Aq_ = Array2D(discretization_->pSize());
 
     int iteration = 0;
     // Initialization Loop
-    double local_alpha = 0.0;  
+    double local_alpha = 0.0;
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
-            double D2pDx2 = (discretization_->p(i-1, j) - 2 * discretization_->p(i, j) + discretization_->p(i+1, j)) / dx2;
-            double D2pDy2 = (discretization_->p(i, j-1) - 2 * discretization_->p(i, j) + discretization_->p(i, j+1)) / dy2;
+            double D2pDx2 =
+                    (discretization_->p(i - 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i + 1, j)) / dx2;
+            double D2pDy2 =
+                    (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
-            residual_(i - pIBegin, j - pJBegin) = discretization_->rhs(i,j) - (D2pDx2 + D2pDy2);
-            
+            residual_(i - pIBegin, j - pJBegin) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
+
             // set search direction to preconditioned defect q = z
             (*q_)(i - pIBegin, j - pJBegin) = residual_(i - pIBegin, j - pJBegin);
 
 
-            local_alpha += pow(residual_(i- pIBegin, j- pJBegin), 2);
+            local_alpha += pow(residual_(i - pIBegin, j - pJBegin), 2);
         }
     }
 
@@ -61,14 +62,14 @@ void ConjugateGradient::solve() {
     do {
 
         qGhostLayer();
-        double local_lambda = 0.0; 
+        double local_lambda = 0.0;
         // Calculate auxillary variable Aq
         for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
             for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
-                double D2qDx2 = ((*q_)(i-1, j) - 2 * (*q_)(i, j) + (*q_)(i+1, j)) / dx2;
-                double D2qDy2 = ((*q_)(i, j-1) - 2 * (*q_)(i, j) + (*q_)(i, j+1)) / dy2;
+                double D2qDx2 = ((*q_)(i - 1, j) - 2 * (*q_)(i, j) + (*q_)(i + 1, j)) / dx2;
+                double D2qDy2 = ((*q_)(i, j - 1) - 2 * (*q_)(i, j) + (*q_)(i, j + 1)) / dy2;
                 Aq_(i, j) = D2qDx2 + D2qDy2;
-                
+
                 // qₖᵀAqₖ
                 local_lambda += (*q_)(i, j) * Aq_(i, j);
             }
@@ -81,17 +82,17 @@ void ConjugateGradient::solve() {
         double alphaold = alpha;
         local_alpha = 0.0;
         // Update variables in the search direction
-        for (int i = pIIntBegin- pIBegin; i < pIIntEnd- pIBegin; i++) {
-            for (int j = pJIntBegin- pJBegin; j < pJIntEnd- pJBegin; j++) {
-                
+        for (int i = pIIntBegin - pIBegin; i < pIIntEnd - pIBegin; i++) {
+            for (int j = pJIntBegin - pJBegin; j < pJIntEnd - pJBegin; j++) {
+
                 // pₖ₊₁ = pₖ + λ qₖ
-                discretization_->p(i + pIBegin, j + pIBegin)+= lambda * (*q_)(i, j); 
-                
+                discretization_->p(i + pIBegin, j + pIBegin) += lambda * (*q_)(i, j);
+
                 // rₖ₊₁ = rₖ - λ Aqₖ
-                residual_(i , j) -= lambda * Aq_(i ,j);
-                
+                residual_(i, j) -= lambda * Aq_(i, j);
+
                 // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
-                local_alpha += pow(residual_(i, j) ,2); 
+                local_alpha += pow(residual_(i, j), 2);
             }
         }
         alpha = partitioning_->globalSum(local_alpha);
@@ -145,8 +146,7 @@ void ConjugateGradient::qGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         setQBoundaryValuesTop();
-    }
-    else {
+    } else {
         // send row on the top to top neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_topRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJEnd - 1 - pJBegin);
@@ -164,8 +164,7 @@ void ConjugateGradient::qGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         setQBoundaryValuesBottom();
-    }
-    else {
+    } else {
         // send row on the bottom to bottom neighbour
         for (int i = pInteriorIBegin; i < pInteriorIEnd; i++) {
             p_bottomRow.at(i - p_rowOffset) = (*q_)(i - pIBegin, pInteriorJBegin - pJBegin);
@@ -182,8 +181,7 @@ void ConjugateGradient::qGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         setQBoundaryValuesRight();
-    }
-    else {
+    } else {
         // send to column on the right to right neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_rightColumn.at(j - p_columnOffset) = (*q_)(pInteriorIEnd - 1 - pIBegin, j - pJBegin);
@@ -202,8 +200,7 @@ void ConjugateGradient::qGhostLayer() {
     */
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         setQBoundaryValuesLeft();
-    }
-    else {
+    } else {
         // send to column on the left to left neighbour
         for (int j = pInteriorJBegin; j < pInteriorJEnd; j++) {
             p_leftColumn.at(j - p_columnOffset) = (*q_)(pInteriorIBegin - pIBegin, j - pJBegin);
@@ -263,13 +260,16 @@ void ConjugateGradient::setQBoundaryValuesBottom() {
         (*q_)(i, 0) = (*q_)(i, 1);
     }
 }
+
 /**
  * set boundary values at the top of the subdomain for the search direction
 */
 void ConjugateGradient::setQBoundaryValuesTop() {
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to top boundary
-        (*q_)(i, discretization_->pJEnd() - 1 - discretization_->pJBegin()) = (*q_)(i, discretization_->pInteriorJEnd() - 1 - discretization_->pJBegin());
+        (*q_)(i, discretization_->pJEnd() - 1 - discretization_->pJBegin()) = (*q_)(i,
+                                                                                    discretization_->pInteriorJEnd() -
+                                                                                    1 - discretization_->pJBegin());
     }
 }
 
@@ -289,6 +289,7 @@ void ConjugateGradient::setQBoundaryValuesLeft() {
 void ConjugateGradient::setQBoundaryValuesRight() {
     for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
         // copy values to right boundary
-        (*q_)(discretization_->pIEnd() - 1 - discretization_->pIBegin(), j) = (*q_)(discretization_->pInteriorIEnd() - 1 - discretization_->pIBegin(), j);
+        (*q_)(discretization_->pIEnd() - 1 - discretization_->pIBegin(), j) = (*q_)(
+                discretization_->pInteriorIEnd() - 1 - discretization_->pIBegin(), j);
     }
 }

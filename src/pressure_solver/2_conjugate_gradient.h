@@ -14,10 +14,10 @@ public:
     * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
     * @param partitioning information about subdomain
     */
-    ConjugateGradient(std::shared_ptr <Discretization> discretization,
-        double epsilon,
-        int maximumNumberOfIterations,
-        std::shared_ptr<Partitioning> partitioning);
+    ConjugateGradient(std::shared_ptr<Discretization> discretization,
+                      double epsilon,
+                      int maximumNumberOfIterations,
+                      std::shared_ptr<Partitioning> partitioning);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
@@ -26,6 +26,7 @@ public:
 
 protected:
     std::shared_ptr<Array2D> q_;
+
     /**
     *  Implementation of communication of pressure values between neighbouring subdomains
     */
@@ -38,7 +39,7 @@ protected:
 
     /**
     * set boundary values at the top of the subdomain for the search direction
-    */    
+    */
     void setQBoundaryValuesTop();
 
     /**

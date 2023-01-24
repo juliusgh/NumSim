@@ -8,18 +8,17 @@
  */
 StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                              std::array<double, 2> meshWidth) :
-    partitioning_(partitioning),
-    nCells_(partitioning->nCellsLocal()),
-    meshWidth_(meshWidth),
-    f_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
-    g_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
-    p_(pSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    rhs_(rhsSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
-    v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
-    t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-    q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth)
-{
+        partitioning_(partitioning),
+        nCells_(partitioning->nCellsLocal()),
+        meshWidth_(meshWidth),
+        f_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+        g_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
+        p_(pSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        rhs_(rhsSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+        v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
+        t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
 
 };
 
@@ -31,8 +30,7 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
  * get the mesh width
  * @return mesh width
  */
-const std::array<double, 2> StaggeredGrid::meshWidth() const
-{
+const std::array<double, 2> StaggeredGrid::meshWidth() const {
     return meshWidth_;
 };
 
@@ -40,8 +38,7 @@ const std::array<double, 2> StaggeredGrid::meshWidth() const
  * get number of cells
  * @return number of cells
  */
-const std::array<int, 2> StaggeredGrid::nCells() const
-{
+const std::array<int, 2> StaggeredGrid::nCells() const {
     return nCells_;
 };
 
@@ -49,8 +46,7 @@ const std::array<int, 2> StaggeredGrid::nCells() const
  * get mesh width in x-direction
  * @return mesh width in x-direction
  */
-double StaggeredGrid::dx() const
-{
+double StaggeredGrid::dx() const {
     return meshWidth_[0];
 };
 
@@ -58,8 +54,7 @@ double StaggeredGrid::dx() const
  * get mesh width in y-direction
  * @return mesh width in y-direction
  */
-double StaggeredGrid::dy() const
-{
+double StaggeredGrid::dy() const {
     return meshWidth_[1];
 };
 
@@ -71,8 +66,7 @@ double StaggeredGrid::dy() const
  * get first valid index for p in x direction
  * @return first valid index for p in x direction
  */
-int StaggeredGrid::pIBegin() const
-{
+int StaggeredGrid::pIBegin() const {
     return -1;
 };
 
@@ -80,8 +74,7 @@ int StaggeredGrid::pIBegin() const
  * get one after last valid index for p in x direction
  * @return one after last valid index for p in x direction
  */
-int StaggeredGrid::pIEnd() const
-{
+int StaggeredGrid::pIEnd() const {
     return nCells_[0] + 1;
 };
 
@@ -89,8 +82,7 @@ int StaggeredGrid::pIEnd() const
  * get first valid index for p in y direction
  * @return first valid index for p in y direction
  */
-int StaggeredGrid::pJBegin() const
-{
+int StaggeredGrid::pJBegin() const {
     return -1;
 };
 
@@ -98,8 +90,7 @@ int StaggeredGrid::pJBegin() const
  * get one after last valid index for p in y direction
  * @return one after last valid index for p in y direction
  */
-int StaggeredGrid::pJEnd() const
-{
+int StaggeredGrid::pJEnd() const {
     return nCells_[1] + 1;
 };
 
@@ -107,8 +98,7 @@ int StaggeredGrid::pJEnd() const
  * get size of FieldVariable p
  * @return size of FieldVariable p
  */
-std::array<int, 2> StaggeredGrid::pSize() const
-{
+std::array<int, 2> StaggeredGrid::pSize() const {
     return {pIEnd() - pIBegin(), pJEnd() - pJBegin()};
 }
 
@@ -116,8 +106,7 @@ std::array<int, 2> StaggeredGrid::pSize() const
  * get first valid Interior index for p in x direction
  * @return first valid Interior index for p in x direction
  */
-int StaggeredGrid::pInteriorIBegin() const
-{
+int StaggeredGrid::pInteriorIBegin() const {
     return pIBegin() + 1;
 };
 
@@ -125,8 +114,7 @@ int StaggeredGrid::pInteriorIBegin() const
  * get one after last valid Interior index for p in x direction
  * @return one after last valid Interior index for p in x direction
  */
-int StaggeredGrid::pInteriorIEnd() const
-{
+int StaggeredGrid::pInteriorIEnd() const {
     return pIEnd() - 1;
 };
 
@@ -134,8 +122,7 @@ int StaggeredGrid::pInteriorIEnd() const
  * get first valid Interior index for p in y direction
  * @return first valid Interior index for p in y direction
  */
-int StaggeredGrid::pInteriorJBegin() const
-{
+int StaggeredGrid::pInteriorJBegin() const {
     return pJBegin() + 1;
 };
 
@@ -143,8 +130,7 @@ int StaggeredGrid::pInteriorJBegin() const
  * get first valid Interior index for p in y direction
  * @return first valid Interior index for p in y direction
  */
-int StaggeredGrid::pInteriorJEnd() const
-{
+int StaggeredGrid::pInteriorJEnd() const {
     return pJEnd() - 1;
 };
 
@@ -152,8 +138,7 @@ int StaggeredGrid::pInteriorJEnd() const
  * get reference to field variable p
  * @return reference to field variable p
  */
-const FieldVariable &StaggeredGrid::p() const
-{
+const FieldVariable &StaggeredGrid::p() const {
     return p_;
 };
 
@@ -163,12 +148,11 @@ const FieldVariable &StaggeredGrid::p() const
  * @param j: position in y direction in discretized grid
  * @return field variable p in an element (i,j)
  */
-double StaggeredGrid::p(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::p(int i, int j) const {
+#ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    #endif
+#endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
@@ -178,12 +162,11 @@ double StaggeredGrid::p(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return field variable p in an element (i,j)
  */
-double &StaggeredGrid::p(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::p(int i, int j) {
+#ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
-    #endif
+#endif
     return p_(i - pIBegin(), j - pJBegin());
 };
 
@@ -195,8 +178,7 @@ double &StaggeredGrid::p(int i, int j)
  * get first valid index for u in x direction
  * @return first valid index for u in x direction
  */
-int StaggeredGrid::uIBegin() const
-{
+int StaggeredGrid::uIBegin() const {
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         return -1;
     }
@@ -207,8 +189,7 @@ int StaggeredGrid::uIBegin() const
  * get one after last valid index for u in x direction
  * @return one after last valid index for u in x direction
  */
-int StaggeredGrid::uIEnd() const
-{
+int StaggeredGrid::uIEnd() const {
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         return nCells_[0];
     }
@@ -219,8 +200,7 @@ int StaggeredGrid::uIEnd() const
  * get first valid index for u in y direction
  * @return first valid index for u in y direction
  */
-int StaggeredGrid::uJBegin() const
-{
+int StaggeredGrid::uJBegin() const {
     return -1;
 };
 
@@ -228,8 +208,7 @@ int StaggeredGrid::uJBegin() const
  * get one after last valid index for u in y direction
  * @return one after last valid index for u in y direction
  */
-int StaggeredGrid::uJEnd() const
-{
+int StaggeredGrid::uJEnd() const {
     return nCells_[1] + 1;
 };
 
@@ -237,8 +216,7 @@ int StaggeredGrid::uJEnd() const
  * get size of FieldVariable u
  * @return size of FieldVariable u
  */
-std::array<int, 2> StaggeredGrid::uSize() const
-{
+std::array<int, 2> StaggeredGrid::uSize() const {
     return {uIEnd() - uIBegin(), uJEnd() - uJBegin()};
 }
 
@@ -246,8 +224,7 @@ std::array<int, 2> StaggeredGrid::uSize() const
  * get first valid field index for u in x direction
  * @return first valid field index for u in x direction
  */
-int StaggeredGrid::uInteriorIBegin() const
-{
+int StaggeredGrid::uInteriorIBegin() const {
 
     return uIBegin() + 1;
 };
@@ -256,8 +233,7 @@ int StaggeredGrid::uInteriorIBegin() const
  * get first valid field index for u in x direction
  * @return first valid field index for u in x direction
  */
-int StaggeredGrid::uInteriorIEnd() const
-{
+int StaggeredGrid::uInteriorIEnd() const {
 
     return uIEnd() - 1;
 
@@ -267,8 +243,7 @@ int StaggeredGrid::uInteriorIEnd() const
  * first valid Interior index for u in y direction
  * @return first inner grid value of u in j direction
  */
-int StaggeredGrid::uInteriorJBegin() const
-{
+int StaggeredGrid::uInteriorJBegin() const {
 
     return uJBegin() + 1;
 
@@ -278,8 +253,7 @@ int StaggeredGrid::uInteriorJBegin() const
  * get one after last valid Interior index for u in y direction
  * @return one after last valid Interior index for u in y direction
  */
-int StaggeredGrid::uInteriorJEnd() const
-{
+int StaggeredGrid::uInteriorJEnd() const {
 
     return uJEnd() - 1;
 
@@ -289,8 +263,7 @@ int StaggeredGrid::uInteriorJEnd() const
  * get a reference to field variable u
  * @return reference to field variable u
  */
-const FieldVariable &StaggeredGrid::u() const
-{
+const FieldVariable &StaggeredGrid::u() const {
     return u_;
 };
 
@@ -300,12 +273,11 @@ const FieldVariable &StaggeredGrid::u() const
  * @param j: position in y direction in discretized grid
  * @return value of u in element (i,j)
  */
-double StaggeredGrid::u(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::u(int i, int j) const {
+#ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    #endif
+#endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
@@ -315,12 +287,11 @@ double StaggeredGrid::u(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return value of u in element (i,j)
  */
-double &StaggeredGrid::u(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::u(int i, int j) {
+#ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    #endif
+#endif
     return u_(i - uIBegin(), j - uJBegin());
 };
 
@@ -332,8 +303,7 @@ double &StaggeredGrid::u(int i, int j)
  * get first valid index for v in x direction
  * @return first valid index for v in x direction
  */
-int StaggeredGrid::vIBegin() const
-{
+int StaggeredGrid::vIBegin() const {
     return -1;
 };
 
@@ -341,8 +311,7 @@ int StaggeredGrid::vIBegin() const
  * get one after last valid index for v in x direction
  * @return one after last valid index for v in x direction
  */
-int StaggeredGrid::vIEnd() const
-{
+int StaggeredGrid::vIEnd() const {
     return nCells_[0] + 1;
 };
 
@@ -350,8 +319,7 @@ int StaggeredGrid::vIEnd() const
  * get first valid index for v in y direction
  * @return first valid index for v in y direction
  */
-int StaggeredGrid::vJBegin() const
-{
+int StaggeredGrid::vJBegin() const {
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         return -1;
     }
@@ -362,8 +330,7 @@ int StaggeredGrid::vJBegin() const
  * get one after last valid index for v in y direction
  * @return one after last valid index for v in y direction
  */
-int StaggeredGrid::vJEnd() const
-{
+int StaggeredGrid::vJEnd() const {
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         return nCells_[1];
     }
@@ -374,8 +341,7 @@ int StaggeredGrid::vJEnd() const
  * get size of FieldVariable v
  * @return size of FieldVariable v
  */
-std::array<int, 2> StaggeredGrid::vSize() const
-{
+std::array<int, 2> StaggeredGrid::vSize() const {
     return {vIEnd() - vIBegin(), vJEnd() - vJBegin()};
 }
 
@@ -383,8 +349,7 @@ std::array<int, 2> StaggeredGrid::vSize() const
  * get first valid Interior index for v in x direction
  * @return first valid Interior index for v in x direction
  */
-int StaggeredGrid::vInteriorIBegin() const
-{
+int StaggeredGrid::vInteriorIBegin() const {
     return vIBegin() + 1;
 
 };
@@ -394,8 +359,7 @@ int StaggeredGrid::vInteriorIBegin() const
  * get one after last valid Interior index for v in x direction
  * @return one after last valid Interior index for v in x direction
  */
-int StaggeredGrid::vInteriorIEnd() const
-{
+int StaggeredGrid::vInteriorIEnd() const {
     return vIEnd() - 1;
 
 };
@@ -404,8 +368,7 @@ int StaggeredGrid::vInteriorIEnd() const
  * get first valid Interior index for v in y direction
  * @return first valid Interior index for v in y direction
  */
-int StaggeredGrid::vInteriorJBegin() const
-{
+int StaggeredGrid::vInteriorJBegin() const {
     return vJBegin() + 1;
 
 };
@@ -414,8 +377,7 @@ int StaggeredGrid::vInteriorJBegin() const
  * get one after last valid Interior index for v in y direction
  * @return one after last valid Interior index for v in y direction
  */
-int StaggeredGrid::vInteriorJEnd() const
-{
+int StaggeredGrid::vInteriorJEnd() const {
     return vJEnd() - 1;
 
 };
@@ -424,8 +386,7 @@ int StaggeredGrid::vInteriorJEnd() const
  * get a reference to field variable v
  * @return a reference to field variable v
  */
-const FieldVariable &StaggeredGrid::v() const
-{
+const FieldVariable &StaggeredGrid::v() const {
     return v_;
 };
 
@@ -435,12 +396,11 @@ const FieldVariable &StaggeredGrid::v() const
  * @param j: position in y direction in discretized grid
  * @return value of v in element (i,j)
  */
-double StaggeredGrid::v(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::v(int i, int j) const {
+#ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    #endif
+#endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
@@ -450,12 +410,11 @@ double StaggeredGrid::v(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return value of v in element (i,j)
  */
-double &StaggeredGrid::v(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::v(int i, int j) {
+#ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    #endif
+#endif
     return v_(i - vIBegin(), j - vJBegin());
 };
 
@@ -467,8 +426,7 @@ double &StaggeredGrid::v(int i, int j)
  * get first valid index for rhs in x direction
  * @return first valid index for rhs in x direction
  */
-int StaggeredGrid::rhsIBegin() const
-{
+int StaggeredGrid::rhsIBegin() const {
     return -1;
 };
 
@@ -476,8 +434,7 @@ int StaggeredGrid::rhsIBegin() const
  * get one after last valid index for rhs in x direction
  * @return one after last valid index for rhs in x direction
  */
-int StaggeredGrid::rhsIEnd() const
-{
+int StaggeredGrid::rhsIEnd() const {
     return nCells_[0] + 1;
 };
 
@@ -486,8 +443,7 @@ int StaggeredGrid::rhsIEnd() const
  * get first valid index for rhs in y direction
  * @return first valid index for rhs in y direction
  */
-int StaggeredGrid::rhsJBegin() const
-{
+int StaggeredGrid::rhsJBegin() const {
     return -1;
 };
 
@@ -495,8 +451,7 @@ int StaggeredGrid::rhsJBegin() const
  * get one after last valid index for rhs in y direction
  * @return one after last valid index for rhs in y direction
  */
-int StaggeredGrid::rhsJEnd() const
-{
+int StaggeredGrid::rhsJEnd() const {
     return nCells_[1] + 1;
 };
 
@@ -504,8 +459,7 @@ int StaggeredGrid::rhsJEnd() const
  * get size of FieldVariable rhs
  * @return size of FieldVariable rhs
  */
-std::array<int, 2> StaggeredGrid::rhsSize() const
-{
+std::array<int, 2> StaggeredGrid::rhsSize() const {
     return {rhsIEnd() - rhsIBegin(), rhsJEnd() - rhsJBegin()};
 }
 
@@ -513,8 +467,7 @@ std::array<int, 2> StaggeredGrid::rhsSize() const
  * get first valid field index for u in x direction
  * @return first valid field index for u in x direction
  */
-int StaggeredGrid::rhsInteriorIBegin() const
-{
+int StaggeredGrid::rhsInteriorIBegin() const {
 
     return rhsIBegin() + 1;
 };
@@ -523,8 +476,7 @@ int StaggeredGrid::rhsInteriorIBegin() const
  * get one after last valid Interior index for u in x direction
  * @return one after last valid Interior index for u in x direction
  */
-int StaggeredGrid::rhsInteriorIEnd() const
-{
+int StaggeredGrid::rhsInteriorIEnd() const {
 
     return rhsIEnd() - 1;
 
@@ -534,8 +486,7 @@ int StaggeredGrid::rhsInteriorIEnd() const
  * get first valid Interior index for u in y direction
  * @return first valid Interior index for u in y direction
  */
-int StaggeredGrid::rhsInteriorJBegin() const
-{
+int StaggeredGrid::rhsInteriorJBegin() const {
 
     return rhsJBegin() + 1;
 
@@ -545,8 +496,7 @@ int StaggeredGrid::rhsInteriorJBegin() const
  * get one after last valid Interior index for u in y direction
  * @return one after last valid Interior index for u in y direction
  */
-int StaggeredGrid::rhsInteriorJEnd() const
-{
+int StaggeredGrid::rhsInteriorJEnd() const {
 
     return rhsJEnd() - 1;
 
@@ -558,12 +508,11 @@ int StaggeredGrid::rhsInteriorJEnd() const
  * @param j: position in y direction in discretized grid
  * @return value of rhs in element (i,j)
  */
-double StaggeredGrid::rhs(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::rhs(int i, int j) const {
+#ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    #endif
+#endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
@@ -573,12 +522,11 @@ double StaggeredGrid::rhs(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return value of rhs in element (i,j)
  */
-double &StaggeredGrid::rhs(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::rhs(int i, int j) {
+#ifndef NDEBUG
     assert((rhsIBegin() <= i) && (i <= rhsIEnd()));
     assert((rhsJBegin() <= j) && (j <= rhsJEnd()));
-    #endif
+#endif
     return rhs_(i - rhsIBegin(), j - rhsJBegin());
 };
 
@@ -586,8 +534,7 @@ double &StaggeredGrid::rhs(int i, int j)
  * get reference to field variable rhs
  * @return reference to field variable rhs
  */
-const FieldVariable &StaggeredGrid::rhs() const
-{
+const FieldVariable &StaggeredGrid::rhs() const {
     return rhs_;
 };
 
@@ -601,12 +548,11 @@ const FieldVariable &StaggeredGrid::rhs() const
  * @param j: position in y direction in discretized grid
  * @return value of F in element (i,j)
  */
-double StaggeredGrid::f(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::f(int i, int j) const {
+#ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    #endif
+#endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
@@ -616,12 +562,11 @@ double StaggeredGrid::f(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return value of F in element (i,j)
  */
-double &StaggeredGrid::f(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::f(int i, int j) {
+#ifndef NDEBUG
     assert((uIBegin() <= i) && (i <= uIEnd()));
     assert((uJBegin() <= j) && (j <= uJEnd()));
-    #endif
+#endif
     return f_(i - uIBegin(), j - uJBegin());
 };
 
@@ -630,8 +575,7 @@ double &StaggeredGrid::f(int i, int j)
  * get reference to field variable F
  * @return reference to field variable F
  */
-const FieldVariable &StaggeredGrid::f() const
-{
+const FieldVariable &StaggeredGrid::f() const {
     return f_;
 };
 
@@ -646,12 +590,11 @@ const FieldVariable &StaggeredGrid::f() const
  * @param j: position in y direction in discretized grid
  * @return value of G in element (i,j)
  */
-double StaggeredGrid::g(int i, int j) const
-{
-    #ifndef NDEBUG
+double StaggeredGrid::g(int i, int j) const {
+#ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    #endif
+#endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 
@@ -661,12 +604,11 @@ double StaggeredGrid::g(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return value of G in element (i,j)
  */
-double &StaggeredGrid::g(int i, int j)
-{
-    #ifndef NDEBUG
+double &StaggeredGrid::g(int i, int j) {
+#ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    #endif
+#endif
     return g_(i - vIBegin(), j - vJBegin());
 };
 
@@ -674,8 +616,7 @@ double &StaggeredGrid::g(int i, int j)
  * get reference to field variable G
  * @return reference to field variable G
  */
-const FieldVariable &StaggeredGrid::g() const
-{
+const FieldVariable &StaggeredGrid::g() const {
     return g_;
 };
 
@@ -687,8 +628,7 @@ const FieldVariable &StaggeredGrid::g() const
  * get first valid index for t in x direction
  * @return first valid index for t in x direction
  */
-int StaggeredGrid::tIBegin() const
-{
+int StaggeredGrid::tIBegin() const {
     return -1;
 };
 
@@ -696,8 +636,7 @@ int StaggeredGrid::tIBegin() const
  * get one after last valid index for t in x direction
  * @return one after last valid index for t in x direction
  */
-int StaggeredGrid::tIEnd() const
-{
+int StaggeredGrid::tIEnd() const {
     return nCells_[0] + 1;
 };
 
@@ -705,8 +644,7 @@ int StaggeredGrid::tIEnd() const
  * get first valid index for t in y direction
  * @return first valid index for t in y direction
  */
-int StaggeredGrid::tJBegin() const
-{
+int StaggeredGrid::tJBegin() const {
     return -1;
 };
 
@@ -714,8 +652,7 @@ int StaggeredGrid::tJBegin() const
  * get one after last valid index for t in y direction
  * @return one after last valid index for t in y direction
  */
-int StaggeredGrid::tJEnd() const
-{
+int StaggeredGrid::tJEnd() const {
     return nCells_[1] + 1;
 };
 
@@ -723,8 +660,7 @@ int StaggeredGrid::tJEnd() const
  * get size of FieldVariable t
  * @return size of FieldVariable t
  */
-std::array<int, 2> StaggeredGrid::tSize() const
-{
+std::array<int, 2> StaggeredGrid::tSize() const {
     return {tIEnd() - tIBegin(), tJEnd() - tJBegin()};
 }
 
@@ -732,8 +668,7 @@ std::array<int, 2> StaggeredGrid::tSize() const
  * get first valid Interior index for t in x direction
  * @return first valid Interior index for t in x direction
  */
-int StaggeredGrid::tInteriorIBegin() const
-{
+int StaggeredGrid::tInteriorIBegin() const {
     return tIBegin() + 1;
 };
 
@@ -741,8 +676,7 @@ int StaggeredGrid::tInteriorIBegin() const
  * get one after last valid Interior index for t in x direction
  * @return one after last valid Interior index for t in x direction
  */
-int StaggeredGrid::tInteriorIEnd() const
-{
+int StaggeredGrid::tInteriorIEnd() const {
     return tIEnd() - 1;
 };
 
@@ -750,8 +684,7 @@ int StaggeredGrid::tInteriorIEnd() const
  * get first valid Interior index for t in y direction
  * @return first valid Interior index for t in y direction
  */
-int StaggeredGrid::tInteriorJBegin() const
-{
+int StaggeredGrid::tInteriorJBegin() const {
     return tJBegin() + 1;
 };
 
@@ -759,8 +692,7 @@ int StaggeredGrid::tInteriorJBegin() const
  * get first valid Interior index for t in y direction
  * @return first valid Interior index for t in y direction
  */
-int StaggeredGrid::tInteriorJEnd() const
-{
+int StaggeredGrid::tInteriorJEnd() const {
     return tJEnd() - 1;
 };
 
@@ -768,8 +700,7 @@ int StaggeredGrid::tInteriorJEnd() const
  * get reference to field variable t
  * @return reference to field variable t
  */
-const FieldVariable &StaggeredGrid::t() const
-{
+const FieldVariable &StaggeredGrid::t() const {
     return t_;
 };
 
@@ -779,8 +710,7 @@ const FieldVariable &StaggeredGrid::t() const
  * @param j: position in y direction in discretized grid
  * @return field variable t in an element (i,j)
  */
-double StaggeredGrid::t(int i, int j) const
-{
+double StaggeredGrid::t(int i, int j) const {
 #ifndef NDEBUG
     assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed in const");
     assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed in const");
@@ -794,11 +724,10 @@ double StaggeredGrid::t(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return field variable t in an element (i,j)
  */
-double &StaggeredGrid::t(int i, int j)
-{
+double &StaggeredGrid::t(int i, int j) {
 #ifndef NDEBUG
-    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed" );
-    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed" );
+    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed");
+    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed");
 #endif
     return t_(i - tIBegin(), j - tJBegin());
 };
@@ -811,8 +740,7 @@ double &StaggeredGrid::t(int i, int j)
  * get first valid index for q in x direction
  * @return first valid index for q in x direction
  */
-int StaggeredGrid::qIBegin() const
-{
+int StaggeredGrid::qIBegin() const {
     return -1;
 };
 
@@ -820,8 +748,7 @@ int StaggeredGrid::qIBegin() const
  * get one after last valid index for q in x direction
  * @return one after last valid index for q in x direction
  */
-int StaggeredGrid::qIEnd() const
-{
+int StaggeredGrid::qIEnd() const {
     return nCells_[0] + 1;
 };
 
@@ -829,8 +756,7 @@ int StaggeredGrid::qIEnd() const
  * get first valid index for q in y direction
  * @return first valid index for q in y direction
  */
-int StaggeredGrid::qJBegin() const
-{
+int StaggeredGrid::qJBegin() const {
     return -1;
 };
 
@@ -838,8 +764,7 @@ int StaggeredGrid::qJBegin() const
  * get one after last valid index for q in y direction
  * @return one after last valid index for q in y direction
  */
-int StaggeredGrid::qJEnd() const
-{
+int StaggeredGrid::qJEnd() const {
     return nCells_[1] + 1;
 };
 
@@ -847,8 +772,7 @@ int StaggeredGrid::qJEnd() const
  * get size of FieldVariable t
  * @return size of FieldVariable t
  */
-std::array<int, 2> StaggeredGrid::qSize() const
-{
+std::array<int, 2> StaggeredGrid::qSize() const {
     return {qIEnd() - qIBegin(), qJEnd() - qJBegin()};
 }
 
@@ -856,8 +780,7 @@ std::array<int, 2> StaggeredGrid::qSize() const
  * get first valid Interior index for q in x direction
  * @return first valid Interior index for q in x direction
  */
-int StaggeredGrid::qInteriorIBegin() const
-{
+int StaggeredGrid::qInteriorIBegin() const {
     return qIBegin() + 1;
 };
 
@@ -865,8 +788,7 @@ int StaggeredGrid::qInteriorIBegin() const
  * get one after last valid Interior index for q in x direction
  * @return one after last valid Interior index for q in x direction
  */
-int StaggeredGrid::qInteriorIEnd() const
-{
+int StaggeredGrid::qInteriorIEnd() const {
     return qIEnd() - 1;
 };
 
@@ -874,8 +796,7 @@ int StaggeredGrid::qInteriorIEnd() const
  * get first valid Interior index for q in y direction
  * @return first valid Interior index for q in y direction
  */
-int StaggeredGrid::qInteriorJBegin() const
-{
+int StaggeredGrid::qInteriorJBegin() const {
     return qJBegin() + 1;
 };
 
@@ -883,8 +804,7 @@ int StaggeredGrid::qInteriorJBegin() const
  * get first valid Interior index for q in y direction
  * @return first valid Interior index for q in y direction
  */
-int StaggeredGrid::qInteriorJEnd() const
-{
+int StaggeredGrid::qInteriorJEnd() const {
     return qJEnd() - 1;
 };
 
@@ -892,8 +812,7 @@ int StaggeredGrid::qInteriorJEnd() const
  * get reference to field variable t
  * @return reference to field variable t
  */
-const FieldVariable &StaggeredGrid::q() const
-{
+const FieldVariable &StaggeredGrid::q() const {
     return q_;
 };
 
@@ -903,10 +822,9 @@ const FieldVariable &StaggeredGrid::q() const
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
  */
-double StaggeredGrid::q(int i, int j) const
-{
+double StaggeredGrid::q(int i, int j) const {
 #ifndef NDEBUG
-    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed in const" );
+    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed in const");
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed in const");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
@@ -918,10 +836,9 @@ double StaggeredGrid::q(int i, int j) const
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
  */
-double &StaggeredGrid::q(int i, int j)
-{
+double &StaggeredGrid::q(int i, int j) {
 #ifndef NDEBUG
-    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed" );
+    assert((qIBegin() <= i) && (i <= qIEnd()) && "Q i failed");
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());

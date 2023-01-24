@@ -15,11 +15,10 @@
 FieldVariable::FieldVariable(std::array<int, 2> size,
                              std::array<double, 2> origin,
                              std::array<double, 2> meshWidth) :
-    Array2D(size),
-    origin_(origin),
-    meshWidth_(meshWidth)
-{
-    
+        Array2D(size),
+        origin_(origin),
+        meshWidth_(meshWidth) {
+
 }
 
 /**
@@ -30,13 +29,12 @@ FieldVariable::FieldVariable(std::array<int, 2> size,
  * @param y: y coordinate of the desired point to interpolate
  * @return interpolated value at the specified point (x, y)
  */
-double FieldVariable::interpolateAt(double x, double y) const
-{
+double FieldVariable::interpolateAt(double x, double y) const {
     // Assert that the specified point is part of the domain
-    #ifndef NDEBUG
+#ifndef NDEBUG
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
-    #endif
+#endif
 
     // Determine i and j indices of the corresponding cell (shifted by origin)
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
@@ -74,13 +72,12 @@ double FieldVariable::interpolateAt(double x, double y) const
     return interp;
 }
 
-double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<Partitioning> partitioning) const
-{
+double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<Partitioning> partitioning) const {
     // Assert that the specified point is part of the domain
-    #ifndef NDEBUG
+#ifndef NDEBUG
     assert((0.0 <= x) && (x <= size_[0] * meshWidth_[0]));
     assert((0.0 <= y) && (y <= size_[1] * meshWidth_[1]));
-    #endif
+#endif
 
     // Determine i and j indices of the corresponding cell (shifted by origin)
     int i = (x - origin_[0]) / meshWidth_[0] + 1;
@@ -95,18 +92,18 @@ double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<
     int y_size = size_[1];
 
     // Determines if GhostLayers exists and shifts the index if necessary and adjusts the boundary index
-    if (!partitioning->ownPartitionContainsLeftBoundary() && u){
+    if (!partitioning->ownPartitionContainsLeftBoundary() && u) {
         i_test++;
         x_size--;
     }
-    if (!partitioning->ownPartitionContainsRightBoundary() && u){
+    if (!partitioning->ownPartitionContainsRightBoundary() && u) {
         x_size--;
     }
-    if (!partitioning->ownPartitionContainsBottomBoundary() && v){
+    if (!partitioning->ownPartitionContainsBottomBoundary() && v) {
         j_test++;
         y_size--;
     }
-    if (!partitioning->ownPartitionContainsTopBoundary() && v){
+    if (!partitioning->ownPartitionContainsTopBoundary() && v) {
         y_size--;
     }
 
@@ -152,13 +149,12 @@ double FieldVariable::interpolateAtParallel(double x, double y, std::shared_ptr<
  * Compute absolute maximal value needed in computation to determine optimal time step
  * @return maximal absolute value of the field variable given
  */
-double FieldVariable::absMax() const
-{
+double FieldVariable::absMax() const {
     double abs_max = 0;
     for (int i = 1; i < size_[0] - 1; i++) {
         for (int j = 1; j < size_[1] - 1; j++) {
-            if (fabs((*this)(i,j)) > abs_max)
-                abs_max = fabs((*this)(i,j));
+            if (fabs((*this)(i, j)) > abs_max)
+                abs_max = fabs((*this)(i, j));
         }
     }
     return abs_max;

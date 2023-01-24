@@ -7,11 +7,10 @@
  * @param maximumNumberOfIterations
  */
 
-GaussSeidel::GaussSeidel(std::shared_ptr <Discretization> discretization,
-         double epsilon,
-         int maximumNumberOfIterations) :
-        PressureSolver(discretization, epsilon, maximumNumberOfIterations)
-{
+GaussSeidel::GaussSeidel(std::shared_ptr<Discretization> discretization,
+                         double epsilon,
+                         int maximumNumberOfIterations) :
+        PressureSolver(discretization, epsilon, maximumNumberOfIterations) {
 
 }
 

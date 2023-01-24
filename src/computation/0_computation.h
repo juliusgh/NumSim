@@ -1,4 +1,5 @@
 #pragma once
+
 #include <memory>
 #include <algorithm>
 #include "settings.h"
@@ -30,6 +31,7 @@ public:
 
 protected:
     virtual void setExternalHeat();
+
     /**
      * Set the boundary values of the velocities (u, v)
      * 

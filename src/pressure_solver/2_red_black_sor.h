@@ -16,16 +16,17 @@ public:
     * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
     * @param partitioning information about subdomain
     */
-    RedBlackSOR(std::shared_ptr <Discretization> discretization,
-        double epsilon,
-        int maximumNumberOfIterations,
-        double omega,
-        std::shared_ptr<Partitioning> partitioning);
+    RedBlackSOR(std::shared_ptr<Discretization> discretization,
+                double epsilon,
+                int maximumNumberOfIterations,
+                double omega,
+                std::shared_ptr<Partitioning> partitioning);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
      */
     void solve() override;
+
 private:
     double omega_;
 };

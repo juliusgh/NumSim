@@ -14,13 +14,12 @@
  * Parse the settings from the parameter file that is given as the command line argument
  * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
  */
-void ComputationParallel::initialize(string filename)
-{
+void ComputationParallel::initialize(string filename) {
     std::cout << "I am parallel" << std::endl;
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);
-    
+
 #ifndef NDEBUG
     // Print settings
     settings_.printSettings();
@@ -34,8 +33,7 @@ void ComputationParallel::initialize(string filename)
 
     if (settings_.useDonorCell) {
         discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma);
-    }
-    else {
+    } else {
         discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_);
     }
 
@@ -44,14 +42,14 @@ void ComputationParallel::initialize(string filename)
 #ifndef NDEBUG
     if (settings_.pressureSolver == "SOR") {
         pressureSolver_ = std::make_unique<RedBlackSOR>(discretization_, settings_.epsilon,
-                                                settings_.maximumNumberOfIterations, settings_.omega, partitioning_);
-    }
-    else if (settings_.pressureSolver == "GaussSeidel") {
+                                                        settings_.maximumNumberOfIterations, settings_.omega,
+                                                        partitioning_);
+    } else if (settings_.pressureSolver == "GaussSeidel") {
         pressureSolver_ = std::make_unique<RedBlack>(discretization_, settings_.epsilon,
                                                      settings_.maximumNumberOfIterations, partitioning_);
     } else if (settings_.pressureSolver == "CG") {
         pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
-                                                     settings_.maximumNumberOfIterations, partitioning_);
+                                                              settings_.maximumNumberOfIterations, partitioning_);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
@@ -61,7 +59,7 @@ void ComputationParallel::initialize(string filename)
 #endif
 
 
-    
+
     // Initialize output writers
 #ifndef NDEBUG
     outputWriterText_ = std::make_unique<OutputWriterTextParallel>(discretization_, partitioning_);
@@ -78,11 +76,11 @@ void ComputationParallel::runSimulation() {
 #ifndef NDEBUG
     const clock_t sim_start_time = clock();
     float sim_duration;
-#else 
+#else
     double time_steps_print = 1;
     double time_last_printed = -time_steps_print;
 #endif
-    while (time < settings_.endTime){
+    while (time < settings_.endTime) {
         t_iter++;
 
         /*
@@ -122,7 +120,7 @@ void ComputationParallel::runSimulation() {
         /*
         * 6) Update the velocities (u, v)
         */
-        computeVelocities(); 
+        computeVelocities();
 
         /*
         * 7) Output debug information and simulation results
@@ -135,19 +133,19 @@ void ComputationParallel::runSimulation() {
         }
         outputWriterText_->writeFile(time);
         outputWriterParaview_->writeFile(time);
-        sim_duration = float( clock()  - sim_start_time) / CLOCKS_PER_SEC;
-        if (sim_duration >= 600){
+        sim_duration = float(clock() - sim_start_time) / CLOCKS_PER_SEC;
+        if (sim_duration >= 600) {
             std::cout << "TERMINATED (cause: runTimeError)" << std::endl;
             break;
         }
-#else   
-        
+#else
+
         if (time - time_last_printed >= time_steps_print){
             outputWriterParaview_->writeFile(time);
             time_last_printed += time_steps_print;
         }
 
-#endif 
+#endif
 
     }
 #ifndef NDEBUG
@@ -212,8 +210,7 @@ void ComputationParallel::applyBoundaryValues() {
     */
     if (partitioning_->ownPartitionContainsTopBoundary()) {
         applyBoundaryValuesTop();
-    }
-    else {
+    } else {
         // v: send second to last row on the top to top neighbour
         for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
             v_topRow.at(i - v_rowOffset) = discretization_->v(i, vInteriorJEnd - 2);
@@ -238,8 +235,7 @@ void ComputationParallel::applyBoundaryValues() {
     */
     if (partitioning_->ownPartitionContainsBottomBoundary()) {
         applyBoundaryValuesBottom();
-    }
-    else {
+    } else {
         // v: send second row on the bottom to bottom neighbour
         for (int i = vInteriorIBegin; i < vInteriorIEnd; i++) {
             v_bottomRow.at(i - v_rowOffset) = discretization_->v(i, vInteriorJBegin + 1);
@@ -267,8 +263,7 @@ void ComputationParallel::applyBoundaryValues() {
     */
     if (partitioning_->ownPartitionContainsRightBoundary()) {
         applyBoundaryValuesRight();
-    }
-    else {
+    } else {
         // v: send last column on the right to right neighbour
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
             v_rightColumn.at(j - v_columnOffset) = discretization_->v(vInteriorIEnd - 1, j);
@@ -283,8 +278,8 @@ void ComputationParallel::applyBoundaryValues() {
         partitioning_->isendToRight(u_rightColumn, request_u_rightColumn);
 
         // receive ghost layer column on the right from right neighbour
-        partitioning_->irecvFromRight( v_rightColumn, v_columnCount, request_v_rightColumn);
-        partitioning_->irecvFromRight( u_rightColumn, u_columnCount, request_u_rightColumn);
+        partitioning_->irecvFromRight(v_rightColumn, v_columnCount, request_v_rightColumn);
+        partitioning_->irecvFromRight(u_rightColumn, u_columnCount, request_u_rightColumn);
     }
     /*
     * velocities u and v communication: send to and receive from subdomain directly left of 
@@ -293,8 +288,7 @@ void ComputationParallel::applyBoundaryValues() {
     */
     if (partitioning_->ownPartitionContainsLeftBoundary()) {
         applyBoundaryValuesLeft();
-    }
-    else {
+    } else {
         // v: send first column on the left to left neighbour
         for (int j = vInteriorJBegin; j < vInteriorJEnd; j++) {
 
@@ -318,9 +312,9 @@ void ComputationParallel::applyBoundaryValues() {
     /*
     set top and bottom ghost layers first (low priority)
     */
-   /* 
-   * Set subdomain ghost layer at top for velocities
-   */
+    /*
+    * Set subdomain ghost layer at top for velocities
+    */
     if (!partitioning_->ownPartitionContainsTopBoundary()) {
         // wait until all MPI requests from the top neighbour are finished
         partitioning_->wait(request_v_topRow);
@@ -334,7 +328,7 @@ void ComputationParallel::applyBoundaryValues() {
             discretization_->u(i, uJEnd - 1) = u_topRow.at(i - u_rowOffset);
         }
     }
-    
+
     /* 
     * Set subdomain ghost layer at bottom for velocities
     */
@@ -398,11 +392,11 @@ void ComputationParallel::applyBoundaryValues() {
  * over all subdomains 
  */
 void ComputationParallel::computeTimeStepWidth() {
-    const double dx =  discretization_->dx();
-    const double dy =  discretization_->dy();
+    const double dx = discretization_->dx();
+    const double dy = discretization_->dy();
 
     // Compute maximal time step width regarding the diffusion
-    double dt_diff = settings_.re / 2 / (1 / (dx * dx) + 1 / (dy * dy) );
+    double dt_diff = settings_.re / 2 / (1 / (dx * dx) + 1 / (dy * dy));
 
     // Compute maximal time step width regarding the convection u
     double u_absMax_local = discretization_->u().absMax();

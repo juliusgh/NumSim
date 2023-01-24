@@ -697,38 +697,38 @@ TEST(DiscretizationTest, FirstOrderMixed)
     double omega = 2.0 / (1.0 + sin(3.1 * meshWidth[0]));
     auto sor = SOR(static_cast<std::shared_ptr<Discretization>>(d), epsilon, maximumNumberOfIterations, omega);
     sor.solve();*/
-    /*std::cout << "Iterations "  << sor.iterations() << std::endl;
-    std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
-    /*
-    //std::cout << "p = ..." << std::endl;
-    d->p().print();
+/*std::cout << "Iterations "  << sor.iterations() << std::endl;
+std::cout << "Norm "  << sor.residualNorm() << std::endl;*/
+/*
+//std::cout << "p = ..." << std::endl;
+d->p().print();
 
-    // check interior of the domain
-    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
-        for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-            EXPECT_NEAR(d->p(i, j), dRef->p(i, j), epsilon);
-        }
-    }
-
-    // check boundary of the domain
+// check interior of the domain
+for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
     for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
-
-        // check left boundary
-        ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
-
-        // check right boundary
-        ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
+        EXPECT_NEAR(d->p(i, j), dRef->p(i, j), epsilon);
     }
+}
 
-    // check boundary of the domain
-    for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+// check boundary of the domain
+for (int j = d->pInteriorJBegin(); j < d->pInteriorJEnd(); j++) {
 
-        // check left boundary
-        ASSERT_EQ(d->p(i, d->pJBegin()), d->p(i, d->pInteriorJBegin()));
+    // check left boundary
+    ASSERT_EQ(d->p(d->pIBegin(), j), d->p(d->pInteriorIBegin(), j));
 
-        // check right boundary
-        ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
-    }
+    // check right boundary
+    ASSERT_EQ(d->p(d->pIEnd() - 1, j), d->p(d->pInteriorIEnd() - 1, j));
+}
+
+// check boundary of the domain
+for (int i = d->pInteriorIBegin(); i < d->pInteriorIEnd(); i++) {
+
+    // check left boundary
+    ASSERT_EQ(d->p(i, d->pJBegin()), d->p(i, d->pInteriorJBegin()));
+
+    // check right boundary
+    ASSERT_EQ(d->p(i, d->pJEnd() - 1), d->p(i, d->pInteriorJEnd() - 1));
+}
 }*/
 
 //######################################## Gauss Seidel Test ############################################################
