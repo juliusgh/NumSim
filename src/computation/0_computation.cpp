@@ -144,8 +144,8 @@ void Computation::setInitialValues() {
  * Left and right boundaries should overwrite bottom and top boundaries
  */
 void Computation::setInitialTemperatureValues() {
-    for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
-        for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); j++) {
+    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
+        for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
             discretization_->t(i, j) = settings_.initialTemp;
         }
     }
@@ -381,7 +381,7 @@ void Computation::computeVelocities() {
 void Computation::computeTemperature() {
     for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
         for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
-            discretization_->t(i, j) = discretization_->t(i, j) - dt_ * (1 / (settings_.pr * settings_.re) * (discretization_->computeD2tD2x(i,j)+ discretization_->computeD2tD2y(i,j)) - discretization_->computeDutDx(i,j) - discretization_->computeDvtDy(i,j) + discretization_->q(i,j))  ;
+            discretization_->t(i, j) = discretization_->t(i, j) + dt_ * (1 / (settings_.pr * settings_.re) * (discretization_->computeD2tD2x(i,j)+ discretization_->computeD2tD2y(i,j)) - discretization_->computeDutDx(i,j) - discretization_->computeDvtDy(i,j) + discretization_->q(i,j));
         }
     }
 };
