@@ -159,6 +159,21 @@ public:
     double &u(int i, int j);
 
     /**
+     * get a reference to field variable u
+    */
+    const FieldVariable &uLast() const;
+
+    /**
+     * access value of u in element (i,j)
+    */
+    double uLast(int i, int j) const;
+
+    /**
+     * access value of u in element (i,j)
+    */
+    double &uLast(int i, int j);
+
+    /**
      * first valid index for u in x direction
     */
     int uIBegin() const;
@@ -217,6 +232,21 @@ public:
      * access value of v in element (i,j)
     */
     double &v(int i, int j);
+
+    /**
+     * get a reference to Interior variable v
+    */
+    const FieldVariable &vLast() const;
+
+    /**
+     * access value of v in element (i,j)
+    */
+    double vLast(int i, int j) const;
+
+    /**
+     * access value of v in element (i,j)
+    */
+    double &vLast(int i, int j);
 
     /**
      * first valid index for v in x direction
@@ -454,6 +484,8 @@ protected:
     FieldVariable rhs_;
     FieldVariable u_;
     FieldVariable v_;
+    FieldVariable uLast_;
+    FieldVariable vLast_;
     FieldVariable t_;
     FieldVariable q_;
 };

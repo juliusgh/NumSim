@@ -38,7 +38,6 @@ protected:
      * Left and right boundaries should overwrite bottom and top boundaries
      */
 
-
     void applyBoundaryValues();
 
     void applyBoundaryValuesTop();
@@ -77,6 +76,8 @@ protected:
      * Compute the time step width dt based on the maximum velocities
      */
     virtual void computeTimeStepWidth();
+
+    virtual void updateLastVelocities();
 
     /**
      * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)

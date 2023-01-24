@@ -17,6 +17,8 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
         rhs_(rhsSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         u_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
         v_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
+        uLast_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
+        vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
 
@@ -296,6 +298,42 @@ double &StaggeredGrid::u(int i, int j) {
 };
 
 /**
+ * get a reference to field variable u
+ * @return reference to field variable u
+ */
+const FieldVariable &StaggeredGrid::uLast() const {
+    return uLast_;
+};
+
+/**
+ * access value of u in element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return value of u in element (i,j)
+ */
+double StaggeredGrid::uLast(int i, int j) const {
+#ifndef NDEBUG
+    assert((uIBegin() <= i) && (i <= uIEnd()));
+    assert((uJBegin() <= j) && (j <= uJEnd()));
+#endif
+    return uLast_(i - uIBegin(), j - uJBegin());
+};
+
+/**
+ * access value of u in element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return value of u in element (i,j)
+ */
+double &StaggeredGrid::uLast(int i, int j) {
+#ifndef NDEBUG
+    assert((uIBegin() <= i) && (i <= uIEnd()));
+    assert((uJBegin() <= j) && (j <= uJEnd()));
+#endif
+    return uLast_(i - uIBegin(), j - uJBegin());
+};
+
+/**
  * velocity in y-direction v
  */
 
@@ -416,6 +454,42 @@ double &StaggeredGrid::v(int i, int j) {
     assert((vJBegin() <= j) && (j <= vJEnd()));
 #endif
     return v_(i - vIBegin(), j - vJBegin());
+};
+
+/**
+ * get a reference to field variable v
+ * @return a reference to field variable v
+ */
+const FieldVariable &StaggeredGrid::vLast() const {
+    return vLast_;
+};
+
+/**
+ * access value of v in element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return value of v in element (i,j)
+ */
+double StaggeredGrid::vLast(int i, int j) const {
+#ifndef NDEBUG
+    assert((vIBegin() <= i) && (i <= vIEnd()));
+    assert((vJBegin() <= j) && (j <= vJEnd()));
+#endif
+    return vLast_(i - vIBegin(), j - vJBegin());
+};
+
+/**
+ * access value of v in element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return value of v in element (i,j)
+ */
+double &StaggeredGrid::vLast(int i, int j) {
+#ifndef NDEBUG
+    assert((vIBegin() <= i) && (i <= vIEnd()));
+    assert((vJBegin() <= j) && (j <= vJEnd()));
+#endif
+    return vLast_(i - vIBegin(), j - vJBegin());
 };
 
 /**
