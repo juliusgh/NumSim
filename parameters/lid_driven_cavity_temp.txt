@@ -15,14 +15,14 @@ dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
 dirichletTopY    = 0
-dirichletLeftX   = 0
+dirichletLeftX   = 1
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
 outflowBottom = false
 outflowTop = false
 outflowLeft = false
-outflowRight = false
+outflowRight = true
 
 # Discretization parameters
 nCellsX = 40          # number of cells in x and y direction
