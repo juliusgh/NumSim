@@ -29,13 +29,15 @@ public:
     virtual void runSimulation();
 
 protected:
-    virtual void setInitialTemperatureValues();
+    virtual void setExternalHeat();
     /**
      * Set the boundary values of the velocities (u, v)
      * 
      * Left and right boundaries should overwrite bottom and top boundaries
      */
 
+
+    void applyBoundaryValues();
 
     void applyBoundaryValuesTop();
 

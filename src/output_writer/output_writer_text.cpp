@@ -174,49 +174,98 @@ void OutputWriterText::writeFile(double currentTime)
 
 void OutputWriterText::writePressureFile()
 {
-  // counter for files, counter value is part of the file name
-  static int pressurefileNo = 0;
+    // counter for files, counter value is part of the file name
+    static int pressurefileNo = 0;
 
-  // Assemble the filename
-  std::stringstream fileName;
-  fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << ".txt";
-  
-  // open file
-  std::ofstream file(fileName.str().c_str());
+    // Assemble the filename
+    std::stringstream fileName;
+    fileName << "out/pressure_" << std::setw(4) << std::setfill('0') << pressurefileNo++ << ".txt";
 
-  if (!file.is_open())
-  {
-    std::cout << "Could not write to file \"" << fileName.str() << "\".";
-    return;
-  }
+    // open file
+    std::ofstream file(fileName.str().c_str());
 
-  // write mesh width
-  file << "nCells: " << discretization_->nCells()[0] << "x" << discretization_->nCells()[1] 
-    << ", dx: " << discretization_->dx() << ", dy: " << discretization_->dy() << std::endl << std::endl;
+    if (!file.is_open())
+    {
+        std::cout << "Could not write to file \"" << fileName.str() << "\".";
+        return;
+    }
 
-  const int fieldWidth = 9;   // number of characters to use for a single value
+    // write mesh width
+    file << "nCells: " << discretization_->nCells()[0] << "x" << discretization_->nCells()[1]
+         << ", dx: " << discretization_->dx() << ", dy: " << discretization_->dy() << std::endl << std::endl;
 
-  // write p
-  // ---------
-  // write header lines
-  file << "p (" << discretization_->p().size()[0] << "x" << discretization_->p().size()[1] << "): " << std::endl 
-    << std::string(fieldWidth, ' ') << "|";
-  for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++)
-  {
-    file << std::setw(fieldWidth) << i;
-  }
-  file << std::endl << std::string(fieldWidth*(discretization_->p().size()[0]+2)+1, '-') << std::endl;
+    const int fieldWidth = 9;   // number of characters to use for a single value
 
-  // write p values
-  for (int j = discretization_->pJEnd()-1; j >= discretization_->pJBegin(); j--)
-  {
-    file << std::setw(fieldWidth) << j << "|";
+    // write p
+    // ---------
+    // write header lines
+    file << "p (" << discretization_->p().size()[0] << "x" << discretization_->p().size()[1] << "): " << std::endl
+         << std::string(fieldWidth, ' ') << "|";
     for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++)
     {
-      file << std::setw(fieldWidth) << std::setprecision(fieldWidth-6) << discretization_->p(i,j);
+        file << std::setw(fieldWidth) << i;
+    }
+    file << std::endl << std::string(fieldWidth*(discretization_->p().size()[0]+2)+1, '-') << std::endl;
+
+    // write p values
+    for (int j = discretization_->pJEnd()-1; j >= discretization_->pJBegin(); j--)
+    {
+        file << std::setw(fieldWidth) << j << "|";
+        for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++)
+        {
+            file << std::setw(fieldWidth) << std::setprecision(fieldWidth-6) << discretization_->p(i,j);
+        }
+        file << std::endl;
     }
     file << std::endl;
-  }
-  file << std::endl;
+
+}
+
+void OutputWriterText::writeTemperatureFile()
+{
+    // counter for files, counter value is part of the file name
+    static int temperaturefileNo = 0;
+
+    // Assemble the filename
+    std::stringstream fileName;
+    fileName << "out/temperature_" << std::setw(4) << std::setfill('0') << temperaturefileNo++ << ".txt";
+
+    // open file
+    std::ofstream file(fileName.str().c_str());
+
+    if (!file.is_open())
+    {
+        std::cout << "Could not write to file \"" << fileName.str() << "\".";
+        return;
+    }
+
+    // write mesh width
+    file << "nCells: " << discretization_->nCells()[0] << "x" << discretization_->nCells()[1]
+         << ", dx: " << discretization_->dx() << ", dy: " << discretization_->dy() << std::endl << std::endl;
+
+    const int fieldWidth = 9;   // number of characters to use for a single value
+
+    // write p
+    // ---------
+    // write header lines
+    file << "t (" << discretization_->p().size()[0] << "x" << discretization_->p().size()[1] << "): " << std::endl
+         << std::string(fieldWidth, ' ') << "|";
+    for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++)
+    {
+        file << std::setw(fieldWidth) << i;
+    }
+    file << std::endl << std::string(fieldWidth*(discretization_->t().size()[0]+2)+1, '-') << std::endl;
+
+    // write t values
+    for (int j = discretization_->tJEnd()-1; j >= discretization_->tJBegin(); j--)
+    {
+        file << std::setw(fieldWidth) << j << "|";
+        for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++)
+        {
+            file << std::setw(fieldWidth) << std::setprecision(fieldWidth-6) << discretization_->t(i,j);
+        }
+        file << std::endl;
+    }
+    file << std::endl;
 
 }
