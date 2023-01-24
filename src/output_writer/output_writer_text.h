@@ -18,5 +18,6 @@ public:
 
   //! write only current values of pressure to file, filename is pressure_<count>.txt
   void writePressureFile();
+  void writeTemperatureFile();
 
 };

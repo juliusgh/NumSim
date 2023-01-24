@@ -46,7 +46,6 @@ void OutputWriterParaview::writeFile(double currentTime)
 
   // Set the number of temperature values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
   arrayTemperature->SetNumberOfTuples(dataSet->GetNumberOfPoints());
-  std::cout << "write temperature" << std::endl;
   arrayTemperature->SetName("temperature");
 
   // loop over the nodes of the mesh and assign the interpolated T values in the vtk data structure

@@ -69,9 +69,10 @@ void Computation::runSimulation() {
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
+        applyBoundaryValues();
         applyPreliminaryBoundaryValues();
 #ifndef NDEBUG
-        std::cout << "Preliminary Boundary values applied" << std::endl;
+        //std::cout << "Preliminary Boundary values applied" << std::endl;
 #endif
 
 
@@ -80,7 +81,7 @@ void Computation::runSimulation() {
         */
         computeTimeStepWidth();
         // endTime should be reached exactly:
-        if (time + dt_ > settings_.endTime) {
+        if (time + dt_ > settings_.endTime - dt_ / 100) {
             dt_ = settings_.endTime - time;
         }
         time += dt_;
@@ -116,7 +117,7 @@ void Computation::runSimulation() {
 #ifndef NDEBUG
         cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations() << endl;
-        //outputWriterText_->writePressureFile();
+        outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
 #endif
         outputWriterParaview_->writeFile(time);
@@ -126,7 +127,7 @@ void Computation::runSimulation() {
 /**
  * Set the initial values of the temperature t
  */
-void Computation::setInitialValues() {
+void Computation::applyBoundaryValues() {
     // set boundary values for u at bottom and top side (lower priority)
     applyBoundaryValuesBottom();
     applyBoundaryValuesTop();
@@ -135,7 +136,7 @@ void Computation::setInitialValues() {
     applyBoundaryValuesLeft();
     applyBoundaryValuesRight();
 
-    setInitialTemperatureValues();
+    setExternalHeat();
 };
 
 /**
@@ -143,12 +144,31 @@ void Computation::setInitialValues() {
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
-void Computation::setInitialTemperatureValues() {
-    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
-        for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
+void Computation::setInitialValues() {
+    for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
+        for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); j++) {
             discretization_->t(i, j) = settings_.initialTemp;
         }
     }
+};
+
+/**
+ * Set the boundary values of the velocities (u, v)
+ *
+ * Left and right boundaries should overwrite bottom and top boundaries
+ */
+void Computation::setExternalHeat() {
+    /*int mI = (discretization_->tInteriorIBegin() + discretization_->tInteriorIEnd()) / 2;
+    int mJ = (discretization_->tInteriorJBegin() + discretization_->tInteriorJEnd()) / 2;
+
+    for (int i = mI - 2; i < mI + 2; i++) {
+        for (int j = mJ - 2; j < mJ + 2; j++) {
+            discretization_->q(i, j) = 0.0;
+        }
+    }
+    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
+        discretization_->q(i, discretization_->tInteriorJBegin()) = 100;
+    }*/
 };
 
 void Computation::applyBoundaryValuesTop(){
@@ -190,8 +210,10 @@ void Computation::applyBoundaryValuesBottom(){
     // set boundary values for t at bottom side
     for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
         if (settings_.setFixedTempBottom) {
+            //std::cout << "tempBcBottom = " << settings_.tempBcBottom << std::endl;
             discretization_->t(i, discretization_->tJBegin()) =
                     2.0 * settings_.tempBcBottom - discretization_->t(i, discretization_->tInteriorJBegin());
+            //std::cout << "t(i, discretization_->tJBegin()) = " << discretization_->t(i, discretization_->tJBegin()) << std::endl;
         } else {
             discretization_->t(i, discretization_->tJBegin()) =
                     discretization_->t(i, discretization_->tInteriorJBegin()) - discretization_->dy() * settings_.tempBcBottom;
@@ -355,7 +377,7 @@ void Computation::computeTimeStepWidth() {
 
     // Set the appropriate time step width by using a security factor tau
     double computed_dt = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
-    std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
+    //std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
     dt_ = std::min({settings_.maximumDt, computed_dt});
 };
 
@@ -381,7 +403,10 @@ void Computation::computeVelocities() {
 void Computation::computeTemperature() {
     for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
         for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
-            discretization_->t(i, j) = discretization_->t(i, j) + dt_ * (1 / (settings_.pr * settings_.re) * (discretization_->computeD2tD2x(i,j)+ discretization_->computeD2tD2y(i,j)) - discretization_->computeDutDx(i,j) - discretization_->computeDvtDy(i,j) + discretization_->q(i,j));
+            discretization_->t(i, j) = discretization_->t(i, j) + dt_ * (1 / (settings_.pr * settings_.re)
+                    * (discretization_->computeD2tD2x(i,j) + discretization_->computeD2tD2y(i,j))
+                    - discretization_->computeDutDx(i,j) - discretization_->computeDvtDy(i,j)
+                    + discretization_->q(i,j));
         }
     }
 };
