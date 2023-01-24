@@ -19,6 +19,10 @@ dirichletLeftX   = 0
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
+outflowBottom = false
+outflowTop = false
+outflowLeft = false
+outflowRight = false
 
 # Discretization parameters
 nCellsX = 40          # number of cells in x and y direction

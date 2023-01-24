@@ -7,18 +7,18 @@
  *  All values are written to the file as they are stored in the field variables,
  *  no interpolation takes place.
  */
-class OutputWriterTextParallel : 
-  public OutputWriterText
-{
+class OutputWriterTextParallel :
+        public OutputWriterText {
 public:
     //! constructor
-    OutputWriterTextParallel(std::shared_ptr<Discretization> discretization, std::shared_ptr<Partitioning> partitioning);
+    OutputWriterTextParallel(std::shared_ptr<Discretization> discretization,
+                             std::shared_ptr<Partitioning> partitioning);
 
     //! write current velocities to file, filename is output_<count>.<rankNo>.txt
-  void writeFile(double currentTime);
+    void writeFile(double currentTime);
 
-  std::shared_ptr<Partitioning> partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
+    std::shared_ptr<Partitioning> partitioning_;                 //< the partitioning object that knowns about the domain decomposition, only significant when executing in parallel
 
-  //! write only current values of pressure to file, filename is pressure_<count>.<rankNo>.txt
-  void writePressureFile();
+    //! write only current values of pressure to file, filename is pressure_<count>.<rankNo>.txt
+    void writePressureFile();
 };

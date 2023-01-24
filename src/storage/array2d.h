@@ -8,8 +8,7 @@
  * Internally they are stored consecutively in memory.
  * The entries can be accessed by two indices i,j.
  */
-class Array2D
-{
+class Array2D {
 public:
     /**
     * constructor

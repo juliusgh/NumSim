@@ -2,6 +2,7 @@
 #include <iostream>  // for cout
 #include <iomanip>
 #include "settings.h"
+
 using namespace std;
 
 void Settings::loadFromFile(string filename) {
@@ -9,15 +10,13 @@ void Settings::loadFromFile(string filename) {
     ifstream file(filename, ios::in);
 
     // check if file is open
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         cout << "Could not open parameter file \"" << filename << "\"." << endl;
         return;
     }
 
     // loop over lines of file
-    for (int lineNo = 0; ; lineNo++)
-    {
+    for (int lineNo = 0;; lineNo++) {
         // read line
         string line;
         getline(file, line);
@@ -27,8 +26,7 @@ void Settings::loadFromFile(string filename) {
             break;
 
         // remove whitespace at beginning of line (if there is any)
-        if (line.find_first_of(" \t") != string::npos)
-        {
+        if (line.find_first_of(" \t") != string::npos) {
             line = line.substr(line.find_first_not_of(" \t"));
         }
         // if first character is a '#', skip line (line[0] == '#')
@@ -40,25 +38,21 @@ void Settings::loadFromFile(string filename) {
         // parse parameter name
         string parameterName = line.substr(0, line.find('='));
         // remove trailing spaces from parameterName
-        if (parameterName.find_first_of(" \t") != string::npos)
-        {
+        if (parameterName.find_first_of(" \t") != string::npos) {
             parameterName.erase(parameterName.find_first_of(" \t"));
         }
         // parse value
         string value = line.substr(line.find('=') + 1);
         // remove whitespace at beginning of value
-        if (value.find_first_of(" \t") != string::npos)
-        {
+        if (value.find_first_of(" \t") != string::npos) {
             value = value.substr(value.find_first_not_of(" \t"));
         }
         // remove comments at end of value
-        if (value.find_first_of('#') != string::npos)
-        {
+        if (value.find_first_of('#') != string::npos) {
             value = value.substr(0, value.find_first_of('#'));
         }
         // remove whitespace at end of value
-        if (value.find_first_of(" \t") != string::npos)
-        {
+        if (value.find_first_of(" \t") != string::npos) {
             value = value.substr(0, value.find_first_of(" \t"));
         }
 
@@ -67,8 +61,7 @@ void Settings::loadFromFile(string filename) {
             nCells[0] = atoi(value.c_str());
             continue;
         }
-        if (parameterName == "nCellsY")
-        {
+        if (parameterName == "nCellsY") {
             nCells[1] = atoi(value.c_str());
             continue;
         }
@@ -156,6 +149,22 @@ void Settings::loadFromFile(string filename) {
             dirichletBcRight[1] = atof(value.c_str());
             continue;
         }
+        if (parameterName == "outflowTop") {
+            istringstream(value.c_str()) >> boolalpha >> outflowTop;
+            continue;
+        }
+        if (parameterName == "outflowBottom") {
+            istringstream(value.c_str()) >> boolalpha >> outflowBottom;
+            continue;
+        }
+        if (parameterName == "outflowLeft") {
+            istringstream(value.c_str()) >> boolalpha >> outflowLeft;
+            continue;
+        }
+        if (parameterName == "outflowRight") {
+            istringstream(value.c_str()) >> boolalpha >> outflowRight;
+            continue;
+        }
         if (parameterName == "beta") {
             beta = atof(value.c_str());
             continue;
@@ -215,15 +224,17 @@ void Settings::loadFromFile(string filename) {
     }
 }
 
-void Settings::printSettings()
-{
+void Settings::printSettings() {
     cout << "Settings: " << endl
-              << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x " << nCells[1] << endl
-              << "  endTime: " << endTime << " s, re: " << re << " beta: " << beta << ", g: (" << g[0] << "," << g[1] << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
-              << "  dirichletBC: bottom: (" << dirichletBcBottom[0] << "," << dirichletBcBottom[1]  << ")"
-              << ", top: ("  << dirichletBcTop[0] << "," << dirichletBcTop[1]  << ")"
-              << ", left: ("  << dirichletBcLeft[0] << "," << dirichletBcLeft[1] << ")"
-              << ", right: ("  << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << endl
-              << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << ", gamma: " << gamma << endl
-              << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon << ", maximumNumberOfIterations: " << maximumNumberOfIterations << endl;
+         << "  physicalSize: " << physicalSize[0] << " x " << physicalSize[1] << ", nCells: " << nCells[0] << " x "
+         << nCells[1] << endl
+         << "  endTime: " << endTime << " s, re: " << re << " beta: " << beta << ", g: (" << g[0] << "," << g[1]
+         << "), tau: " << tau << ", maximum dt: " << maximumDt << endl
+         << "  dirichletBC: bottom: (" << dirichletBcBottom[0] << "," << dirichletBcBottom[1] << ")"
+         << ", top: (" << dirichletBcTop[0] << "," << dirichletBcTop[1] << ")"
+         << ", left: (" << dirichletBcLeft[0] << "," << dirichletBcLeft[1] << ")"
+         << ", right: (" << dirichletBcRight[0] << "," << dirichletBcRight[1] << ")" << endl
+         << "  useDonorCell: " << boolalpha << useDonorCell << ", alpha: " << alpha << ", gamma: " << gamma << endl
+         << "  pressureSolver: " << pressureSolver << ", omega: " << omega << ", epsilon: " << epsilon
+         << ", maximumNumberOfIterations: " << maximumNumberOfIterations << endl;
 }

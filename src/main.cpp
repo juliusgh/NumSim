@@ -1,10 +1,14 @@
 #ifndef NPARALLEL
-    #include "computation/1_computation_parallel.h"
+
+#include "computation/1_computation_parallel.h"
+
 #else
-    #include "computation/0_computation.h"
+#include "computation/0_computation.h"
 #endif
+
 #include <iostream>
 #include <cstdlib>
+
 using namespace std;
 
 /**
@@ -21,8 +25,7 @@ int main(int argc, char *argv[]) {
     if (argc == 1) {
         cout << "enter parameter file path: " << endl;
         cin >> filename;
-    }
-    else {
+    } else {
         // read in the first argument
         filename = argv[1];
     }

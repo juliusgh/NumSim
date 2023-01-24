@@ -15,7 +15,7 @@ public:
     * @param maximumNumberOfIterations
     * @param omega
     */
-    SOR(std::shared_ptr <Discretization> discretization,
+    SOR(std::shared_ptr<Discretization> discretization,
         double epsilon,
         int maximumNumberOfIterations,
         double omega);

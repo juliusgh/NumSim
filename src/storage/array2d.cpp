@@ -22,6 +22,7 @@ Array2D::Array2D(std::array<int, 2> size) :
 std::array<int, 2> Array2D::size() const {
     return size_;
 }
+
 /**
  * access the value at coordinate (i,j), declared not const, i.e. the value can be changed
  * @param i: discretized position in x direction
@@ -32,14 +33,15 @@ double &Array2D::operator()(int i, int j) {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
-    #ifndef NDEBUG
+#ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
     assert(j * size_[0] + i < (int) data_.size());
-    #endif
+#endif
 
     return data_[index];
 }
+
 /**
  * get the value at coordinate (i,j), declared const, i.e. it is not possible to change the value
  * @param i: discretized position in x direction
@@ -50,11 +52,11 @@ double Array2D::operator()(int i, int j) const {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
-    #ifndef NDEBUG
+#ifndef NDEBUG
     assert((0 <= i) && (i < size_[0]));
     assert((0 <= j) && (j < size_[1]));
     assert(j * size_[0] + i < (int) data_.size());
-    #endif
+#endif
 
     return data_[index];
 }
@@ -73,12 +75,10 @@ void Array2D::print() const {
     }
 }
 
-void Array2D::setToZero()
-{
+void Array2D::setToZero() {
     data_.resize(size_[0] * size_[1], 0.0);
 }
 
-void *Array2D::data()
-{
+void *Array2D::data() {
     return data_.data();
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <mpi.h>
 #include "computation/0_computation.h"
 #include "partitioning/partitioning.h"
@@ -14,7 +15,7 @@ public:
      *
      *  inherits from the old Computation class and overloads the public runSimulation method as well as some of the protected methods.
      */
-     virtual void initialize(string filename);
+    virtual void initialize(string filename);
 
     /**
      * Run the whole simulation until tend
@@ -30,5 +31,5 @@ protected:
     virtual void applyBoundaryValues();
 
     virtual void computeTimeStepWidth();
-    
+
 };
