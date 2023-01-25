@@ -137,6 +137,62 @@ int StaggeredGrid::pInteriorJEnd() const {
 };
 
 /**
+ * evaluate field variable p in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable p in an element (i,j)
+ */
+StaggeredGrid::MARKER StaggeredGrid::marker(int i, int j) const {
+#ifndef NDEBUG
+    assert((pIBegin() <= i) && (i <= pIEnd()));
+    assert((pJBegin() <= j) && (j <= pJEnd()));
+#endif
+    return (MARKER)marker_(i - pIBegin(), j - pJBegin());
+};
+
+/**
+ * evaluate field variable p in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable p in an element (i,j)
+ */
+StaggeredGrid::MARKER &StaggeredGrid::marker(int i, int j) {
+#ifndef NDEBUG
+    assert((pIBegin() <= i) && (i <= pIEnd()));
+    assert((pJBegin() <= j) && (j <= pJEnd()));
+#endif
+    return (MARKER&)marker_(i - pIBegin(), j - pJBegin());
+};
+
+/**
+ * evaluate field variable p in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable p in an element (i,j)
+ */
+StaggeredGrid::BOUNDARY_TYPE StaggeredGrid::boundary_type(int i, int j) const {
+#ifndef NDEBUG
+    assert((pIBegin() <= i) && (i <= pIEnd()));
+    assert((pJBegin() <= j) && (j <= pJEnd()));
+#endif
+    return (BOUNDARY_TYPE)boundary_type_(i - pIBegin(), j - pJBegin());
+};
+
+/**
+ * evaluate field variable p in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable p in an element (i,j)
+ */
+StaggeredGrid::BOUNDARY_TYPE &StaggeredGrid::boundary_type(int i, int j) {
+#ifndef NDEBUG
+    assert((pIBegin() <= i) && (i <= pIEnd()));
+    assert((pJBegin() <= j) && (j <= pJEnd()));
+#endif
+    return (BOUNDARY_TYPE&)boundary_type_(i - pIBegin(), j - pJBegin());
+};
+
+/**
  * get reference to field variable p
  * @return reference to field variable p
  */
@@ -916,4 +972,56 @@ double &StaggeredGrid::q(int i, int j) {
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
+};
+
+void StaggeredGrid::readMarkers() {
+
+};
+
+void StaggeredGrid::applyBoundaryVelocities() {
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                    break;
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    break;
+                case OBSTACLE_LEFT:
+
+                    break;
+                case OBSTACLE_RIGHT:
+                    break;
+                case OBSTACLE_TOP:
+                    f(i, j) = u(i, j) = -u(i, j + 1);
+                    g(i, j) = v(i, j);
+                    break;
+                case OBSTACLE_BOTTOM:
+                    f(i, j) = u(i, j) = -u(i, j - 1);
+                    g(i, j) = v(i, j);
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    f(i - 1, j) = u(i - 1, j);
+                    g(i, j) = v(i, j) = -v(i - 1, j - 1);
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    f(i, j) = u(i, j);
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    break;
+            }
+        }
+    }
+};
+
+void StaggeredGrid::applyBoundaryPressure() {
+
+};
+
+void StaggeredGrid::applyBoundaryTemperature() {
+
 };

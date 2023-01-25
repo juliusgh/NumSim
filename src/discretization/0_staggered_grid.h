@@ -18,6 +18,27 @@ public:
     StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
                   std::array<double, 2> meshWidth);
 
+    enum MARKER {
+        FLUID,
+        FREE,
+        OBSTACLE,
+        OBSTACLE_LEFT,
+        OBSTACLE_RIGHT,
+        OBSTACLE_TOP,
+        OBSTACLE_BOTTOM,
+        OBSTACLE_LEFT_TOP,
+        OBSTACLE_RIGHT_TOP,
+        OBSTACLE_LEFT_BOTTOM,
+        OBSTACLE_RIGHT_BOTTOM
+    };
+
+    enum BOUNDARY_TYPE {
+        NONE,
+        NOSLIP,
+        INFLOW,
+        OUTFLOW
+    };
+
     /**
      * get mesh width in x-direction
      */
@@ -74,6 +95,36 @@ public:
     const std::array<int, 2> nCells() const;
 
     /**
+     * evaluate field variable p in an element (i,j)
+    */
+    MARKER marker(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    MARKER &marker(int i, int j);
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    DIRECTION direction(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    DIRECTION &direction(int i, int j);
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    BOUNDARY_TYPE boundary_type(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    BOUNDARY_TYPE &boundary_type(int i, int j);
+
+    /**
      * get reference to field variable p
     */
     const FieldVariable &p() const;
@@ -89,11 +140,6 @@ public:
     double &p(int i, int j);
 
     /**
-     * Number of ghost layers for p in x direction (each left and right)
-    */
-    //int pIGhost() const;
-
-    /**
      * first valid index for p in x direction
     */
     int pIBegin() const;
@@ -102,11 +148,6 @@ public:
      * one after last valid index for p in x direction
     */
     int pIEnd() const;
-
-    /**
-     * Number of ghost layers for p in y direction (each bottom and top)
-    */
-    int pJGhost() const;
 
     /**
      * first valid index for p in y direction
@@ -473,6 +514,14 @@ public:
     */
     int qInteriorJEnd() const;
 
+    void readMarkers();
+
+    void applyBoundaryVelocities();
+
+    void applyBoundaryPressure();
+
+    void applyBoundaryTemperature();
+
 
 protected:
     const std::array<double, 2> meshWidth_;
@@ -488,4 +537,6 @@ protected:
     FieldVariable vLast_;
     FieldVariable t_;
     FieldVariable q_;
+    Array2D marker_;
+    Array2D boundary_type_;
 };
