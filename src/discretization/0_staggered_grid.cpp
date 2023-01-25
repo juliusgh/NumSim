@@ -989,9 +989,12 @@ void StaggeredGrid::applyBoundaryVelocities() {
                 case OBSTACLE:
                     break;
                 case OBSTACLE_LEFT:
-
+                    v(i,j) = -v(i-1,j);
+                    g(i,j) = v(i,j);
                     break;
                 case OBSTACLE_RIGHT:
+                    g(i,j) = v(i,j) = v(i+1,j);
+                    f(i,j) = u(i,j);
                     break;
                 case OBSTACLE_TOP:
                     f(i, j) = u(i, j) = -u(i, j + 1);
@@ -999,19 +1002,26 @@ void StaggeredGrid::applyBoundaryVelocities() {
                     break;
                 case OBSTACLE_BOTTOM:
                     f(i, j) = u(i, j) = -u(i, j - 1);
-                    g(i, j) = v(i, j);
                     break;
                 case OBSTACLE_LEFT_TOP:
-                    f(i - 1, j) = u(i - 1, j);
+                    //f(i - 1, j) = u(i - 1, j); //think the neighbour cell is responsible
                     g(i, j) = v(i, j) = -v(i - 1, j - 1);
                     break;
                 case OBSTACLE_RIGHT_TOP:
                     f(i, j) = u(i, j);
-                    g(i, j) = v(i, j) = 0.0;
+                    g(i, j) = v(i, j);
                     break;
                 case OBSTACLE_LEFT_BOTTOM:
+                    g(i, j) = v(i, j - 1) = -v(i - 1, j - 1);
+                    v(i,j) = - v(i,j-1);
+                    u(i,j) = -u(i,j-1);
+                    f(i,j) = u(i,j);
+                    g(i,j) = v(i,j);
                     break;
                 case OBSTACLE_RIGHT_BOTTOM:
+                    v(i,j) = -v(i+1, j);
+                    f(i,j) = u(i,j);
+                    g(i,j) = v(i,j);
                     break;
             }
         }
@@ -1019,9 +1029,79 @@ void StaggeredGrid::applyBoundaryVelocities() {
 };
 
 void StaggeredGrid::applyBoundaryPressure() {
-
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                    break;
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    break;
+                case OBSTACLE_LEFT:
+                    p(i,j) = p(i-1,j);
+                    break;
+                case OBSTACLE_RIGHT:
+                    p(i,j) = p(i+1,j);
+                    break;
+                case OBSTACLE_TOP:
+                    p(i,j) = p(i,j+1);
+                    break;
+                case OBSTACLE_BOTTOM:
+                    p(i,j) = p(i,j-1);
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    p(i,j) = (p(i-1,j) + p(i,j+1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    p(i,j) = (p(i+1,j) + p(i,j+1)) / 2.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    p(i,j) = (p(i-1,j) + p(i,j-1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    p(i,j) = (p(i+1,j) + p(i,j-1)) / 2.0;
+                    break;
+            }
+        }
+    }
 };
 
 void StaggeredGrid::applyBoundaryTemperature() {
-
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                    break;
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    break;
+                case OBSTACLE_LEFT:
+                    t(i,j) = t(i-1,j);
+                    break;
+                case OBSTACLE_RIGHT:
+                    t(i,j) = t(i+1,j);
+                    break;
+                case OBSTACLE_TOP:
+                    t(i,j) = t(i,j+1);
+                    break;
+                case OBSTACLE_BOTTOM:
+                    t(i,j) = t(i,j-1);
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    t(i,j) = (t(i-1,j) + t(i,j+1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    t(i,j) = (t(i+1,j) + t(i,j+1)) / 2.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    t(i,j) = (t(i-1,j) + t(i,j-1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    t(i,j) = (t(i+1,j) + t(i,j-1)) / 2.0;
+                    break;
+            }
+        }
+    }
 };
