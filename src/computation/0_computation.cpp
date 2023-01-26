@@ -66,9 +66,9 @@ void Computation::runSimulation() {
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
-        //applyBoundaryValues();
+        applyBoundaryValues();
         //applyPreliminaryBoundaryValues();
-        discretization_->applyBoundaryVelocities();
+
 #ifndef NDEBUG
         //std::cout << "Preliminary Boundary values applied" << std::endl;
 #endif
@@ -128,13 +128,14 @@ void Computation::runSimulation() {
  */
 void Computation::applyBoundaryValues() {
     // set boundary values for u at bottom and top side (lower priority)
-    applyBoundaryValuesBottom();
+    /*applyBoundaryValuesBottom();
     applyBoundaryValuesTop();
 
     // set boundary values for u at left and right side (higher priority)
     applyBoundaryValuesLeft();
-    applyBoundaryValuesRight();
-
+    applyBoundaryValuesRight();*/
+    discretization_->applyBoundaryVelocities();
+    discretization_->applyBoundaryTemperature();
     setExternalHeat();
 };
 

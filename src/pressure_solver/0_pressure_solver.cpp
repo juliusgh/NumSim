@@ -20,13 +20,14 @@ PressureSolver::PressureSolver(std::shared_ptr<Discretization> discretization,
  * Set pressure solver boundary values
  */
 void PressureSolver::setBoundaryValues() {
-    // copy values to bottom and top boundary (lower priority)
+    discretization_->applyBoundaryPressure();
+    /*// copy values to bottom and top boundary (lower priority)
     setBoundaryValuesBottom();
     setBoundaryValuesTop();
 
     // copy values to left and right boundary (higher priority)
     setBoundaryValuesLeft();
-    setBoundaryValuesRight();
+    setBoundaryValuesRight();*/
 }
 
 void PressureSolver::setBoundaryValuesBottom() {
