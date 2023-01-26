@@ -1065,7 +1065,7 @@ void StaggeredGrid::applyBoundaryVelocities() {
                 break;
             case INFLOW:
                 if (i < pIEnd() - 1) {
-                    u(i, uJEnd() - 1) = 2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd());
+                    u(i, uJEnd() - 1) = 2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
                 }
                 v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
                 break;
