@@ -126,6 +126,7 @@ option(NPARALLEL "Disable MPI parallelization" OFF)
 if (NPARALLEL)
     add_definitions(-DNPARALLEL)
 endif ()
+add_definitions(-DNPARALLEL)
 
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 

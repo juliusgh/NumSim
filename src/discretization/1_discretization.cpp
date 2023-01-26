@@ -6,8 +6,10 @@
  * @param meshWidth: width of grid cell in one direction
  */
 
-Discretization::Discretization(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth) :
-        StaggeredGrid(partitioning, meshWidth) {
+Discretization::Discretization(std::shared_ptr<Partitioning> partitioning,
+                               std::array<double, 2> meshWidth,
+                               std::shared_ptr<Settings> settings) :
+        StaggeredGrid(partitioning, meshWidth, settings) {
 
 };
 

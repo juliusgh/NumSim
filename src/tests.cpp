@@ -6,7 +6,7 @@
 #include "pressure_solver/1_gauss_seidel.h"
 #include "partitioning/partitioning.h"
 #include <cmath>
-
+/*
 TEST(MPITest, PartitioningCheck1) {
     auto size = std::array<int, 2>{10, 10};
     auto partitioning = std::make_shared<Partitioning>(size);

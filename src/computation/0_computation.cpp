@@ -25,9 +25,9 @@ void Computation::initialize(string filename) {
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma);
+        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma, std::shared_ptr<Settings>(&settings_));
     } else {
-        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_);
+        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_, std::shared_ptr<Settings>(&settings_));
     }
 
     // Initialize solver
@@ -66,12 +66,12 @@ void Computation::runSimulation() {
         /*
         * 1) Apply boundary values (for u, v, F, G)
         */
-        applyBoundaryValues();
-        applyPreliminaryBoundaryValues();
+        //applyBoundaryValues();
+        //applyPreliminaryBoundaryValues();
+        discretization_->applyBoundaryVelocities();
 #ifndef NDEBUG
         //std::cout << "Preliminary Boundary values applied" << std::endl;
 #endif
-
 
         /*
         * 2) Compute the next time step width

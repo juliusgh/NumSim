@@ -4,6 +4,7 @@
 #include <memory>
 #include "storage/field_variable.h"
 #include "partitioning/partitioning.h"
+#include "settings.h"
 
 /**
  * Implement staggered grid, providing a variety of parameters
@@ -16,11 +17,15 @@ public:
     * @param meshWidth: cell width in all directions
     */
     StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
-                  std::array<double, 2> meshWidth);
+                  std::array<double, 2> meshWidth,
+                  std::shared_ptr<Settings> settings);
 
     enum MARKER {
         FLUID,
         FREE,
+        NOSLIP,
+        INFLOW,
+        OUTFLOW,
         OBSTACLE,
         OBSTACLE_LEFT,
         OBSTACLE_RIGHT,
@@ -30,13 +35,6 @@ public:
         OBSTACLE_RIGHT_TOP,
         OBSTACLE_LEFT_BOTTOM,
         OBSTACLE_RIGHT_BOTTOM
-    };
-
-    enum BOUNDARY_TYPE {
-        NONE,
-        NOSLIP,
-        INFLOW,
-        OUTFLOW
     };
 
     /**
@@ -103,26 +101,6 @@ public:
      * evaluate field variable p in an element (i,j)
     */
     MARKER &marker(int i, int j);
-
-    /**
-     * evaluate field variable p in an element (i,j)
-    */
-    DIRECTION direction(int i, int j) const;
-
-    /**
-     * evaluate field variable p in an element (i,j)
-    */
-    DIRECTION &direction(int i, int j);
-
-    /**
-     * evaluate field variable p in an element (i,j)
-    */
-    BOUNDARY_TYPE boundary_type(int i, int j) const;
-
-    /**
-     * evaluate field variable p in an element (i,j)
-    */
-    BOUNDARY_TYPE &boundary_type(int i, int j);
 
     /**
      * get reference to field variable p
@@ -514,8 +492,6 @@ public:
     */
     int qInteriorJEnd() const;
 
-    void readMarkers();
-
     void applyBoundaryVelocities();
 
     void applyBoundaryPressure();
@@ -538,5 +514,5 @@ protected:
     FieldVariable t_;
     FieldVariable q_;
     Array2D marker_;
-    Array2D boundary_type_;
+    shared_ptr<Settings> settings_;
 };

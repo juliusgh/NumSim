@@ -8,7 +8,9 @@
 
 class CentralDifferences : public Discretization {
 public:
-    CentralDifferences(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth);
+    CentralDifferences(std::shared_ptr<Partitioning> partitioning,
+                       std::array<double, 2> meshWidth,
+                       std::shared_ptr<Settings> settings);
 
     /**
     * compute the 1st derivative ∂ u^2 / ∂x
