@@ -422,7 +422,7 @@ void Computation::computePreliminaryVelocities() {
             double conv_u = discretization_->computeDu2Dx(i, j) + discretization_->computeDuvDy(i, j);
             double f_tilde = discretization_->u(i, j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
             double t_interp_right = (discretization_->t(i, j) - discretization_->t(i + 1, j)) / 2.0;
-            discretization_->f(i, j) = f_tilde - dt_ + settings_.beta * settings_.g[0] * t_interp_right;
+            discretization_->f(i, j) = f_tilde - dt_ * settings_.beta * settings_.g[0] * t_interp_right;
         }
     }
 
@@ -433,7 +433,7 @@ void Computation::computePreliminaryVelocities() {
             double conv_v = discretization_->computeDv2Dy(i, j) + discretization_->computeDuvDx(i, j);
             double g_tilde = discretization_->v(i, j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
             double t_interp_up = (discretization_->t(i, j) - discretization_->t(i, j + 1)) / 2.0;
-            discretization_->g(i, j) = g_tilde - dt_ + settings_.beta * settings_.g[1] * t_interp_up;
+            discretization_->g(i, j) = g_tilde - dt_ * settings_.beta * settings_.g[1] * t_interp_up;
         }
     }
 };

@@ -1149,21 +1149,21 @@ void StaggeredGrid::applyBoundaryVelocities() {
         switch (marker(i, pJEnd() - 1)) {
             case NOSLIP:
                 if (i < pIEnd() - 1) {
-                    u(i, uJEnd() - 1) = -u(i, uInteriorJEnd() - 1);
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = -u(i, uInteriorJEnd() - 1);
                 }
-                v(i, vJEnd() - 1) = 0.0;
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = 0.0;
                 break;
             case INFLOW:
                 if (i < pIEnd() - 1) {
-                    u(i, uJEnd() - 1) = 2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = 2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
                 }
-                v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
                 break;
             case OUTFLOW:
                 if (i < pIEnd() - 1) {
-                    u(i, uJEnd() - 1) = u(i, uInteriorJEnd() - 1);
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = u(i, uInteriorJEnd() - 1);
                 }
-                v(i, vJEnd() - 1) = v(i, vInteriorJEnd() - 1);
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = v(i, vInteriorJEnd() - 1);
                 break;
             default:
                 break;
@@ -1175,20 +1175,20 @@ void StaggeredGrid::applyBoundaryVelocities() {
         // set boundary values for u at left side
         switch (marker(pIBegin(), j)) {
             case NOSLIP:
-                u(uIBegin(), j) = 0.0;
+                f(uIBegin(), j) = u(uIBegin(), j) = 0.0;
                 if (j < pJEnd() - 1) {
-                    v(vIBegin(), j) = -v(vInteriorIBegin(), j);
+                    g(vIBegin(), j) = v(vIBegin(), j) = -v(vInteriorIBegin(), j);
                 }
                 break;
             case INFLOW:
-                u(uIBegin(), j) = settings_->dirichletBcLeft[0];
+                f(uIBegin(), j) = u(uIBegin(), j) = settings_->dirichletBcLeft[0];
                 if (j < pJEnd() - 1) {
-                    v(vIBegin(), j) = 2.0 * settings_->dirichletBcLeft[1]
+                    g(vIBegin(), j) = v(vIBegin(), j) = 2.0 * settings_->dirichletBcLeft[1]
                                       - v(vInteriorIBegin(), j);
                 }
                 break;
             case OUTFLOW:
-                u(uIBegin(), j) = u(uInteriorIBegin(), j);
+                f(uIBegin(), j) = u(uIBegin(), j) = u(uInteriorIBegin(), j);
                 if (j < pJEnd() - 1) {
                     v(vIBegin(), j) = v(vInteriorIBegin(), j);
                 }
@@ -1199,28 +1199,31 @@ void StaggeredGrid::applyBoundaryVelocities() {
         // set boundary values for u at right side
         switch (marker(pIEnd() - 1, j)) {
             case NOSLIP:
-                u(uIEnd() - 1, j) = 0.0;
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = 0.0;
                 if (j < pJEnd() - 1) {
-                    v(vIEnd() - 1, j) = -v(vInteriorIEnd() - 1, j);
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = -v(vInteriorIEnd() - 1, j);
                 }
                 break;
             case INFLOW:
-                u(uIEnd() - 1, j) = settings_->dirichletBcRight[0];
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = settings_->dirichletBcRight[0];
                 if (j < pJEnd() - 1) {
-                    v(vIEnd() - 1, j) = settings_->dirichletBcRight[1]
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = settings_->dirichletBcRight[1]
                                         - u(vInteriorIEnd() - 1, j);
                 }
                 break;
             case OUTFLOW:
-                u(uIEnd() - 1, j) = u(uInteriorIEnd() - 1, j);
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = u(uInteriorIEnd() - 1, j);
                 if (j < pJEnd() - 1) {
-                    v(vIEnd() - 1, j) = v(vInteriorIEnd() - 1, j);
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = v(vInteriorIEnd() - 1, j);
                 }
                 break;
             default:
                 break;
         }
     }
+    /*std::cout << "u =";
+    u_.print();
+    getchar();*/
 };
 
 void StaggeredGrid::applyBoundaryPressure() {
