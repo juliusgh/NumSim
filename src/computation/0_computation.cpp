@@ -1,6 +1,7 @@
 #include "computation/0_computation.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
+#include "pressure_solver/2_conjugate_gradient.h"
 
 /**
  * Initialize the computation object for a sequential simulation
@@ -38,6 +39,9 @@ void Computation::initialize(string filename) {
         pressureSolver_ = std::make_unique<GaussSeidel>(discretization_, settings_.epsilon,
                                                         settings_.maximumNumberOfIterations);
 
+    } else if (settings_.pressureSolver == "CG") {
+        pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+                                                      settings_.maximumNumberOfIterations, partitioning_);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
