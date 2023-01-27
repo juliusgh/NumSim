@@ -29,7 +29,90 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
     // TODO: read markers from file
     // read marker values from input file
     // open file
-    ifstream file(settings_->domainfile_path(), ios::in);
+    ifstream file(settings_->domainfile_path, ios::in);
+
+    // check if file is open
+    if (!file.is_open()) {
+        cout << "Could not open parameter file \"" << settings_->domainfile_path << "\"." << endl;
+        return;
+    }
+
+    // loop over lines of file
+    for (int j = 0;; j++) {
+        // read line
+        string line;
+        getline(file, line);
+
+        // at the end of the file break for loop
+        if (file.eof())
+            break;
+
+        for (std::string::size_type i = 0; i < line.size(); ++i) {
+            switch (line[i]) {
+                case ' ':
+                    marker(i, j) = MARKER::FLUID;
+                    break;
+                case 'i':
+                    marker(i, j) = MARKER::INFLOW;
+                    break;
+                case 'o':
+                    marker(i, j) = MARKER::OUTFLOW;
+                    break;
+                case 'n':
+                    marker(i, j) = MARKER::NOSLIP;
+                    break;
+                case 'x':
+                    marker(i, j) = MARKER::OBSTACLE;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    // set obstacle markers
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) != MARKER::OBSTACLE)
+                continue;
+            // check right neighbor
+            if (marker(i + 1, j) == MARKER::FLUID) {
+                // check top neighbor
+                if (marker(i, j + 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_RIGHT_TOP;
+                }
+                // check bottom neighbor
+                else if (marker(i, j - 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_RIGHT_BOTTOM;
+                } else {
+                    marker(i, j) = MARKER::OBSTACLE_RIGHT;
+                }
+            }
+            // check left neighbor
+            else if (marker(i - 1, j) == MARKER::FLUID) {
+                // check top neighbor
+                if (marker(i, j + 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_LEFT_TOP;
+                }
+                // check bottom neighbor
+                else if (marker(i, j - 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_LEFT_BOTTOM;
+                } else {
+                    marker(i, j) = MARKER::OBSTACLE_LEFT;
+                }
+            } else {
+                // check top neighbor
+                if (marker(i, j + 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_TOP;
+                }
+                // check bottom neighbor
+                else if (marker(i, j - 1) == MARKER::FLUID) {
+                    marker(i, j) = MARKER::OBSTACLE_BOTTOM;
+                }
+            }
+        }
+    }
+
+    /*
     // set markers manually
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -48,6 +131,7 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
         // right
         marker(pIEnd() - 1, j) = MARKER::NOSLIP;
     }
+     */
     std::cout << "finished setting markers" << std::endl;
 };
 
