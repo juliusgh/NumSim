@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "discretization/0_staggered_grid.h"
 
 /**
@@ -26,6 +27,10 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
         q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
     // set markers
     // TODO: read markers from file
+    // read marker values from input file
+    // open file
+    ifstream file(settings_->domainfile_path(), ios::in);
+    // set markers manually
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             marker(i, j) = MARKER::FLUID;

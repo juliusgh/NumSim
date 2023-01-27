@@ -221,6 +221,10 @@ void Settings::loadFromFile(string filename) {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
             continue;
         }
+        if (parameterName == "domainFile") {
+            domainfile_path = value;
+            continue;
+        }
     }
 }
 
