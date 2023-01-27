@@ -71,8 +71,9 @@ void Array2D::print() const {
         for (int i = 0; i < size_[0]; i++) {
             std::cout << (*this)(i, j) << " | ";
         }
-        std::cout << std::endl << "----------" << std::endl;
+        std::cout << std::endl;
     }
+    std::cout << "----------" << std::endl;
 }
 
 void Array2D::setToZero() {
