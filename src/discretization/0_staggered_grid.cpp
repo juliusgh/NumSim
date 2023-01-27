@@ -119,11 +119,13 @@ if (!file.is_open()) {
             marker(i, j) = MARKER::FLUID;
         }
     }
+    /*
+    //lid driven cavity
     for (int i = pIBegin(); i < pIEnd(); i++) {
         // bottom
-        marker(i, pJBegin()) = MARKER::NOSLIP;
+        marker(i, pJBegin()) = MARKER::INFLOW;
         // top
-        marker(i, pJEnd() - 1) = MARKER::INFLOW;
+        marker(i, pJEnd() - 1) = MARKER::OUTFLOW;
     }
     for (int j = pJBegin(); j < pJEnd(); j++) {
         // left
@@ -132,6 +134,42 @@ if (!file.is_open()) {
         marker(pIEnd() - 1, j) = MARKER::NOSLIP;
     }
      */
+    //lid driven cavity rotated
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        // top
+        marker(i, pJEnd() - 1) = MARKER::INFLOW;
+        settings_->dirichletBcTop[0] = 1.0;
+        settings_->dirichletBcTop[1] = 0.0;
+        // bottom
+        marker(i, pJBegin()) = MARKER::NOSLIP;
+        settings_->dirichletBcBottom[0] = 0.0;
+        settings_->dirichletBcBottom[1] = 0.0;
+    }
+    for (int j = pJBegin(); j < pJEnd(); j++) {
+        // left
+        marker(pIBegin(), j) = MARKER::NOSLIP;
+        settings_->dirichletBcLeft[0] = 0.0;
+        settings_->dirichletBcLeft[1] = 0.0;
+        // right
+        marker(pIEnd() - 1, j) = MARKER::NOSLIP;
+        settings_->dirichletBcRight[0] = 0.0;
+        settings_->dirichletBcRight[1] = 0.0;
+    }
+    /*
+    // channel
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        // bottom
+        marker(i, pJBegin()) = MARKER::NOSLIP;
+        // top
+        marker(i, pJEnd() - 1) = MARKER::NOSLIP;
+    }
+    for (int j = pJBegin(); j < pJEnd(); j++) {
+        // left
+        marker(pIBegin(), j) = MARKER::INFLOW;
+        // right
+        marker(pIEnd() - 1, j) = MARKER::OUTFLOW;
+    }
+    */
     std::cout << "finished setting markers" << std::endl;
     marker_.print();
 };
