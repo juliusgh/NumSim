@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <utility>
 #include "discretization/0_staggered_grid.h"
 
 /**
@@ -7,11 +8,11 @@
  * @param nCells: number of cells
  * @param meshWidth: cell width in all directions
  */
-StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
+StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                              std::array<double, 2> meshWidth,
                              std::shared_ptr<Settings> settings) :
         partitioning_(partitioning),
-        settings_(settings),
+        settings_(std::move(settings)),
         nCells_(partitioning->nCellsLocal()),
         meshWidth_(meshWidth),
         marker_(pSize()),
@@ -25,25 +26,22 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
-    // set markers
-    // TODO: read markers from file
-    // read marker values from input file
-    // open file
-    ifstream file(settings_->domainfile_path, ios::in);
 
-    // check if file is open
-    if (!file.is_open()) {
+    // set markers:
+
+    // read marker values from input file
+    ifstream file(settings_->domainfile_path, ios::in);
+if (!file.is_open()) {
         cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
         return;
     }
 
-    // loop over lines of file
+    marker_.setToFluid();
+
     for (int j = 0;; j++) {
-        // read line
         string line;
         getline(file, line);
 
-        // at the end of the file break for loop
         if (file.eof())
             break;
 
@@ -135,6 +133,7 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
     }
      */
     std::cout << "finished setting markers" << std::endl;
+    marker_.print();
 };
 
 /**
@@ -255,7 +254,7 @@ int StaggeredGrid::pInteriorJEnd() const {
  * @param j: position in y direction in discretized grid
  * @return field variable p in an element (i,j)
  */
-StaggeredGrid::MARKER StaggeredGrid::marker(int i, int j) const {
+MARKER StaggeredGrid::marker(int i, int j) const {
 #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
@@ -269,7 +268,7 @@ StaggeredGrid::MARKER StaggeredGrid::marker(int i, int j) const {
  * @param j: position in y direction in discretized grid
  * @return field variable p in an element (i,j)
  */
-StaggeredGrid::MARKER &StaggeredGrid::marker(int i, int j) {
+MARKER &StaggeredGrid::marker(int i, int j) {
 #ifndef NDEBUG
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
