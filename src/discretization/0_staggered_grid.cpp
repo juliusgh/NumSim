@@ -33,7 +33,7 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
 
     // check if file is open
     if (!file.is_open()) {
-        cout << "Could not open parameter file \"" << settings_->domainfile_path << "\"." << endl;
+        cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
         return;
     }
 
@@ -48,21 +48,23 @@ StaggeredGrid::StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
             break;
 
         for (std::string::size_type i = 0; i < line.size(); ++i) {
+            int mi = i + pIBegin();
+            int mj = pJEnd() - j - 1;
             switch (line[i]) {
                 case ' ':
-                    marker(i, j) = MARKER::FLUID;
+                    marker(mi, mj) = MARKER::FLUID;
                     break;
                 case 'i':
-                    marker(i, j) = MARKER::INFLOW;
+                    marker(mi, mj) = MARKER::INFLOW;
                     break;
                 case 'o':
-                    marker(i, j) = MARKER::OUTFLOW;
+                    marker(mi, mj) = MARKER::OUTFLOW;
                     break;
                 case 'n':
-                    marker(i, j) = MARKER::NOSLIP;
+                    marker(mi, mj) = MARKER::NOSLIP;
                     break;
                 case 'x':
-                    marker(i, j) = MARKER::OBSTACLE;
+                    marker(mi, mj) = MARKER::OBSTACLE;
                     break;
                 default:
                     break;
@@ -1145,7 +1147,7 @@ void StaggeredGrid::applyBoundaryVelocities() {
         }
 
         // set boundary values for u at top side
-        switch (marker(i, uJEnd() - 1)) {
+        switch (marker(i, pJEnd() - 1)) {
             case NOSLIP:
                 if (i < pIEnd() - 1) {
                     u(i, uJEnd() - 1) = -u(i, uInteriorJEnd() - 1);
@@ -1196,7 +1198,7 @@ void StaggeredGrid::applyBoundaryVelocities() {
                 break;
         }
         // set boundary values for u at right side
-        switch (marker(uIEnd() - 1, j)) {
+        switch (marker(pIEnd() - 1, j)) {
             case NOSLIP:
                 u(uIEnd() - 1, j) = 0.0;
                 if (j < pJEnd() - 1) {
