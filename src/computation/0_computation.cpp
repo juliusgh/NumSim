@@ -55,15 +55,9 @@ void Computation::initialize(string filename) {
  * Run the whole simulation until tend
  */
 void Computation::runSimulation() {
-#ifndef NDEBUG
-    std::cout << "Running simulation ..." << std::endl;
-#endif
     int t_iter = 0;
     double time = 0.0;
     setInitialValues();
-#ifndef NDEBUG
-    std::cout << "initialized" << std::endl;
-#endif
     while (time < settings_.endTime) {
         t_iter++;
 
@@ -71,11 +65,6 @@ void Computation::runSimulation() {
         * 1) Apply boundary values (for u, v, F, G)
         */
         applyBoundaryValues();
-        //applyPreliminaryBoundaryValues();
-
-#ifndef NDEBUG
-        //std::cout << "Preliminary Boundary values applied" << std::endl;
-#endif
 
         /*
         * 2) Compute the next time step width
@@ -134,7 +123,6 @@ void Computation::runSimulation() {
 void Computation::applyBoundaryValues() {
     discretization_->applyBoundaryVelocities();
     discretization_->applyBoundaryTemperature();
-    setExternalHeat();
 };
 
 /**
@@ -148,25 +136,6 @@ void Computation::setInitialValues() {
             discretization_->t(i, j) = settings_.initialTemp;
         }
     }
-};
-
-/**
- * Set the boundary values of the velocities (u, v)
- *
- * Left and right boundaries should overwrite bottom and top boundaries
- */
-void Computation::setExternalHeat() {
-    /*int mI = (discretization_->tInteriorIBegin() + discretization_->tInteriorIEnd()) / 2;
-    int mJ = (discretization_->tInteriorJBegin() + discretization_->tInteriorJEnd()) / 2;
-
-    for (int i = mI - 2; i < mI + 2; i++) {
-        for (int j = mJ - 2; j < mJ + 2; j++) {
-            discretization_->q(i, j) = 0.0;
-        }
-    }
-    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
-        discretization_->q(i, discretization_->tInteriorJBegin()) = 100;
-    }*/
 };
 
 void Computation::applyBoundaryValuesTop() {
@@ -233,10 +202,8 @@ void Computation::applyBoundaryValuesBottom() {
     // set boundary values for t at bottom side
     for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
         if (settings_.setFixedTempBottom) {
-            //std::cout << "tempBcBottom = " << settings_.tempBcBottom << std::endl;
             discretization_->t(i, discretization_->tJBegin()) =
                     2.0 * settings_.tempBcBottom - discretization_->t(i, discretization_->tInteriorJBegin());
-            //std::cout << "t(i, discretization_->tJBegin()) = " << discretization_->t(i, discretization_->tJBegin()) << std::endl;
         } else {
             discretization_->t(i, discretization_->tJBegin()) =
                     discretization_->t(i, discretization_->tInteriorJBegin())
@@ -474,7 +441,6 @@ void Computation::computeTimeStepWidth() {
 
     // Set the appropriate time step width by using a security factor tau
     double computed_dt = settings_.tau * std::min({dt_diff, dt_diff_temp, dt_conv_u, dt_conv_v});
-    //std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
     dt_ = std::min({settings_.maximumDt, computed_dt});
 };
 
