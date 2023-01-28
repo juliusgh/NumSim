@@ -1,6 +1,7 @@
 #include "computation/0_computation.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
+#include "pressure_solver/2_conjugate_gradient.h"
 
 /**
  * Initialize the computation object for a sequential simulation
@@ -38,6 +39,9 @@ void Computation::initialize(string filename) {
         pressureSolver_ = std::make_unique<GaussSeidel>(discretization_, settings_.epsilon,
                                                         settings_.maximumNumberOfIterations);
 
+    } else if (settings_.pressureSolver == "CG") {
+        pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+                                                              settings_.maximumNumberOfIterations, partitioning_);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
@@ -51,15 +55,9 @@ void Computation::initialize(string filename) {
  * Run the whole simulation until tend
  */
 void Computation::runSimulation() {
-#ifndef NDEBUG
-    std::cout << "Running simulation ..." << std::endl;
-#endif
     int t_iter = 0;
     double time = 0.0;
     setInitialValues();
-#ifndef NDEBUG
-    std::cout << "initialized" << std::endl;
-#endif
     while (time < settings_.endTime) {
         t_iter++;
 
@@ -67,11 +65,6 @@ void Computation::runSimulation() {
         * 1) Apply boundary values (for u, v, F, G)
         */
         applyBoundaryValues();
-        //applyPreliminaryBoundaryValues();
-
-#ifndef NDEBUG
-        //std::cout << "Preliminary Boundary values applied" << std::endl;
-#endif
 
         /*
         * 2) Compute the next time step width
@@ -108,6 +101,7 @@ void Computation::runSimulation() {
         */
         updateLastVelocities();
         computeVelocities();
+        discretization_->setObstacleValues();
 
         /*
         * 7) Output debug information and simulation results
@@ -127,16 +121,8 @@ void Computation::runSimulation() {
  * Set the initial values of the temperature t
  */
 void Computation::applyBoundaryValues() {
-    // set boundary values for u at bottom and top side (lower priority)
-    /*applyBoundaryValuesBottom();
-    applyBoundaryValuesTop();
-
-    // set boundary values for u at left and right side (higher priority)
-    applyBoundaryValuesLeft();
-    applyBoundaryValuesRight();*/
     discretization_->applyBoundaryVelocities();
     discretization_->applyBoundaryTemperature();
-    setExternalHeat();
 };
 
 /**
@@ -150,25 +136,6 @@ void Computation::setInitialValues() {
             discretization_->t(i, j) = settings_.initialTemp;
         }
     }
-};
-
-/**
- * Set the boundary values of the velocities (u, v)
- *
- * Left and right boundaries should overwrite bottom and top boundaries
- */
-void Computation::setExternalHeat() {
-    /*int mI = (discretization_->tInteriorIBegin() + discretization_->tInteriorIEnd()) / 2;
-    int mJ = (discretization_->tInteriorJBegin() + discretization_->tInteriorJEnd()) / 2;
-
-    for (int i = mI - 2; i < mI + 2; i++) {
-        for (int j = mJ - 2; j < mJ + 2; j++) {
-            discretization_->q(i, j) = 0.0;
-        }
-    }
-    for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
-        discretization_->q(i, discretization_->tInteriorJBegin()) = 100;
-    }*/
 };
 
 void Computation::applyBoundaryValuesTop() {
@@ -235,10 +202,8 @@ void Computation::applyBoundaryValuesBottom() {
     // set boundary values for t at bottom side
     for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
         if (settings_.setFixedTempBottom) {
-            //std::cout << "tempBcBottom = " << settings_.tempBcBottom << std::endl;
             discretization_->t(i, discretization_->tJBegin()) =
                     2.0 * settings_.tempBcBottom - discretization_->t(i, discretization_->tInteriorJBegin());
-            //std::cout << "t(i, discretization_->tJBegin()) = " << discretization_->t(i, discretization_->tJBegin()) << std::endl;
         } else {
             discretization_->t(i, discretization_->tJBegin()) =
                     discretization_->t(i, discretization_->tInteriorJBegin())
@@ -421,8 +386,8 @@ void Computation::computePreliminaryVelocities() {
             double lap_u = discretization_->computeD2uDx2(i, j) + discretization_->computeD2uDy2(i, j);
             double conv_u = discretization_->computeDu2Dx(i, j) + discretization_->computeDuvDy(i, j);
             double f_tilde = discretization_->u(i, j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
-            double t_interp_right = (discretization_->t(i, j) - discretization_->t(i + 1, j)) / 2.0;
-            discretization_->f(i, j) = f_tilde - dt_ + settings_.beta * settings_.g[0] * t_interp_right;
+            double t_interp_right = (discretization_->t(i, j) + discretization_->t(i + 1, j)) / 2.0;
+            discretization_->f(i, j) = f_tilde - dt_ * settings_.beta * settings_.g[0] * t_interp_right;
         }
     }
 
@@ -432,8 +397,8 @@ void Computation::computePreliminaryVelocities() {
             double lap_v = discretization_->computeD2vDx2(i, j) + discretization_->computeD2vDy2(i, j);
             double conv_v = discretization_->computeDv2Dy(i, j) + discretization_->computeDuvDx(i, j);
             double g_tilde = discretization_->v(i, j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
-            double t_interp_up = (discretization_->t(i, j) - discretization_->t(i, j + 1)) / 2.0;
-            discretization_->g(i, j) = g_tilde - dt_ + settings_.beta * settings_.g[1] * t_interp_up;
+            double t_interp_up = (discretization_->t(i, j) + discretization_->t(i, j + 1)) / 2.0;
+            discretization_->g(i, j) = g_tilde - dt_ * settings_.beta * settings_.g[1] * t_interp_up;
         }
     }
 };
@@ -446,7 +411,7 @@ void Computation::computePressure() {
 };
 
 /**
- * Compute the right hand side rhs of the pressure Poisson equation 
+ * Compute the right hand side rhs of the pressure Poisson equation
  */
 void Computation::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
@@ -464,9 +429,10 @@ void Computation::computeRightHandSide() {
  */
 void Computation::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
-    double dt_diff = settings_.re * settings_.pr / 2 / (1 / (discretization_->dx() * discretization_->dx()) +
-                                                        1 / (discretization_->dy() * discretization_->dy()));
+    double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) +
+                                         1 / (discretization_->dy() * discretization_->dy()));
 
+    double dt_diff_temp = settings_.pr * dt_diff;
     // Compute maximal time step width regarding the convection u
     double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
 
@@ -474,8 +440,7 @@ void Computation::computeTimeStepWidth() {
     double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
 
     // Set the appropriate time step width by using a security factor tau
-    double computed_dt = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
-    //std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
+    double computed_dt = settings_.tau * std::min({dt_diff, dt_diff_temp, dt_conv_u, dt_conv_v});
     dt_ = std::min({settings_.maximumDt, computed_dt});
 };
 

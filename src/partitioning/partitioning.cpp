@@ -579,6 +579,9 @@ double Partitioning::globalMin(double localValue) {
  * @return globalValue combined value
  */
 double Partitioning::allReduce(double localValue, MPI_Op op) {
+#ifdef NPARALLEL
+    return localValue;
+#else
     double globalValue = 0.0;
     MPI_Allreduce(&localValue,
                   &globalValue,
@@ -588,6 +591,7 @@ double Partitioning::allReduce(double localValue, MPI_Op op) {
                   MPI_COMM_WORLD
     );
     return globalValue;
+#endif
 }
 
 /**

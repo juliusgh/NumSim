@@ -1,4 +1,4 @@
-#include "storage/array2d.h"
+#include "storage/marker2d.h"
 #include <iostream>
 #include <cassert>
 
@@ -9,17 +9,17 @@
  * @param size: number of cells
  */
 
-Array2D::Array2D(std::array<int, 2> size) :
+Marker2D::Marker2D(std::array<int, 2> size) :
         size_(size) {
-    // allocate data, initialize to 0
-    data_.resize(size_[0] * size_[1], 0.0);
+    // allocate data, initialize to FLUID
+    setToFluid();
 }
 
 /**
  * get number of cells
  * @return number of cells
  */
-std::array<int, 2> Array2D::size() const {
+std::array<int, 2> Marker2D::size() const {
     return size_;
 }
 
@@ -29,7 +29,7 @@ std::array<int, 2> Array2D::size() const {
  * @param j: discretized position in y direction
  * @return reference to value at the grid cell (i,j)
  */
-double &Array2D::operator()(int i, int j) {
+MARKER &Marker2D::operator()(int i, int j) {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
@@ -48,7 +48,7 @@ double &Array2D::operator()(int i, int j) {
  * @param j: discretized position in y direction
  * @return value at the grid cell (i,j)
  */
-double Array2D::operator()(int i, int j) const {
+MARKER Marker2D::operator()(int i, int j) const {
     const int index = j * size_[0] + i;
 
     // assert that indices are in range
@@ -65,21 +65,20 @@ double Array2D::operator()(int i, int j) const {
  * print out grid in two dimensions
  */
 
-void Array2D::print() const {
-    std::cout << std::endl << "----------" << std::endl;
+void Marker2D::print() const {
+    std::cout << std::endl;
     for (int j = size_[1] - 1; j >= 0; j--) {
         for (int i = 0; i < size_[0]; i++) {
-            std::cout << (*this)(i, j) << " | ";
+            std::cout << (*this)(i, j) << "|";
         }
         std::cout << std::endl;
     }
-    std::cout << "----------" << std::endl;
 }
 
-void Array2D::setToZero() {
-    data_.resize(size_[0] * size_[1], 0.0);
+void Marker2D::setToFluid() {
+    data_.resize(size_[0] * size_[1], MARKER::FLUID);
 }
 
-void *Array2D::data() {
+void *Marker2D::data() {
     return data_.data();
 }

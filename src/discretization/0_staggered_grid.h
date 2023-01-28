@@ -3,6 +3,7 @@
 #include <cassert>
 #include <memory>
 #include "storage/field_variable.h"
+#include "storage/marker2d.h"
 #include "partitioning/partitioning.h"
 #include "settings.h"
 
@@ -16,26 +17,9 @@ public:
     * @param nCells: number of cells
     * @param meshWidth: cell width in all directions
     */
-    StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
+    StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                   std::array<double, 2> meshWidth,
                   std::shared_ptr<Settings> settings);
-
-    enum MARKER {
-        FLUID,
-        FREE,
-        NOSLIP,
-        INFLOW,
-        OUTFLOW,
-        OBSTACLE,
-        OBSTACLE_LEFT,
-        OBSTACLE_RIGHT,
-        OBSTACLE_TOP,
-        OBSTACLE_BOTTOM,
-        OBSTACLE_LEFT_TOP,
-        OBSTACLE_RIGHT_TOP,
-        OBSTACLE_LEFT_BOTTOM,
-        OBSTACLE_RIGHT_BOTTOM
-    };
 
     /**
      * get mesh width in x-direction
@@ -498,6 +482,8 @@ public:
 
     void applyBoundaryTemperature();
 
+    void setObstacleValues();
+
 
 protected:
     const std::array<double, 2> meshWidth_;
@@ -513,6 +499,6 @@ protected:
     FieldVariable vLast_;
     FieldVariable t_;
     FieldVariable q_;
-    Array2D marker_;
+    Marker2D marker_;
     shared_ptr<Settings> settings_;
 };
