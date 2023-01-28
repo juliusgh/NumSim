@@ -15,7 +15,11 @@ public:
     * @param meshWidth: width of a cell in both directions
     * @param alpha: donor cell weight parameter
     */
-    DonorCell(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth, double alpha, double gamma);
+    DonorCell(std::shared_ptr<Partitioning> partitioning,
+              std::array<double, 2> meshWidth,
+              double alpha,
+              double gamma,
+              std::shared_ptr<Settings> settings);
 
 
     /**

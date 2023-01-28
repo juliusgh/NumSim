@@ -7,8 +7,10 @@
  * @param meshWidth: width of cells in all directions
  */
 
-CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitioning, std::array<double, 2> meshWidth) :
-        Discretization(partitioning, meshWidth) {
+CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitioning,
+                                       std::array<double, 2> meshWidth,
+                                       std::shared_ptr<Settings> settings) :
+        Discretization(partitioning, meshWidth, settings) {
 
 }
 

@@ -3,7 +3,9 @@
 #include <cassert>
 #include <memory>
 #include "storage/field_variable.h"
+#include "storage/marker2d.h"
 #include "partitioning/partitioning.h"
+#include "settings.h"
 
 /**
  * Implement staggered grid, providing a variety of parameters
@@ -15,8 +17,9 @@ public:
     * @param nCells: number of cells
     * @param meshWidth: cell width in all directions
     */
-    StaggeredGrid(std::shared_ptr<Partitioning> partitioning,
-                  std::array<double, 2> meshWidth);
+    StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
+                  std::array<double, 2> meshWidth,
+                  std::shared_ptr<Settings> settings);
 
     /**
      * get mesh width in x-direction
@@ -74,6 +77,16 @@ public:
     const std::array<int, 2> nCells() const;
 
     /**
+     * evaluate field variable p in an element (i,j)
+    */
+    MARKER marker(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    MARKER &marker(int i, int j);
+
+    /**
      * get reference to field variable p
     */
     const FieldVariable &p() const;
@@ -89,11 +102,6 @@ public:
     double &p(int i, int j);
 
     /**
-     * Number of ghost layers for p in x direction (each left and right)
-    */
-    //int pIGhost() const;
-
-    /**
      * first valid index for p in x direction
     */
     int pIBegin() const;
@@ -102,11 +110,6 @@ public:
      * one after last valid index for p in x direction
     */
     int pIEnd() const;
-
-    /**
-     * Number of ghost layers for p in y direction (each bottom and top)
-    */
-    int pJGhost() const;
 
     /**
      * first valid index for p in y direction
@@ -157,6 +160,21 @@ public:
      * access value of u in element (i,j)
     */
     double &u(int i, int j);
+
+    /**
+     * get a reference to field variable u
+    */
+    const FieldVariable &uLast() const;
+
+    /**
+     * access value of u in element (i,j)
+    */
+    double uLast(int i, int j) const;
+
+    /**
+     * access value of u in element (i,j)
+    */
+    double &uLast(int i, int j);
 
     /**
      * first valid index for u in x direction
@@ -217,6 +235,21 @@ public:
      * access value of v in element (i,j)
     */
     double &v(int i, int j);
+
+    /**
+     * get a reference to Interior variable v
+    */
+    const FieldVariable &vLast() const;
+
+    /**
+     * access value of v in element (i,j)
+    */
+    double vLast(int i, int j) const;
+
+    /**
+     * access value of v in element (i,j)
+    */
+    double &vLast(int i, int j);
 
     /**
      * first valid index for v in x direction
@@ -443,6 +476,14 @@ public:
     */
     int qInteriorJEnd() const;
 
+    void applyBoundaryVelocities();
+
+    void applyBoundaryPressure();
+
+    void applyBoundaryTemperature();
+
+    void setObstacleValues();
+
 
 protected:
     const std::array<double, 2> meshWidth_;
@@ -454,6 +495,10 @@ protected:
     FieldVariable rhs_;
     FieldVariable u_;
     FieldVariable v_;
+    FieldVariable uLast_;
+    FieldVariable vLast_;
     FieldVariable t_;
     FieldVariable q_;
+    Marker2D marker_;
+    shared_ptr<Settings> settings_;
 };

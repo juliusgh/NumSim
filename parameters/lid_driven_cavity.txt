@@ -10,7 +10,7 @@ gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account f
 gY = 0.0
 
 # Dirichlet boundary conditions
-dirichletBottomX = 0
+dirichletBottomX = 1
 dirichletBottomY = 0
 dirichletTopX    = 1
 dirichletTopY    = 0

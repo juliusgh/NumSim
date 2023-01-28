@@ -34,7 +34,7 @@ add_executable(${PROJECT_NAME}
         output_writer/output_writer_paraview.cpp
         output_writer/output_writer_text_parallel.cpp
         output_writer/output_writer_paraview_parallel.cpp
-        )
+        storage/marker2d.cpp)
 
 find_package(MPI REQUIRED)
 
@@ -87,7 +87,7 @@ if (GTest_FOUND)
             output_writer/output_writer_paraview.cpp
             output_writer/output_writer_text_parallel.cpp
             output_writer/output_writer_paraview_parallel.cpp
-            )
+            storage/marker2d.cpp)
 
     target_link_libraries(runTests ${GTEST_LIBRARIES} pthread)
     target_include_directories(runTests PUBLIC ${PROJECT_SOURCE_DIR})
@@ -126,6 +126,7 @@ option(NPARALLEL "Disable MPI parallelization" OFF)
 if (NPARALLEL)
     add_definitions(-DNPARALLEL)
 endif ()
+add_definitions(-DNPARALLEL)
 
 message("CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
