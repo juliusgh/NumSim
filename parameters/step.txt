@@ -22,12 +22,12 @@ dirichletRightY  = 0
 
 # Discretization parameters
 nCellsX = 80          # number of cells in x and y direction
-nCellsY = 40
+nCellsY = 20
 useDonorCell = true   # if donor cell discretization should be used, possible values: true false
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 gamma = 0.5           # factor for donor-cell for temperature
 tau = 0.5             # safety factor for time step width
-maximumDt = 0.5       # maximum values for time step width
+maximumDt = 0.1       # maximum values for time step width
 
 # Temperature parameters
 beta = 0.2            # volume expansion coefficient
@@ -49,4 +49,4 @@ maximumNumberOfIterations = 1e5    # maximum number of iterations in the solver
 
 
 # domain file path
-domainFile = ../../domains/channel_obstacle.txt
+domainFile = ../../domains/step.txt

@@ -37,6 +37,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
     }
 
     marker_.setToFluid();
+    q_.setToZero();
 
     for (int j = 0;; j++) {
         string line;
@@ -52,6 +53,10 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                 case ' ':
                     marker(mi, mj) = MARKER::FLUID;
                     break;
+                case '*':
+                    marker(mi, mj) = MARKER::FLUID;
+                    q(mi, mj) = settings_->heatMagnitude;
+                    break;
                 case 'i':
                     marker(mi, mj) = MARKER::INFLOW;
                     break;
@@ -63,6 +68,10 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                     break;
                 case 'x':
                     marker(mi, mj) = MARKER::OBSTACLE;
+                    break;
+                case '#':
+                    marker(mi, mj) = MARKER::OBSTACLE;
+                    q(mi, mj) = settings_->heatMagnitude;
                     break;
                 default:
                     break;
