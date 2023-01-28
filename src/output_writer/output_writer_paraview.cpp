@@ -3,6 +3,7 @@
 #include <vtkImageData.h>
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
+#include <vtkIntArray.h>
 
 OutputWriterParaview::OutputWriterParaview(std::shared_ptr<Discretization> discretization) :
         OutputWriter(discretization) {
@@ -96,6 +97,40 @@ void OutputWriterParaview::writeFile(double currentTime) {
 
     // add the field variable to the data set
     dataSet->GetPointData()->AddArray(arrayPressure);
+
+    // add marker field variable
+    // ---------------------------
+    vtkSmartPointer <vtkIntArray> arrayMarker = vtkIntArray::New();
+
+    // the marker is a scalar which means the number of components is 1
+    arrayMarker->SetNumberOfComponents(1);
+
+    // Set the number of marker values and allocate memory for it. We already know the number, it has to be the same as there are nodes in the mesh.
+    arrayMarker->SetNumberOfTuples(dataSet->GetNumberOfPoints());
+
+    arrayMarker->SetName("marker");
+
+    // loop over the nodes of the mesh and assign the interpolated p values in the vtk data structure
+    // we only consider the cells that are the actual computational domain, not the helper values in the "halo"
+
+    index = 0;   // index for the vtk data structure, will be incremented in the inner loop
+    for (int j = discretization_->pJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+        for (int i = discretization_->pIBegin(); i < discretization_->pInteriorIEnd(); i++, index++) {
+            const double x = i * dx;
+            const double y = j * dy;
+            // TODO: I think we need a proper interpolation here!
+            if (i == discretization_->pInteriorIEnd() - 1) i++;
+            if (j == discretization_->pInteriorJEnd() - 1) j++;
+
+            arrayMarker->SetValue(index, discretization_->marker(i, j));
+        }
+    }
+
+    // now, we should have added as many values as there are points in the vtk data structure
+    assert(index == dataSet->GetNumberOfPoints());
+
+    // add the field variable to the data set
+    dataSet->GetPointData()->AddArray(arrayMarker);
 
     // add velocity field variable
     // ---------------------------

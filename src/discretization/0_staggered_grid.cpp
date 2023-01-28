@@ -8,7 +8,7 @@
  * @param nCells: number of cells
  * @param meshWidth: cell width in all directions
  */
-StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
+StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                              std::array<double, 2> meshWidth,
                              std::shared_ptr<Settings> settings) :
         partitioning_(partitioning),
@@ -29,55 +29,71 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
 
     // set markers:
 
-    // read marker values from input file
-    ifstream file(settings_->domainfile_path, ios::in);
-    if (!file.is_open()) {
-        cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
-        return;
-    }
-
     marker_.setToFluid();
     q_.setToZero();
 
-    for (int j = 0;; j++) {
-        string line;
-        getline(file, line);
+    // open input file for markers
+    ifstream file(settings_->domainfile_path, ios::in);
+    if (!file.is_open()) {
+        cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
+        cout << "Using lid driven cavity as default scenario on domain" << endl;
+        // lid driven cavity scenario as default
+        for (int i = pIBegin(); i < pIEnd(); i++) {
+            // bottom
+            marker(i, pJBegin()) = MARKER::NOSLIP;
+            // top
+            marker(i, pJEnd() - 1) = MARKER::INFLOW;
+        }
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            // left
+            marker(pIBegin(), j) = MARKER::NOSLIP;
+            // right
+            marker(pIEnd() - 1, j) = MARKER::NOSLIP;
+        }
+    } else {
+        // read markers from file{
+        cout << "Reading domain file \"" << settings_->domainfile_path << "\"." << endl;
+        for (int j = 0;; j++) {
+            string line;
+            getline(file, line);
 
-        if (file.eof())
-            break;
+            if (file.eof())
+                break;
 
-        for (std::string::size_type i = 0; i < line.size(); ++i) {
-            int mi = i + pIBegin();
-            int mj = pJEnd() - j - 1;
-            switch (line[i]) {
-                case ' ':
-                    marker(mi, mj) = MARKER::FLUID;
-                    break;
-                case '*':
-                    marker(mi, mj) = MARKER::FLUID;
-                    q(mi, mj) = settings_->heatMagnitude;
-                    break;
-                case 'i':
-                    marker(mi, mj) = MARKER::INFLOW;
-                    break;
-                case 'o':
-                    marker(mi, mj) = MARKER::OUTFLOW;
-                    break;
-                case 'n':
-                    marker(mi, mj) = MARKER::NOSLIP;
-                    break;
-                case 'x':
-                    marker(mi, mj) = MARKER::OBSTACLE;
-                    break;
-                case '#':
-                    marker(mi, mj) = MARKER::OBSTACLE;
-                    q(mi, mj) = settings_->heatMagnitude;
-                    break;
-                default:
-                    break;
+            for (int i = 0; i < line.size(); ++i) {
+                int mi = i + pIBegin();
+                int mj = pJEnd() - j - 1;
+                switch (line[i]) {
+                    case ' ':
+                        marker(mi, mj) = MARKER::FLUID;
+                        break;
+                    case '*':
+                        marker(mi, mj) = MARKER::FLUID;
+                        q(mi, mj) = settings_->heatMagnitude;
+                        break;
+                    case 'i':
+                        marker(mi, mj) = MARKER::INFLOW;
+                        break;
+                    case 'o':
+                        marker(mi, mj) = MARKER::OUTFLOW;
+                        break;
+                    case 'n':
+                        marker(mi, mj) = MARKER::NOSLIP;
+                        break;
+                    case 'x':
+                        marker(mi, mj) = MARKER::OBSTACLE;
+                        break;
+                    case '#':
+                        marker(mi, mj) = MARKER::OBSTACLE;
+                        q(mi, mj) = settings_->heatMagnitude;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
+
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -89,20 +105,20 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                 if (marker(i, j + 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_RIGHT_TOP;
                 }
-                // check bottom neighbor
+                    // check bottom neighbor
                 else if (marker(i, j - 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_RIGHT_BOTTOM;
                 } else {
                     marker(i, j) = MARKER::OBSTACLE_RIGHT;
                 }
             }
-            // check left neighbor
+                // check left neighbor
             else if (marker(i - 1, j) == MARKER::FLUID) {
                 // check top neighbor
                 if (marker(i, j + 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_LEFT_TOP;
                 }
-                // check bottom neighbor
+                    // check bottom neighbor
                 else if (marker(i, j - 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_LEFT_BOTTOM;
                 } else {
@@ -113,53 +129,366 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                 if (marker(i, j + 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_TOP;
                 }
-                // check bottom neighbor
+                    // check bottom neighbor
                 else if (marker(i, j - 1) == MARKER::FLUID) {
                     marker(i, j) = MARKER::OBSTACLE_BOTTOM;
                 }
             }
         }
     }
+    std::cout << "Domain with markers:";
+    marker_.print();
+};
 
-    /*
-    // set markers manually
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            marker(i, j) = MARKER::FLUID;
+void StaggeredGrid::setObstacleValues() {
+    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
+        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
+            switch (marker(i, j)) {
+                case OBSTACLE:
+                case OBSTACLE_LEFT:
+                case OBSTACLE_RIGHT:
+                case OBSTACLE_TOP:
+                case OBSTACLE_BOTTOM:
+                case OBSTACLE_LEFT_TOP:
+                case OBSTACLE_RIGHT_TOP:
+                case OBSTACLE_LEFT_BOTTOM:
+                case OBSTACLE_RIGHT_BOTTOM:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                default:
+                    break;
+            }
         }
     }
-    /*
-    //lid driven cavity
+}
+
+void StaggeredGrid::applyBoundaryVelocities() {
+    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
+        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                case OBSTACLE_LEFT:
+                    f(i, j) = u(i, j) = 0.0;
+                    f(i - 1, j) = u(i - 1, j) = 0.0;
+                    g(i, j) = v(i, j) = -v(i - 1, j);
+                    break;
+                case OBSTACLE_RIGHT:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = -v(i + 1, j);
+                    break;
+                case OBSTACLE_TOP:
+                    f(i, j) = u(i, j) = -u(i, j + 1);
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                case OBSTACLE_BOTTOM:
+                    f(i, j) = u(i, j) = -u(i, j - 1);
+                    g(i, j) = v(i, j) = 0.0;
+                    g(i, j - 1) = v(i, j - 1) = 0.0;
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = 0.0;
+                    f(i - 1, j) = u(i - 1, j) = 0.0;
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    f(i, j) = u(i, j) = -u(i, j - 1);
+                    f(i - 1, j) = u(i - 1, j) = 0.0;
+                    g(i, j) = v(i, j) = -v(i - 1, j);
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = -v(i + 1, j);
+                    g(i, j - 1) = v(i, j - 1) = 0.0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    // set boundary values for u and v at bottom and top side (lower priority)
     for (int i = pIBegin(); i < pIEnd(); i++) {
-        // bottom
-        marker(i, pJBegin()) = MARKER::INFLOW;
-        // top
-        marker(i, pJEnd() - 1) = MARKER::OUTFLOW;
+        // set boundary values at bottom side
+        switch (marker(i, pJBegin())) {
+            case NOSLIP:
+                if (i < pIEnd() - 1) {
+                    f(i, uJBegin()) = u(i, uJBegin()) = -u(i, uInteriorJBegin());
+                }
+                g(i, vJBegin()) = v(i, vJBegin()) = 0.0;
+                break;
+            case INFLOW:
+                if (i < pIEnd() - 1) {
+                    f(i, uJBegin()) =
+                    u(i, uJBegin()) = 2.0 * settings_->dirichletBcBottom[0]
+                                              - u(i, uInteriorJBegin());
+                }
+                g(i, vJBegin()) =
+                v(i, vJBegin()) = settings_->dirichletBcBottom[1];
+                break;
+            case OUTFLOW:
+                if (i < pIEnd() - 1) {
+                    f(i, uJBegin()) =
+                    u(i, uJBegin()) = u(i, uInteriorJBegin());
+                }
+                g(i, vJBegin()) =
+                v(i, vJBegin()) = v(i, vInteriorJBegin());
+                break;
+            default:
+                break;
+        }
+
+        // set boundary values for u at top side
+        switch (marker(i, pJEnd() - 1)) {
+            case NOSLIP:
+                if (i < pIEnd() - 1) {
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = -u(i, uInteriorJEnd() - 1);
+                }
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = 0.0;
+                break;
+            case INFLOW:
+                if (i < pIEnd() - 1) {
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) =
+                            2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
+                }
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
+                break;
+            case OUTFLOW:
+                if (i < pIEnd() - 1) {
+                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = u(i, uInteriorJEnd() - 1);
+                }
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = v(i, vInteriorJEnd() - 1);
+                break;
+            default:
+                break;
+        }
     }
+
+    // set boundary values for u and v at left and right side (higher priority)
     for (int j = pJBegin(); j < pJEnd(); j++) {
-        // left
-        marker(pIBegin(), j) = MARKER::NOSLIP;
-        // right
-        marker(pIEnd() - 1, j) = MARKER::NOSLIP;
+        // set boundary values for u at left side
+        switch (marker(pIBegin(), j)) {
+            case NOSLIP:
+                f(uIBegin(), j) = u(uIBegin(), j) = 0.0;
+                if (j < pJEnd() - 1) {
+                    g(vIBegin(), j) = v(vIBegin(), j) = -v(vInteriorIBegin(), j);
+                }
+                break;
+            case INFLOW:
+                f(uIBegin(), j) = u(uIBegin(), j) = settings_->dirichletBcLeft[0];
+                if (j < pJEnd() - 1) {
+                    g(vIBegin(), j) = v(vIBegin(), j) = 2.0 * settings_->dirichletBcLeft[1]
+                                                        - v(vInteriorIBegin(), j);
+                }
+                break;
+            case OUTFLOW:
+                f(uIBegin(), j) = u(uIBegin(), j) = u(uInteriorIBegin(), j);
+                if (j < pJEnd() - 1) {
+                    v(vIBegin(), j) = v(vInteriorIBegin(), j);
+                }
+                break;
+            default:
+                break;
+        }
+        // set boundary values for u at right side
+        switch (marker(pIEnd() - 1, j)) {
+            case NOSLIP:
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = 0.0;
+                if (j < pJEnd() - 1) {
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = -v(vInteriorIEnd() - 1, j);
+                }
+                break;
+            case INFLOW:
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = settings_->dirichletBcRight[0];
+                if (j < pJEnd() - 1) {
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = settings_->dirichletBcRight[1]
+                                                            - u(vInteriorIEnd() - 1, j);
+                }
+                break;
+            case OUTFLOW:
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = u(uInteriorIEnd() - 1, j);
+                if (j < pJEnd() - 1) {
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = v(vInteriorIEnd() - 1, j);
+                }
+                break;
+            default:
+                break;
+        }
     }
-     */
-    /*
-    // channel
+};
+
+void StaggeredGrid::applyBoundaryPressure() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
-        // bottom
-        marker(i, pJBegin()) = MARKER::NOSLIP;
-        // top
-        marker(i, pJEnd() - 1) = MARKER::NOSLIP;
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    p(i, j) = p(i - 1, j);
+                    break;
+                case OBSTACLE_LEFT:
+                    p(i, j) = p(i - 1, j);
+                    break;
+                case OBSTACLE_RIGHT:
+                    p(i, j) = p(i + 1, j);
+                    break;
+                case OBSTACLE_TOP:
+                    p(i, j) = p(i,j + 1);
+                    break;
+                case OBSTACLE_BOTTOM:
+                    p(i, j) = p(i, j - 1);
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    p(i, j) = (p(i - 1, j) + p(i,j + 1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    p(i, j) = (p(i + 1, j) + p(i,j + 1)) / 2.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    p(i, j) = (p(i - 1, j) + p(i,j - 1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    p(i, j) = (p(i + 1, j) + p(i,j - 1)) / 2.0;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
+
+    // set boundary values for p at bottom and top side (lower priority)
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        // set boundary values at bottom side
+        switch (marker(i, pJBegin())) {
+            case INFLOW:
+            case NOSLIP:
+                p(i, pJBegin()) = p(i, pInteriorJBegin());
+                break;
+            case OUTFLOW:
+                p(i, uJBegin()) = -p(i, uInteriorJBegin());
+                break;
+            default:
+                break;
+        }
+        // set boundary values for p at top side
+        switch (marker(i, pJEnd() - 1)) {
+            case NOSLIP:
+            case INFLOW:
+                p(i, pJEnd() - 1) = p(i, pInteriorJEnd() - 1);
+                break;
+            case OUTFLOW:
+                p(i, uJEnd() - 1) = -p(i, uInteriorJEnd() - 1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // set boundary values for p at left and right side (higher priority)
     for (int j = pJBegin(); j < pJEnd(); j++) {
-        // left
-        marker(pIBegin(), j) = MARKER::INFLOW;
-        // right
-        marker(pIEnd() - 1, j) = MARKER::OUTFLOW;
+        // set boundary values for p at left side
+        switch (marker(pIBegin(), j)) {
+            case NOSLIP:
+            case INFLOW:
+                p(pIBegin(), j) = p(pInteriorIBegin(), j);
+                break;
+            case OUTFLOW:
+                p(pIBegin(), j) = -p(uInteriorIBegin(), j);
+                break;
+            default:
+                break;
+        }
+        // set boundary values for p at right side
+        switch (marker(pIEnd() - 1, j)) {
+            case NOSLIP:
+            case INFLOW:
+                p(pIEnd() - 1, j) = p(pInteriorIEnd() - 1, j);
+                break;
+            case OUTFLOW:
+                p(pIEnd() - 1, j) = -p(uInteriorIEnd() - 1, j);
+                break;
+            default:
+                break;
+        }
     }
-    */
-    //std::cout << "finished setting markers" << std::endl;
-    marker_.print();
+};
+
+void StaggeredGrid::applyBoundaryTemperature() {
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case FLUID:
+                    break;
+                case FREE:
+                    break;
+                case OBSTACLE:
+                    break;
+                case OBSTACLE_LEFT:
+                    t(i, j) = t(i - 1, j);
+                    break;
+                case OBSTACLE_RIGHT:
+                    t(i, j) = t(i + 1, j);
+                    break;
+                case OBSTACLE_TOP:
+                    t(i, j) = t(i, j + 1);
+                    break;
+                case OBSTACLE_BOTTOM:
+                    t(i, j) = t(i, j - 1);
+                    break;
+                case OBSTACLE_LEFT_TOP:
+                    t(i, j) = (t(i - 1, j) + t(i, j + 1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_TOP:
+                    t(i, j) = (t(i + 1, j) + t(i, j + 1)) / 2.0;
+                    break;
+                case OBSTACLE_LEFT_BOTTOM:
+                    t(i, j) = (t(i - 1, j) + t(i, j - 1)) / 2.0;
+                    break;
+                case OBSTACLE_RIGHT_BOTTOM:
+                    t(i, j) = (t(i + 1, j) + t(i, j - 1)) / 2.0;
+                    break;
+            }
+        }
+    }
+
+    // set boundary values for t at bottom and top side (lower priotity)
+    for (int i = tIBegin(); i < tIEnd(); i++) {
+        if (settings_->setFixedTempBottom) {
+            t(i, tJBegin()) = 2.0 * settings_->tempBcBottom - t(i, tInteriorJBegin());
+        } else {
+            t(i, tJBegin()) = t(i, tInteriorJBegin()) - dy() * settings_->tempBcBottom;
+        }
+        if (settings_->setFixedTempTop) {
+            t(i, tJEnd() - 1) = 2.0 * settings_->tempBcTop - t(i, tInteriorJEnd() - 1);
+        } else {
+            t(i, tJEnd() - 1) = t(i, tInteriorJEnd() - 1) - dy() * settings_->tempBcTop;
+        }
+    }
+
+    // set boundary values for t at left and right side (higher priority)
+    for (int j = tJBegin(); j < tJEnd(); j++) {
+        if (settings_->setFixedTempLeft) {
+            t(tIBegin(), j) = 2.0 * settings_->tempBcLeft - t(tInteriorIBegin(), j);
+        } else {
+            t(tIBegin(), j) = t(tInteriorIBegin(), j) - dx() * settings_->tempBcLeft;
+        }
+        if (settings_->setFixedTempRight) {
+            t(tIEnd() - 1, j) = 2.0 * settings_->tempBcRight - t(tInteriorIEnd() - 1, j);
+        } else {
+            t(tIEnd() - 1, j) = t(tInteriorIEnd() - 1, j) - dx() * settings_->tempBcRight;
+        }
+    }
 };
 
 /**
@@ -285,7 +614,7 @@ MARKER StaggeredGrid::marker(int i, int j) const {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
 #endif
-    return (MARKER)marker_(i - pIBegin(), j - pJBegin());
+    return (MARKER) marker_(i - pIBegin(), j - pJBegin());
 };
 
 /**
@@ -299,7 +628,7 @@ MARKER &StaggeredGrid::marker(int i, int j) {
     assert((pIBegin() <= i) && (i <= pIEnd()));
     assert((pJBegin() <= j) && (j <= pJEnd()));
 #endif
-    return (MARKER&)marker_(i - pIBegin(), j - pJBegin());
+    return (MARKER &) marker_(i - pIBegin(), j - pJBegin());
 };
 
 /**
@@ -1082,370 +1411,4 @@ double &StaggeredGrid::q(int i, int j) {
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
-};
-
-
-
-void StaggeredGrid::setObstacleValues() {
-    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
-        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
-            switch (marker(i, j)) {
-                case OBSTACLE:
-                case OBSTACLE_LEFT:
-                case OBSTACLE_RIGHT:
-                case OBSTACLE_TOP:
-                case OBSTACLE_BOTTOM:
-                case OBSTACLE_LEFT_TOP:
-                case OBSTACLE_RIGHT_TOP:
-                case OBSTACLE_LEFT_BOTTOM:
-                case OBSTACLE_RIGHT_BOTTOM:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = 0.0;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-}
-
-void StaggeredGrid::applyBoundaryVelocities() {
-    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
-        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
-            switch (marker(i, j)) {
-                case FLUID:
-                case FREE:
-                    break;
-                case OBSTACLE:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = 0.0;
-                    break;
-                case OBSTACLE_LEFT:
-                    f(i, j) = u(i, j) = 0.0;
-                    f(i - 1, j) = u(i - 1, j) = 0.0;
-                    g(i, j) = v(i, j) = -v(i - 1, j);
-                    break;
-                case OBSTACLE_RIGHT:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = -v(i + 1, j);
-                    break;
-                case OBSTACLE_TOP:
-                    f(i, j) = u(i, j) = -u(i, j + 1);
-                    g(i, j) = v(i, j) = 0.0;
-                    break;
-                case OBSTACLE_BOTTOM:
-                    f(i, j) = u(i, j) = -u(i, j - 1);
-                    g(i, j) = v(i, j) = 0.0;
-                    g(i, j - 1) = v(i, j - 1) = 0.0;
-                    break;
-                case OBSTACLE_LEFT_TOP:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = 0.0;
-                    f(i - 1, j) = u(i - 1, j) = 0.0;
-                    break;
-                case OBSTACLE_RIGHT_TOP:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = 0.0;
-                    break;
-                case OBSTACLE_LEFT_BOTTOM:
-                    f(i, j) = u(i, j) = -u(i,j - 1);
-                    f(i - 1, j) = u(i - 1, j) = 0.0;
-                    g(i, j) = v(i, j) = -v(i - 1, j);
-                    break;
-                case OBSTACLE_RIGHT_BOTTOM:
-                    f(i, j) = u(i, j) = 0.0;
-                    g(i, j) = v(i, j) = -v(i + 1, j);
-                    g(i, j - 1) = v(i, j - 1) = 0.0;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    // set boundary values for u and v at bottom and top side (lower priority)
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        // set boundary values at bottom side
-        const int uOffs = uIBegin() - pIBegin();
-        const int vOffs = vIBegin() - pIBegin();
-        switch (marker(i, pJBegin())) {
-            case NOSLIP:
-                if (i < pIEnd() - 1) {
-                    f(i + uOffs, uJBegin()) = u(i + uOffs, uJBegin()) = -u(i + uOffs, uInteriorJBegin());
-                }
-                g(i + vOffs, vJBegin()) = v(i + vOffs, vJBegin()) = 0.0;
-                break;
-            case INFLOW:
-                if (i < pIEnd() - 1) {
-                    f(i + uOffs, uJBegin()) =
-                    u(i + uOffs, uJBegin()) = 2.0 * settings_->dirichletBcBottom[0]
-                                              - u(i + uOffs, uInteriorJBegin());
-                }
-                g(i + vOffs, vJBegin()) =
-                v(i + vOffs, vJBegin()) = settings_->dirichletBcBottom[1];
-                break;
-            case OUTFLOW:
-                if (i < pIEnd() - 1) {
-                    f(i + uOffs, uJBegin()) =
-                    u(i + uOffs, uJBegin()) = u(i + uOffs, uInteriorJBegin());
-                }
-                g(i + vOffs, vJBegin()) =
-                v(i + vOffs, vJBegin()) = v(i + vOffs, vInteriorJBegin());
-                break;
-            default:
-                break;
-        }
-
-        // set boundary values for u at top side
-        switch (marker(i, pJEnd() - 1)) {
-            case NOSLIP:
-                if (i < pIEnd() - 1) {
-                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = -u(i, uInteriorJEnd() - 1);
-                }
-                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = 0.0;
-                break;
-            case INFLOW:
-                if (i < pIEnd() - 1) {
-                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = 2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
-                }
-                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
-                break;
-            case OUTFLOW:
-                if (i < pIEnd() - 1) {
-                    f(i, uJEnd() - 1) = u(i, uJEnd() - 1) = u(i, uInteriorJEnd() - 1);
-                }
-                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = v(i, vInteriorJEnd() - 1);
-                break;
-            default:
-                break;
-        }
-    }
-
-    // set boundary values for u and v at left and right side (higher priority)
-    for (int j = pJBegin(); j < pJEnd(); j++) {
-        // set boundary values for u at left side
-        switch (marker(pIBegin(), j)) {
-            case NOSLIP:
-                f(uIBegin(), j) = u(uIBegin(), j) = 0.0;
-                if (j < pJEnd() - 1) {
-                    g(vIBegin(), j) = v(vIBegin(), j) = -v(vInteriorIBegin(), j);
-                }
-                break;
-            case INFLOW:
-                f(uIBegin(), j) = u(uIBegin(), j) = settings_->dirichletBcLeft[0];
-                if (j < pJEnd() - 1) {
-                    g(vIBegin(), j) = v(vIBegin(), j) = 2.0 * settings_->dirichletBcLeft[1]
-                                      - v(vInteriorIBegin(), j);
-                }
-                break;
-            case OUTFLOW:
-                f(uIBegin(), j) = u(uIBegin(), j) = u(uInteriorIBegin(), j);
-                if (j < pJEnd() - 1) {
-                    v(vIBegin(), j) = v(vInteriorIBegin(), j);
-                }
-                break;
-            default:
-                break;
-        }
-        // set boundary values for u at right side
-        switch (marker(pIEnd() - 1, j)) {
-            case NOSLIP:
-                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = 0.0;
-                if (j < pJEnd() - 1) {
-                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = -v(vInteriorIEnd() - 1, j);
-                }
-                break;
-            case INFLOW:
-                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = settings_->dirichletBcRight[0];
-                if (j < pJEnd() - 1) {
-                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = settings_->dirichletBcRight[1]
-                                        - u(vInteriorIEnd() - 1, j);
-                }
-                break;
-            case OUTFLOW:
-                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = u(uInteriorIEnd() - 1, j);
-                if (j < pJEnd() - 1) {
-                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = v(vInteriorIEnd() - 1, j);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    /*std::cout << "u =";
-    u_.print();
-    getchar();*/
-};
-
-void StaggeredGrid::applyBoundaryPressure() {
-    /*for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            switch (marker(i, j)) {
-                case FLUID:
-                case FREE:
-                    break;
-                case OBSTACLE:
-                    p(i, j) = p(i - 1, j);
-                    break;
-                case OBSTACLE_LEFT:
-                    p(i, j) = p(i - 1, j);
-                    break;
-                case OBSTACLE_RIGHT:
-                    p(i, j) = p(i + 1, j);
-                    break;
-                case OBSTACLE_TOP:
-                    p(i, j) = p(i,j + 1);
-                    break;
-                case OBSTACLE_BOTTOM:
-                    p(i, j) = p(i, j - 1);
-                    break;
-                case OBSTACLE_LEFT_TOP:
-                    p(i, j) = (p(i - 1, j) + p(i,j + 1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_TOP:
-                    p(i, j) = (p(i + 1, j) + p(i,j + 1)) / 2.0;
-                    break;
-                case OBSTACLE_LEFT_BOTTOM:
-                    p(i, j) = (p(i - 1, j) + p(i,j - 1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_BOTTOM:
-                    p(i, j) = (p(i + 1, j) + p(i,j - 1)) / 2.0;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }*/
-
-    // set boundary values for p at bottom and top side (lower priority)
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        // set boundary values at bottom side
-        switch (marker(i, pJBegin())) {
-            case INFLOW:
-            case NOSLIP:
-                p(i, pJBegin()) = p(i, pInteriorJBegin());
-                break;
-            case OUTFLOW:
-                p(i, uJBegin()) = -p(i, uInteriorJBegin());
-                break;
-            default:
-                break;
-        }
-        // set boundary values for p at top side
-        switch (marker(i, pJEnd() - 1)) {
-            case NOSLIP:
-            case INFLOW:
-                p(i, pJEnd() - 1) = p(i, pInteriorJEnd() - 1);
-                break;
-            case OUTFLOW:
-                p(i, uJEnd() - 1) = -p(i, uInteriorJEnd() - 1);
-                break;
-            default:
-                break;
-        }
-    }
-
-    // set boundary values for p at left and right side (higher priority)
-    for (int j = pJBegin(); j < pJEnd(); j++) {
-        // set boundary values for p at left side
-        switch (marker(pIBegin(), j)) {
-            case NOSLIP:
-            case INFLOW:
-                p(pIBegin(), j) = p(pInteriorIBegin(), j);
-                break;
-            case OUTFLOW:
-                p(pIBegin(), j) = -p(uInteriorIBegin(), j);
-                break;
-            default:
-                break;
-        }
-        // set boundary values for p at right side
-        switch (marker(pIEnd() - 1, j)) {
-            case NOSLIP:
-            case INFLOW:
-                p(pIEnd() - 1, j) = p(pInteriorIEnd() - 1, j);
-                break;
-            case OUTFLOW:
-                p(pIEnd() - 1, j) = -p(uInteriorIEnd() - 1, j);
-                break;
-            default:
-                break;
-        }
-    }
-};
-
-void StaggeredGrid::applyBoundaryTemperature() {
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            switch (marker(i, j)) {
-                case FLUID:
-                    break;
-                case FREE:
-                    break;
-                case OBSTACLE:
-                    break;
-                case OBSTACLE_LEFT:
-                    t(i,j) = t(i-1,j);
-                    break;
-                case OBSTACLE_RIGHT:
-                    t(i,j) = t(i+1,j);
-                    break;
-                case OBSTACLE_TOP:
-                    t(i,j) = t(i,j+1);
-                    break;
-                case OBSTACLE_BOTTOM:
-                    t(i,j) = t(i,j-1);
-                    break;
-                case OBSTACLE_LEFT_TOP:
-                    t(i,j) = (t(i-1,j) + t(i,j+1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_TOP:
-                    t(i,j) = (t(i+1,j) + t(i,j+1)) / 2.0;
-                    break;
-                case OBSTACLE_LEFT_BOTTOM:
-                    t(i,j) = (t(i-1,j) + t(i,j-1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_BOTTOM:
-                    t(i,j) = (t(i+1,j) + t(i,j-1)) / 2.0;
-                    break;
-            }
-        }
-    }
-
-    // set boundary values for t at bottom and top side (lower priotity)
-    for (int i = tIBegin(); i < tIEnd(); i++) {
-        if (settings_->setFixedTempBottom) {
-            t(i, tJBegin()) = 2.0 * settings_->tempBcBottom
-                               - t(i, tInteriorJBegin());
-            //std::cout << "t(i, discretization_->tJBegin()) = " << discretization_->t(i, discretization_->tJBegin()) << std::endl;
-        } else {
-            t(i, tJBegin()) = t(i, tInteriorJBegin())
-                               - dy() * settings_->tempBcBottom;
-        }
-        if (settings_->setFixedTempTop) {
-            t(i, tJEnd() - 1) = 2.0 * settings_->tempBcTop
-                                 - t(i, tInteriorJEnd() - 1);
-        } else {
-            t(i, tJEnd() - 1) = t(i, tInteriorJEnd() - 1)
-                                 - dy() * settings_->tempBcTop;
-        }
-    }
-
-    // set boundary values for t at left and right side (higher priority)
-    for (int j = tJBegin(); j < tJEnd(); j++) {
-        if (settings_->setFixedTempLeft) {
-            t(tIBegin(), j) = 2.0 * settings_->tempBcLeft
-                               - t(tInteriorIBegin(), j);
-        } else {
-            t(tIBegin(), j) = t(tInteriorIBegin(), j)
-                                 - dx() * settings_->tempBcLeft;
-        }
-        if (settings_->setFixedTempRight) {
-            t(tIEnd() - 1, j) = 2.0 * settings_->tempBcRight
-                                 - t(tInteriorIEnd() - 1, j);
-        } else {
-            t(tIEnd() - 1, j) = t(tInteriorIEnd() - 1, j)
-                                 - dx() * settings_->tempBcRight;
-        }
-    }
 };
