@@ -31,7 +31,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
 
     // read marker values from input file
     ifstream file(settings_->domainfile_path, ios::in);
-if (!file.is_open()) {
+    if (!file.is_open()) {
         cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
         return;
     }
@@ -134,27 +134,6 @@ if (!file.is_open()) {
         marker(pIEnd() - 1, j) = MARKER::NOSLIP;
     }
      */
-    //lid driven cavity rotated
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        // top
-        marker(i, pJEnd() - 1) = MARKER::INFLOW;
-        settings_->dirichletBcTop[0] = 1.0;
-        settings_->dirichletBcTop[1] = 0.0;
-        // bottom
-        marker(i, pJBegin()) = MARKER::NOSLIP;
-        settings_->dirichletBcBottom[0] = 0.0;
-        settings_->dirichletBcBottom[1] = 0.0;
-    }
-    for (int j = pJBegin(); j < pJEnd(); j++) {
-        // left
-        marker(pIBegin(), j) = MARKER::NOSLIP;
-        settings_->dirichletBcLeft[0] = 0.0;
-        settings_->dirichletBcLeft[1] = 0.0;
-        // right
-        marker(pIEnd() - 1, j) = MARKER::NOSLIP;
-        settings_->dirichletBcRight[0] = 0.0;
-        settings_->dirichletBcRight[1] = 0.0;
-    }
     /*
     // channel
     for (int i = pIBegin(); i < pIEnd(); i++) {
@@ -170,7 +149,7 @@ if (!file.is_open()) {
         marker(pIEnd() - 1, j) = MARKER::OUTFLOW;
     }
     */
-    std::cout << "finished setting markers" << std::endl;
+    //std::cout << "finished setting markers" << std::endl;
     marker_.print();
 };
 
@@ -1095,6 +1074,31 @@ double &StaggeredGrid::q(int i, int j) {
 #endif
     return q_(i - qIBegin(), j - qJBegin());
 };
+
+
+
+void StaggeredGrid::setObstacleValues() {
+    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
+        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
+            switch (marker(i, j)) {
+                case OBSTACLE:
+                case OBSTACLE_LEFT:
+                case OBSTACLE_RIGHT:
+                case OBSTACLE_TOP:
+                case OBSTACLE_BOTTOM:
+                case OBSTACLE_LEFT_TOP:
+                case OBSTACLE_RIGHT_TOP:
+                case OBSTACLE_LEFT_BOTTOM:
+                case OBSTACLE_RIGHT_BOTTOM:
+                    f(i, j) = u(i, j) = 0.0;
+                    g(i, j) = v(i, j) = 0.0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
 
 void StaggeredGrid::applyBoundaryVelocities() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {

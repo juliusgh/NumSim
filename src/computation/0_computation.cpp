@@ -112,6 +112,7 @@ void Computation::runSimulation() {
         */
         updateLastVelocities();
         computeVelocities();
+        discretization_->setObstacleValues();
 
         /*
         * 7) Output debug information and simulation results
@@ -131,13 +132,6 @@ void Computation::runSimulation() {
  * Set the initial values of the temperature t
  */
 void Computation::applyBoundaryValues() {
-    // set boundary values for u at bottom and top side (lower priority)
-    /*applyBoundaryValuesBottom();
-    applyBoundaryValuesTop();
-
-    // set boundary values for u at left and right side (higher priority)
-    applyBoundaryValuesLeft();
-    applyBoundaryValuesRight();*/
     discretization_->applyBoundaryVelocities();
     discretization_->applyBoundaryTemperature();
     setExternalHeat();

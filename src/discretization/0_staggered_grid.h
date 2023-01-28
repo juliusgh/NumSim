@@ -482,6 +482,8 @@ public:
 
     void applyBoundaryTemperature();
 
+    void setObstacleValues();
+
 
 protected:
     const std::array<double, 2> meshWidth_;
