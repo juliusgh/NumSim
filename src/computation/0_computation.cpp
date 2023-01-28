@@ -41,7 +41,7 @@ void Computation::initialize(string filename) {
 
     } else if (settings_.pressureSolver == "CG") {
         pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
-                                                      settings_.maximumNumberOfIterations, partitioning_);
+                                                              settings_.maximumNumberOfIterations, partitioning_);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
@@ -419,7 +419,7 @@ void Computation::computePreliminaryVelocities() {
             double lap_u = discretization_->computeD2uDx2(i, j) + discretization_->computeD2uDy2(i, j);
             double conv_u = discretization_->computeDu2Dx(i, j) + discretization_->computeDuvDy(i, j);
             double f_tilde = discretization_->u(i, j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
-            double t_interp_right = (discretization_->t(i, j) - discretization_->t(i + 1, j)) / 2.0;
+            double t_interp_right = (discretization_->t(i, j) + discretization_->t(i + 1, j)) / 2.0;
             discretization_->f(i, j) = f_tilde - dt_ * settings_.beta * settings_.g[0] * t_interp_right;
         }
     }
@@ -430,7 +430,7 @@ void Computation::computePreliminaryVelocities() {
             double lap_v = discretization_->computeD2vDx2(i, j) + discretization_->computeD2vDy2(i, j);
             double conv_v = discretization_->computeDv2Dy(i, j) + discretization_->computeDuvDx(i, j);
             double g_tilde = discretization_->v(i, j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
-            double t_interp_up = (discretization_->t(i, j) - discretization_->t(i, j + 1)) / 2.0;
+            double t_interp_up = (discretization_->t(i, j) + discretization_->t(i, j + 1)) / 2.0;
             discretization_->g(i, j) = g_tilde - dt_ * settings_.beta * settings_.g[1] * t_interp_up;
         }
     }
@@ -444,7 +444,7 @@ void Computation::computePressure() {
 };
 
 /**
- * Compute the right hand side rhs of the pressure Poisson equation 
+ * Compute the right hand side rhs of the pressure Poisson equation
  */
 void Computation::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
@@ -462,9 +462,10 @@ void Computation::computeRightHandSide() {
  */
 void Computation::computeTimeStepWidth() {
     // Compute maximal time step width regarding the diffusion
-    double dt_diff = settings_.re * settings_.pr / 2 / (1 / (discretization_->dx() * discretization_->dx()) +
-                                                        1 / (discretization_->dy() * discretization_->dy()));
+    double dt_diff = settings_.re / 2 / (1 / (discretization_->dx() * discretization_->dx()) +
+                                         1 / (discretization_->dy() * discretization_->dy()));
 
+    double dt_diff_temp = settings_.pr * dt_diff;
     // Compute maximal time step width regarding the convection u
     double dt_conv_u = discretization_->dx() / discretization_->u().absMax();
 
@@ -472,7 +473,7 @@ void Computation::computeTimeStepWidth() {
     double dt_conv_v = discretization_->dy() / discretization_->v().absMax();
 
     // Set the appropriate time step width by using a security factor tau
-    double computed_dt = settings_.tau * std::min({dt_diff, dt_conv_u, dt_conv_v});
+    double computed_dt = settings_.tau * std::min({dt_diff, dt_diff_temp, dt_conv_u, dt_conv_v});
     //std::cout << "dt_diff = " << dt_diff << ", dt_conv_u = " << dt_conv_u << ", dt_conv_v = " << dt_conv_v << std::endl;
     dt_ = std::min({settings_.maximumDt, computed_dt});
 };
