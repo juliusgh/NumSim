@@ -2,7 +2,7 @@
 # Run ./numsim lid_driven_cavity.txt
 
 # Problem description
-physicalSizeX = 4.0   # physical size of the domain
+physicalSizeX = 2.0   # physical size of the domain
 physicalSizeY = 2.0
 endTime = 20.0        # duration of the simulation
 re = 1000             # Reynolds number
@@ -13,16 +13,16 @@ gY = 0.0 #-9.81
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
-dirichletTopX    = 0
+dirichletTopX    = 1
 dirichletTopY    = 0
-dirichletLeftX   = 0.1
+dirichletLeftX   = 0
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
 
 # Discretization parameters
 nCellsX = 80          # number of cells in x and y direction
-nCellsY = 40
+nCellsY = 80
 useDonorCell = true   # if donor cell discretization should be used, possible values: true false
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 gamma = 0.5           # factor for donor-cell for temperature
@@ -33,7 +33,7 @@ maximumDt = 0.5       # maximum values for time step width
 beta = 0.2            # volume expansion coefficient
 initialTemp = 0   # in Kelvin, 293K = 20°C
 setFixedTempBottom = true
-tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
+tempBcBottom = 1    # prescribed values of tb or tn at bottom of domain
 setFixedTempTop = true
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
 setFixedTempLeft = true
@@ -49,4 +49,4 @@ maximumNumberOfIterations = 1e5    # maximum number of iterations in the solver
 
 
 # domain file path
-domainFile = ../../domains/lid_driven_cavity_.txt
+domainFile = ../../domains/lid_driven_cavity_heat.txt

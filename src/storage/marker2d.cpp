@@ -66,14 +66,13 @@ MARKER Marker2D::operator()(int i, int j) const {
  */
 
 void Marker2D::print() const {
-    std::cout << std::endl << "----------" << std::endl;
+    std::cout << std::endl;
     for (int j = size_[1] - 1; j >= 0; j--) {
         for (int i = 0; i < size_[0]; i++) {
-            std::cout << (*this)(i, j) << " | ";
+            std::cout << (*this)(i, j) << "|";
         }
         std::cout << std::endl;
     }
-    std::cout << "----------" << std::endl;
 }
 
 void Marker2D::setToFluid() {
