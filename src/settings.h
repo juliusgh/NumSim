@@ -36,6 +36,9 @@ struct Settings {
     // temperature initial condition
     double initialTemp = 0; // in Kelvin, 293K = 20°C
 
+    // heat source magnitude
+    double heatMagnitude = 10.0;
+
     // temperature boundary conditions
     bool setFixedTempBottom = false;
     double tempBcBottom = 0.0;  //< prescribed values of tb or tn at bottom of domain
