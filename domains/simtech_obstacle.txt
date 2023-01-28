@@ -1,0 +1,42 @@
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                           xxxx o
+i                                                                           xxxx o
+i                                                            xxxx                o
+i                                                            xxxx                o
+i                                                            xxxx                o
+i                                                                xxxxxxxx        o
+i                                                                xxxxxxxx        o
+i                                                                xxxxxxxx        o
+i                                                                xxxxxxxx        o
+i    xxxx                      xxxxxxxxxx                        xxxxxxxx        o
+i   xxxxxx    xx               xxxxxxxxxx                xx                      o
+i  xxxxxxxx   xx                   xx                    xx                      o
+i xxx    xx                        xx                    xx                      o
+i xxx              xxxxx   xxxx    xx    xxxx      xxx   xxxxxxx                 o
+i xxxxx       xx  xxxxxxxxxxxxxx   xx   xxxxxx    xxxxxx xxxxxxx         xxx     o
+i  xxxxxxx    xx  xxx   xxx   xx   xx  xx    xx  xx   xx xx    xx       xxxx     o
+i   xxxxxxx   xx  xxx   xxx   xx   xx  xx    xx xx       xx    xx       xxxx     o
+i       xxxx  xx  xxx   xxx   xx   xx  xxxxxxxx xx       xx    xx                o
+i xx     xxx  xx  xxx   xxx   xx   xx  xxxxxxxx xx       xx    xx                o
+i xxx    xxx  xx  xxx   xxx   xx   xx  xx       xx       xx    xx                o
+i xxxxxxxxx   xx  xxx   xxx   xx   xx  xx   xxx xx   xx  xx    xx                o
+i  xxxxxxx    xx  xxx   xxx   xx   xx   xxxxxxx  xxxxxx  xx    xx                o
+i    xxx                                 xxxx     xxxx                           o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+i                                                                                o
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
