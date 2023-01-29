@@ -328,7 +328,7 @@ void StaggeredGrid::applyBoundaryVelocities() {
 };
 
 void StaggeredGrid::applyBoundaryPressure() {
-    for (int i = pIBegin(); i < pIEnd(); i++) {
+    /*for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             switch (marker(i, j)) {
                 case FLUID:
@@ -365,7 +365,7 @@ void StaggeredGrid::applyBoundaryPressure() {
                     break;
             }
         }
-    }
+    }*/
 
     // set boundary values for p at bottom and top side (lower priority)
     for (int i = pIBegin(); i < pIEnd(); i++) {
