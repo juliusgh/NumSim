@@ -34,7 +34,8 @@ add_executable(${PROJECT_NAME}
         output_writer/output_writer_paraview.cpp
         output_writer/output_writer_text_parallel.cpp
         output_writer/output_writer_paraview_parallel.cpp
-        storage/marker2d.cpp)
+        storage/marker2d.cpp
+        pressure_solver/1_multigrid.cpp)
 
 find_package(MPI REQUIRED)
 
