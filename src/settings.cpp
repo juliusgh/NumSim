@@ -1,6 +1,7 @@
 #include <fstream>   // for file operations
 #include <iostream>  // for cout
 #include <iomanip>
+#include <filesystem>
 #include "settings.h"
 
 using namespace std;
@@ -222,7 +223,12 @@ void Settings::loadFromFile(string filename) {
             continue;
         }
         if (parameterName == "domainFile") {
-            domainfile_path = value;
+            std::cout << "domainfile" << std::endl;
+            std::filesystem::path path = std::filesystem::path(filename).remove_filename();
+            std::cout << path << std::endl;
+
+            domainfile_path = path / std::filesystem::path(value);
+            std::cout << domainfile_path << std::endl;
             continue;
         }
     }
