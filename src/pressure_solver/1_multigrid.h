@@ -31,7 +31,7 @@ private:
 
     double theta_;
 
-    void smoothing(Array2D& v, int smoothing_steps);
+    void smoothing(Array2D& v, int smoothing_steps, bool convergenceCheck = false);
 
 
     Array2D defect_calculation(Array2D v_L , Array2D rhs);

@@ -33,8 +33,7 @@ void Multigrid::solve(){
 
         // Update the pressure field (Possible that indices are wrong)
         for (int i = discretization_->pInteriorIBegin() - discretization_->pIBegin(); i < discretization_->pInteriorIBegin() - discretization_->pIBegin(); i++) {
-            for (int j = discretization_->pInteriorJBegin() - discretization_->pJBegin();
-                 j < discretization_->pInteriorJEnd() - discretization_->pJBegin(); j++) {
+            for (int j = discretization_->pInteriorJBegin() - discretization_->pJBegin(); j < discretization_->pInteriorJEnd() - discretization_->pJBegin(); j++) {
                 discretization_->p(i, j) = v_L(i, j);
             }
         }
@@ -42,11 +41,27 @@ void Multigrid::solve(){
     iterations_ = iteration;
 };
 
-void Multigrid::smoothing(Array2D& v, int smoothing_steps) {
+void Multigrid::smoothing(Array2D& v, int smoothing_steps, bool convergenceCheck) {
 
-    for (int steps = 0; steps < smoothing_steps; steps++){
-        //TODO: Implement the smoothing step
-    }
+    int steps = 0;
+    double residual = 0;
+    do{
+        steps++;
+        // Apply a Gauss-Seidel relaxation
+        for (int i = 0; i < v.size()[0]; i++) {
+            for (int j = 0; j < v.size()[0]; j++) {
+                v(i, j) = (1 - theta_) * v(i, j) +
+                          theta_ * (1 / (2 * (1 / discretization_->dx() + 1 / discretization_->dy()))) *
+                          (discretization_->rhs(i, j) - (v(i - 1, j) + v(i + 1, j)) / discretization_->dx() -
+                           (v(i, j - 1) + v(i, j + 1)) / discretization_->dy());
+                if (convergenceCheck) {
+                    residual += discretization_->rhs(i, j) - (v(i - 1, j) + v(i + 1, j)) / discretization_->dx() - (v(i, j - 1) + v(i, j + 1)) / discretization_->dy();
+                }
+            }
+
+        }
+    } while ((convergenceCheck && (residualNorm() > epsilon_)) || (steps < smoothing_steps));
+
 
 };
 
@@ -54,8 +69,8 @@ Array2D Multigrid::defect_calculation(Array2D v_L , Array2D rhs) {
     Array2D d_L = Array2D({v_L.size()[0], v_L.size()[1]});
     for (int i = 0; i < d_L.size()[0]; i++) {
         for (int j = 0; j < d_L.size()[1]; j++) {
-            // Calculate the defect
-            //TODO: d_L(i, j) = rhs(i, j) - LAPLACE;
+            // Calculate the Laplacian of the 2D v_L with the 5 point stencil
+            d_L(i, j) = rhs(i, j) - ((v_L(i-1 ,j) + v_L(i+1 ,j) + 2 * v_L(i,j))/ discretization_->dx() + (v_L(i ,j-1) + v_L(i ,j+1) + 2 * v_L(i,j)) / discretization_->dy());
         }
     }
     return d_L;
@@ -96,7 +111,7 @@ void Multigrid::correction(Array2D c_L, Array2D& v_L) {
 Array2D Multigrid::MG_Cycle(int layer, Array2D& v_L, Array2D rhs) {
     //Solve exactly on the coarsest grid
     if (layer==0){
-        //TODO: Solve the linear system exactly
+        smoothing(v_L, mu_ + nu_, true);
     }
     else {
         // Presmoothing
