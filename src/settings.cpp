@@ -17,6 +17,7 @@ void Settings::loadFromFile(string filename) {
     }
 
     // loop over lines of file
+    bool domainFileGiven = false;
     for (int lineNo = 0;; lineNo++) {
         // read line
         string line;
@@ -58,19 +59,49 @@ void Settings::loadFromFile(string filename) {
         }
 
         // parse actual value and set corresponding parameter
-        if (parameterName == "nCellsX") {
+        if (parameterName == "domainFile") {
+            std::filesystem::path path = std::filesystem::path(filename).remove_filename();
+            domainfile_path = path / std::filesystem::path(value);
+            ifstream domainfile(domainfile_path, ios::in);
+            if (!domainfile.is_open()) {
+                    std::cout << "coud not open domain file" << std::endl;
+            } else {
+                std::cout << "test" << std::endl;
+                int lineCount = 0;
+                int linesize = 0;
+                for (int j = 0;; j++) {
+                    string domainLine;
+                    getline(domainfile, domainLine);
+                    if (domainfile.eof())
+                        break;
+                    if (j == 0) {
+                        linesize = domainLine.size();
+                    }
+                    lineCount += 1;
+
+                }
+                nCells[1] = lineCount - 2;
+                nCells[0] = linesize - 2;
+                std::cout << lineCount << " , " << line.size() << std::endl;
+                physicalSize[0] = nCells[0] / 10.0;
+                physicalSize[1] = nCells[1] / 10.0;
+                domainFileGiven = true;
+            continue;
+            }
+        }
+        if (parameterName == "nCellsX" && domainFileGiven == false) {
             nCells[0] = atoi(value.c_str());
             continue;
         }
-        if (parameterName == "nCellsY") {
+        if (parameterName == "nCellsY" && domainFileGiven == false) {
             nCells[1] = atoi(value.c_str());
             continue;
         }
-        if (parameterName == "physicalSizeX") {
+        if (parameterName == "physicalSizeX" && domainFileGiven == false) {
             physicalSize[0] = atof(value.c_str());
             continue;
         }
-        if (parameterName == "physicalSizeY") {
+        if (parameterName == "physicalSizeY" && domainFileGiven == false) {
             physicalSize[1] = atof(value.c_str());
             continue;
         }
@@ -220,15 +251,6 @@ void Settings::loadFromFile(string filename) {
         }
         if (parameterName == "maximumNumberOfIterations") {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
-            continue;
-        }
-        if (parameterName == "domainFile") {
-            std::cout << "domainfile" << std::endl;
-            std::filesystem::path path = std::filesystem::path(filename).remove_filename();
-            std::cout << path << std::endl;
-
-            domainfile_path = path / std::filesystem::path(value);
-            std::cout << domainfile_path << std::endl;
             continue;
         }
     }

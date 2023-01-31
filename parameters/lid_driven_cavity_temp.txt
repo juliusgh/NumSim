@@ -1,6 +1,9 @@
 # Settings file for numsim program
 # Run ./numsim lid_driven_cavity.txt
 
+# Domain file location - this needs to be specified first
+domainFile = domains/newyork.txt
+
 # Problem description
 physicalSizeX = 4.0   # physical size of the domain
 physicalSizeY = 4.0
@@ -46,7 +49,3 @@ pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeid
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 1e4    # maximum number of iterations in the solver
-
-
-# domain file path
-domainFile = domains/z.txt
