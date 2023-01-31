@@ -5,29 +5,43 @@
 
 #include "pressure_solver/0_pressure_solver.h"
 
+
 class Multigrid : public PressureSolver {
 
 public:
     Multigrid(std::shared_ptr<Discretization> discretization,
               double epsilon,
               int maximuNumberOfIterations,
-              int gamma);
+              int maximumNumberOfLayers,
+              int gamma,
+              int mu,
+              int nu,
+              double theta);
 
-    void solve();
+    void solve() override;
 
 private:
     int gamma_;
 
-    void smoothing();
+    int mu_;
 
-    void defect_calculation();
+    int nu_;
 
-    void restriction();
+    int maximumNumberOfLayers_;
 
-    void prolongation();
+    double theta_;
 
-    void correction();
+    void smoothing(Array2D& v, int smoothing_steps);
 
-    void MG_Cycle(int layer);
+
+    Array2D defect_calculation(Array2D v_L , Array2D rhs);
+
+    Array2D restriction(Array2D d_L);
+
+    Array2D prolongation(Array2D);
+
+    void correction(Array2D c_L, Array2D& v_L);
+
+    Array2D MG_Cycle(int layer, Array2D& v, Array2D rhs);
 
 };
