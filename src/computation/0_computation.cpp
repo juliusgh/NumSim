@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "computation/0_computation.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
@@ -107,8 +108,8 @@ void Computation::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations()
+        cout << "time step " << setw(4) <<  t_iter << ", t: " << setw(6) << time << "/" << settings_.endTime << ", dt: " << setw(5)<< dt_ <<
+             ", res. " << setw(5) << std::scientific << pressureSolver_->residualNorm() << std::fixed <<", solver iterations: " << setw(5) << pressureSolver_->iterations()
              << endl;
         outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);
