@@ -6,13 +6,13 @@
 
 Multigrid::Multigrid(std::shared_ptr<Discretization> discretization,
                      double epsilon,
-                     int maximuNumberOfIterations,
+                     int maximumNumberOfIterations,
                      int maximumNumberOfLayers,
                      int gamma,
                      int mu,
                      int nu,
                      double theta):
-        PressureSolver(discretization,epsilon,maximuNumberOfIterations),
+        PressureSolver(discretization,epsilon,maximumNumberOfIterations),
         maximumNumberOfLayers_(maximumNumberOfLayers),
         gamma_(gamma),
         mu_(mu),

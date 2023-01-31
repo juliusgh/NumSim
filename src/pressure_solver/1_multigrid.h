@@ -33,7 +33,6 @@ private:
 
     void smoothing(Array2D& v, int smoothing_steps, bool convergenceCheck = false);
 
-
     Array2D defect_calculation(Array2D v_L , Array2D rhs);
 
     Array2D restriction(Array2D d_L);
