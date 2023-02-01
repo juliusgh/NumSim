@@ -75,6 +75,8 @@ protected:
     */
     void applyBoundarySearchDirection();
 
+    void applyBoundaryResidual();
+
 private:
     FieldVariable s_;
     FieldVariable residual_;
