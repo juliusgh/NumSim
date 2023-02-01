@@ -12,8 +12,8 @@ void Settings::loadFromFile(string filename) {
 
     // check if file is open
     if (!file.is_open()) {
-        cout << "Could not open parameter file \"" << filename << "\"." << endl;
-        return;
+        cout << "Could not open parameter file \"" << filename << "\". Exiting programm!" << endl;
+        std::exit(EXIT_FAILURE);
     }
 
     // loop over lines of file
@@ -73,6 +73,8 @@ void Settings::loadFromFile(string filename) {
                 physicalSize[0] = 2.0;
                 physicalSize[1] = 2.0;
             } else {
+                domainFileGiven = true;
+                std::cout << "wrong loop" << std::endl;
                 int lineCount = 0;
                 int linesize = 0;
                 for (int j = 0;; j++) {
@@ -90,7 +92,7 @@ void Settings::loadFromFile(string filename) {
                 nCells[0] = linesize - 2;
                 physicalSize[0] = nCells[0] / scaling_factor;
                 physicalSize[1] = nCells[1] / scaling_factor;
-            continue;
+                continue;
             }
         }
         if (parameterName == "re") {
@@ -249,6 +251,14 @@ void Settings::loadFromFile(string filename) {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
             continue;
         }
+    }
+    if (domainFileGiven == false) {
+        // Setting lid driven cavity as default
+        std::cout << "test" << std::endl;
+        nCells[1] = 20;
+        nCells[0] = 20;
+        physicalSize[0] = nCells[0] / 10.0;
+        physicalSize[1] = nCells[1] / 10.0;
     }
 }
 

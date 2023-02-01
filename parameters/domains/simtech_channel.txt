@@ -1,42 +1,22 @@
 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
 nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
 nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxx    xxxxxxxxxxxxxxxxxxxxxx          xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxx            xxxxxxxxxxxxxxx          xxxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxn
-nxx             xxxxxxxxxxxxxxxxxxx  xx  xxxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxn
-nx   xxxxxxxxx  xxxxxxxxxxxxxxxxxxx  xx  xxxxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxn
-nx   xxxxxxxxx  xxx     xxx    xxxx  xx      xxxxxx   xxx       xxxxxxxxxxxxxxxxxn
-nx     xxxxxxx  xx              xxx  xx       xxxx               xxxxxxxxxxxxxxxxn
-nxx       xxxx  xx   xxx   xxx  xxx  xx  xxxx  xx  xxx     xxxx  xxxxxxxxxxxxxxxxn
-nxxx       xxx  xx   xxx   xxx  xxx  xx  xxxx     xxxxxxx  xxxx  xxxxxxxxxxxxxxxxn
-nxxxxxxx    xx  xx   xxx   xxx  xxx  xx           xxxxxxx  xxxx  xxxxxxxxxxxxxxxxn
-i   xxxxx   xx  xx   xxx   xxx  xxx  xx           xxxxxxx  xxxx  xxxxxxxxxxxxxxxxn
-i    xxxx   xx  xx   xxx   xxx  xxx  xx  xxx      xxxxxxx  xxxx  xxxxxxxxxxxxxxxxn
-nx         xxx       xxx   xxx       xx  xxx      xxx      xxxx                  o
-nxx       xxxx       xxx   xxx       xxx                   xxxx                  o
-nxxxx   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx    xxxxx    xxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
-nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
+nxxx            xxxxxxxxxxxxxxx            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
+nxx             xxxxxxxxxxxxxxx            xxxxxxxxxxxxxxx   xxxxxxxxxxxxxxxxxxxxn
+nxx             xxxxxxxxxxxxxxxxxxx   xx   xxxxxxxxxxxxxxx   xxxxxxxxxxxxxxxxxxxxn
+nx    xxxxxxx   xxx     xxx   xxxxx   xx      xxxx      xx        xxxxxxxxxxxxxxxn
+nx    xxxxxxx   xx               xx   xx      xxx                  xxxxxxxxxxxxxxn
+nx     xxxxxx   xx               xx   xx       xx                  xxxxxxxxxxxxxxn
+nxx       xxx   xx   xxx   xxx   xx   xx   xxx      xx       xxx   xxxxxxxxxxxxxxn
+nxxx       xx   xx   xxx   xxx   xx   xx   xxx      xxxxxx   xxx   xxxxxxxxxxxxxxn
+nxxxx           xx   xxx   xxx   xx   xx            xxxxxx   xxx   xxxxxxxxxxxxxxn
+i   xxxx        xx   xxx   xxx   xx   xx            xxxxxx   xxx   xxxxxxxxxxxxxxn
+i    xxx             xxx   xxx        xx            xxxxxx   xxx   xxxxxxxxxxxxxxn
+i          xx        xxx   xxx        xx                     xxx                 o
+nx        xxx        xxx   xxx        xx                     xxx                 o
+nxx      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                    xxx                 o
+nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
 nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
 nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn
 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
