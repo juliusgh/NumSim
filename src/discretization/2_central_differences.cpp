@@ -9,7 +9,7 @@
 
 CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitioning,
                                        std::array<double, 2> meshWidth,
-                                       std::shared_ptr<Settings> settings) :
+                                       Settings settings) :
         Discretization(partitioning, meshWidth, settings) {
 
 }

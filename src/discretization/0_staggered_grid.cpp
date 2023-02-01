@@ -10,9 +10,9 @@
  */
 StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                              std::array<double, 2> meshWidth,
-                             std::shared_ptr<Settings> settings) :
+                             Settings settings) :
         partitioning_(partitioning),
-        settings_(std::move(settings)),
+        settings_(settings),
         nCells_(partitioning->nCellsLocal()),
         meshWidth_(meshWidth),
         marker_(pSize()),
@@ -34,9 +34,9 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
     tobs_.setToZero();
 
     // open input file for markers
-    ifstream file(settings_->domainfile_path, ios::in);
+    ifstream file(settings_.domainfile_path, ios::in);
     if (!file.is_open()) {
-        cout << "Could not open domain file \"" << settings_->domainfile_path << "\"." << endl;
+        cout << "Could not open domain file \"" << settings_.domainfile_path << "\"." << endl;
         cout << "Using lid driven cavity as default scenario on domain" << endl;
         // lid driven cavity scenario as default
         for (int i = pIBegin(); i < pIEnd(); i++) {
@@ -53,7 +53,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         }
     } else {
         // read markers from file{
-        cout << "Reading domain file \"" << settings_->domainfile_path << "\"." << endl;
+        cout << "Reading domain file \"" << settings_.domainfile_path << "\"." << endl;
         for (int j = 0;; j++) {
             string line;
             getline(file, line);
@@ -70,7 +70,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                         break;
                     case '*':
                         marker(mi, mj) = MARKER::FLUID;
-                        q(mi, mj) = settings_->heatMagnitude;
+                        q(mi, mj) = settings_.heatMagnitude;
                         break;
                     case 'i':
                         marker(mi, mj) = MARKER::INFLOW;
@@ -86,15 +86,15 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                         break;
                     case '#':
                         marker(mi, mj) = MARKER::OBSTACLE;
-                        q(mi, mj) = settings_->heatMagnitude;
+                        q(mi, mj) = settings_.heatMagnitude;
                         break;
                     case 'h':
                         marker(mi, mj) = MARKER::OBSTACLE;
-                        tobs(mi, mj) = settings_->obstacleHot;
+                        tobs(mi, mj) = settings_.obstacleHot;
                         break;
                     case 'c':
                         marker(mi, mj) = MARKER::OBSTACLE;
-                        tobs(mi, mj) = settings_->obstacleCold;
+                        tobs(mi, mj) = settings_.obstacleCold;
                         break;
                     default:
                         break;
@@ -236,11 +236,11 @@ void StaggeredGrid::applyBoundaryVelocities() {
             case INFLOW:
                 if (i < pIEnd() - 1) {
                     f(i, uJBegin()) =
-                    u(i, uJBegin()) = 2.0 * settings_->dirichletBcBottom[0]
+                    u(i, uJBegin()) = 2.0 * settings_.dirichletBcBottom[0]
                                               - u(i, uInteriorJBegin());
                 }
                 g(i, vJBegin()) =
-                v(i, vJBegin()) = settings_->dirichletBcBottom[1];
+                v(i, vJBegin()) = settings_.dirichletBcBottom[1];
                 break;
             case OUTFLOW:
                 if (i < pIEnd() - 1) {
@@ -265,9 +265,9 @@ void StaggeredGrid::applyBoundaryVelocities() {
             case INFLOW:
                 if (i < pIEnd() - 1) {
                     f(i, uJEnd() - 1) = u(i, uJEnd() - 1) =
-                            2.0 * settings_->dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
+                            2.0 * settings_.dirichletBcTop[0] - u(i, uInteriorJEnd() - 1);
                 }
-                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = settings_->dirichletBcTop[1];
+                g(i, vJEnd() - 1) = v(i, vJEnd() - 1) = settings_.dirichletBcTop[1];
                 break;
             case OUTFLOW:
                 if (i < pIEnd() - 1) {
@@ -291,9 +291,9 @@ void StaggeredGrid::applyBoundaryVelocities() {
                 }
                 break;
             case INFLOW:
-                f(uIBegin(), j) = u(uIBegin(), j) = settings_->dirichletBcLeft[0];
+                f(uIBegin(), j) = u(uIBegin(), j) = settings_.dirichletBcLeft[0];
                 if (j < pJEnd() - 1) {
-                    g(vIBegin(), j) = v(vIBegin(), j) = 2.0 * settings_->dirichletBcLeft[1]
+                    g(vIBegin(), j) = v(vIBegin(), j) = 2.0 * settings_.dirichletBcLeft[1]
                                                         - v(vInteriorIBegin(), j);
                 }
                 break;
@@ -315,9 +315,9 @@ void StaggeredGrid::applyBoundaryVelocities() {
                 }
                 break;
             case INFLOW:
-                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = settings_->dirichletBcRight[0];
+                f(uIEnd() - 1, j) = u(uIEnd() - 1, j) = settings_.dirichletBcRight[0];
                 if (j < pJEnd() - 1) {
-                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = settings_->dirichletBcRight[1]
+                    g(vIEnd() - 1, j) = v(vIEnd() - 1, j) = settings_.dirichletBcRight[1]
                                                             - u(vInteriorIEnd() - 1, j);
                 }
                 break;
@@ -463,29 +463,29 @@ void StaggeredGrid::applyBoundaryTemperature() {
 
     // set boundary values for t at bottom and top side (lower priotity)
     for (int i = tIBegin(); i < tIEnd(); i++) {
-        if (settings_->setFixedTempBottom) {
-            t(i, tJBegin()) = 2.0 * settings_->tempBcBottom - t(i, tInteriorJBegin());
+        if (settings_.setFixedTempBottom) {
+            t(i, tJBegin()) = 2.0 * settings_.tempBcBottom - t(i, tInteriorJBegin());
         } else {
-            t(i, tJBegin()) = t(i, tInteriorJBegin()) - dy() * settings_->tempBcBottom;
+            t(i, tJBegin()) = t(i, tInteriorJBegin()) - dy() * settings_.tempBcBottom;
         }
-        if (settings_->setFixedTempTop) {
-            t(i, tJEnd() - 1) = 2.0 * settings_->tempBcTop - t(i, tInteriorJEnd() - 1);
+        if (settings_.setFixedTempTop) {
+            t(i, tJEnd() - 1) = 2.0 * settings_.tempBcTop - t(i, tInteriorJEnd() - 1);
         } else {
-            t(i, tJEnd() - 1) = t(i, tInteriorJEnd() - 1) - dy() * settings_->tempBcTop;
+            t(i, tJEnd() - 1) = t(i, tInteriorJEnd() - 1) - dy() * settings_.tempBcTop;
         }
     }
 
     // set boundary values for t at left and right side (higher priority)
     for (int j = tJBegin(); j < tJEnd(); j++) {
-        if (settings_->setFixedTempLeft) {
-            t(tIBegin(), j) = 2.0 * settings_->tempBcLeft - t(tInteriorIBegin(), j);
+        if (settings_.setFixedTempLeft) {
+            t(tIBegin(), j) = 2.0 * settings_.tempBcLeft - t(tInteriorIBegin(), j);
         } else {
-            t(tIBegin(), j) = t(tInteriorIBegin(), j) - dx() * settings_->tempBcLeft;
+            t(tIBegin(), j) = t(tInteriorIBegin(), j) - dx() * settings_.tempBcLeft;
         }
-        if (settings_->setFixedTempRight) {
-            t(tIEnd() - 1, j) = 2.0 * settings_->tempBcRight - t(tInteriorIEnd() - 1, j);
+        if (settings_.setFixedTempRight) {
+            t(tIEnd() - 1, j) = 2.0 * settings_.tempBcRight - t(tInteriorIEnd() - 1, j);
         } else {
-            t(tIEnd() - 1, j) = t(tInteriorIEnd() - 1, j) - dx() * settings_->tempBcRight;
+            t(tIEnd() - 1, j) = t(tInteriorIEnd() - 1, j) - dx() * settings_.tempBcRight;
         }
     }
 };

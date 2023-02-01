@@ -19,7 +19,7 @@ public:
               std::array<double, 2> meshWidth,
               double alpha,
               double gamma,
-              std::shared_ptr<Settings> settings);
+              Settings settings);
 
 
     /**

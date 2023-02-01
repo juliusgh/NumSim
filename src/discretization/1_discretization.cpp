@@ -8,7 +8,7 @@
 
 Discretization::Discretization(std::shared_ptr<Partitioning> partitioning,
                                std::array<double, 2> meshWidth,
-                               std::shared_ptr<Settings> settings) :
+                               Settings settings) :
         StaggeredGrid(partitioning, meshWidth, settings) {
 
 };
