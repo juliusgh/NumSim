@@ -58,6 +58,7 @@ struct Settings {
 
     string domainfile_path;
     double scaling_factor = 10.0;
+    bool domainFileGiven = false;
     //! parse a text file with settings, each line contains "<parameterName> = <value>"
     void loadFromFile(string filename);
 
