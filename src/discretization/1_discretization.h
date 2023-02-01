@@ -21,7 +21,7 @@ public:
      */
     Discretization(std::shared_ptr<Partitioning> partitioning,
                    std::array<double, 2> meshWidth,
-                   std::shared_ptr<Settings> settings);
+                   Settings settings);
 
     /**
     * compute the 2nd derivative ∂^2 u / ∂x^2

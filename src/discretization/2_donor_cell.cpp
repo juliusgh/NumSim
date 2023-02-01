@@ -12,7 +12,7 @@ DonorCell::DonorCell(std::shared_ptr<Partitioning> partitioning,
                      std::array<double, 2> meshWidth,
                      double alpha,
                      double gamma,
-                     std::shared_ptr<Settings> settings) :
+                     Settings settings) :
         Discretization(partitioning, meshWidth, settings),
         alpha_(alpha),
         gamma_(gamma) {
