@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "computation/0_computation.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
@@ -40,9 +41,10 @@ void Computation::initialize(string filename) {
                                                         settings_.maximumNumberOfIterations);
 
     } else if (settings_.pressureSolver == "CG") {
-        pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+        /*pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
                                                               settings_.maximumNumberOfIterations, partitioning_);
-    } else {
+        */
+     } else {
         std::cout << "Solver not found!" << std::endl;
     }
 
@@ -107,8 +109,8 @@ void Computation::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        cout << "time step " << t_iter << ", t: " << time << "/" << settings_.endTime << ", dt: " << dt_ <<
-             ", res. " << pressureSolver_->residualNorm() << ", solver iterations: " << pressureSolver_->iterations()
+        cout << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << settings_.endTime << ", dt: " << setw(5)<< dt_ <<
+             ", res. " << setw(5) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
         outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);

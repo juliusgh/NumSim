@@ -37,16 +37,17 @@ tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
 setFixedTempTop = false
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
 setFixedTempLeft = true
-tempBcLeft = 1     # prescribed values of tb or tn at left of domain
-setFixedTempRight = false
+tempBcLeft = 0     # prescribed values of tb or tn at left of domain
+setFixedTempRight = true
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
+obstacleHot = 1
 
 # Solver parameters
 pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
-epsilon = 1e-5        # tolerance for 2-norm of residual
-maximumNumberOfIterations = 3e5    # maximum number of iterations in the solver
+epsilon = 1e-4        # tolerance for 2-norm of residual
+maximumNumberOfIterations = 3e4    # maximum number of iterations in the solver
 
 
 # domain file path
-domainFile = domains/z.txt
+domainFile = ../../domains/curve.txt

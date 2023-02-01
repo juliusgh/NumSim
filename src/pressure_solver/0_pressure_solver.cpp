@@ -64,6 +64,9 @@ void PressureSolver::computeResidualNorm() {
     const int N = discretization_->nCells()[0] * discretization_->nCells()[1];
     for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            if (discretization_->marker(i, j) != FLUID) {
+                continue;
+            }
             double pxx =
                     (discretization_->p(i + 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i - 1, j)) / dx2;
             double pyy =

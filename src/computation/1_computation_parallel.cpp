@@ -48,9 +48,10 @@ void ComputationParallel::initialize(string filename) {
         pressureSolver_ = std::make_unique<RedBlack>(discretization_, settings_.epsilon,
                                                      settings_.maximumNumberOfIterations, partitioning_);
     } else if (settings_.pressureSolver == "CG") {
-        pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
+        /*pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
                                                               settings_.maximumNumberOfIterations, partitioning_);
-    } else {
+        */
+     } else {
         std::cout << "Solver not found!" << std::endl;
     }
 #else

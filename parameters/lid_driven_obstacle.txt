@@ -14,15 +14,15 @@ gY = 0.0 #-9.81
 dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
-dirichletTopY    = 0
-dirichletLeftX   = 1
+dirichletTopY    = -1
+dirichletLeftX   = 0
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
 
 # Discretization parameters
-nCellsX = 80          # number of cells in x and y direction
-nCellsY = 40
+nCellsX = 20          # number of cells in x and y direction
+nCellsY = 20
 useDonorCell = true   # if donor cell discretization should be used, possible values: true false
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 gamma = 0.5           # factor for donor-cell for temperature
@@ -38,15 +38,15 @@ setFixedTempTop = false
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
 setFixedTempLeft = true
 tempBcLeft = 1     # prescribed values of tb or tn at left of domain
-setFixedTempRight = false
+setFixedTempRight = true
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
 
 # Solver parameters
 pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
-maximumNumberOfIterations = 3e5    # maximum number of iterations in the solver
+maximumNumberOfIterations = 3e4    # maximum number of iterations in the solver
 
 
 # domain file path
-domainFile = domains/z.txt
+domainFile = ../../domains/lid_driven_obstacle.txt

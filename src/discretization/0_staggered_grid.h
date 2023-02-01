@@ -372,6 +372,21 @@ public:
     double &t(int i, int j);
 
     /**
+    * get reference to field variable t
+    */
+    const FieldVariable &tobs() const;
+
+    /**
+     * evaluate field variable t in an element (i,j)
+    */
+    double tobs(int i, int j) const;
+
+    /**
+     * evaluate field variable t in an element (i,j)
+    */
+    double &tobs(int i, int j);
+
+    /**
      * first valid index for t in x direction
     */
     int tIBegin() const;
@@ -497,7 +512,8 @@ protected:
     FieldVariable v_;
     FieldVariable uLast_;
     FieldVariable vLast_;
-    FieldVariable t_;
+    FieldVariable t_;;
+    FieldVariable tobs_;
     FieldVariable q_;
     Marker2D marker_;
     shared_ptr<Settings> settings_;
