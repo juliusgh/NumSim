@@ -1,11 +1,11 @@
 #pragma once
 
-#include "pressure_solver/1_pressure_solver_parallel.h"
+#include "pressure_solver/0_pressure_solver.h"
 
 /**
  * Implementation of a parallelisized version of the Conjugated Gradients (CG) solver.
  */
-class ConjugateGradient : public PressureSolverParallel {
+class ConjugateGradient : public PressureSolver {
 public:
     /**
     * constructor
@@ -15,9 +15,9 @@ public:
     * @param partitioning information about subdomain
     */
     ConjugateGradient(std::shared_ptr<Discretization> discretization,
-                      double epsilon,
-                      int maximumNumberOfIterations,
-                      std::shared_ptr<Partitioning> partitioning);
+                              double epsilon,
+                              int maximumNumberOfIterations
+                              );
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid

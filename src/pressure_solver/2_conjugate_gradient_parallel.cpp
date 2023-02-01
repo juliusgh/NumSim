@@ -1,4 +1,4 @@
-#include "pressure_solver/2_conjugate_gradient.h"
+#include "pressure_solver/2_conjugate_gradient_parallel.h"
 
 /**
  * Implementation of a parallelisized version of the Conjugated Gradients (CG) solver.
@@ -8,10 +8,10 @@
  * @param partitioning information about subdomain
  */
 
-ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretization,
-                                     double epsilon,
-                                     int maximumNumberOfIterations,
-                                     std::shared_ptr<Partitioning> partitioning) :
+ConjugateGradientParallel::ConjugateGradientParallel(std::shared_ptr<Discretization> discretization,
+                                                     double epsilon,
+                                                     int maximumNumberOfIterations,
+                                                     std::shared_ptr<Partitioning> partitioning) :
         PressureSolverParallel(discretization, epsilon, maximumNumberOfIterations, partitioning) {
     q_ = std::make_unique<Array2D>(discretization_->pSize()); // Search direction qₖ
 }
@@ -19,7 +19,7 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
 /**
  * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid
  */
-void ConjugateGradient::solve() {
+void ConjugateGradientParallel::solve() {
     const double dx2 = pow(discretization_->dx(), 2);
     const double dy2 = pow(discretization_->dy(), 2);
     const double eps2 = pow(epsilon_, 2);
@@ -117,7 +117,7 @@ void ConjugateGradient::solve() {
 /**
  *  Implementation of communication of search directions q between neighbouring subdomains
  */
-void ConjugateGradient::qGhostLayer() {
+void ConjugateGradientParallel::qGhostLayer() {
     const int pInteriorIBegin = discretization_->pInteriorIBegin();
     const int pInteriorIEnd = discretization_->pInteriorIEnd();
     const int pInteriorJBegin = discretization_->pInteriorJBegin();
@@ -254,7 +254,8 @@ void ConjugateGradient::qGhostLayer() {
 /**
  * set boundary values at the bottom of the subdomain for the search direction
 */
-void ConjugateGradient::setQBoundaryValuesBottom() {
+
+void ConjugateGradientParallel::setQBoundaryValuesBottom() {
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to bottom boundary
         (*q_)(i, 0) = (*q_)(i, 1);
@@ -264,7 +265,8 @@ void ConjugateGradient::setQBoundaryValuesBottom() {
 /**
  * set boundary values at the top of the subdomain for the search direction
 */
-void ConjugateGradient::setQBoundaryValuesTop() {
+void ConjugateGradientParallel::setQBoundaryValuesTop() {
+
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to top boundary
         (*q_)(i, discretization_->pJEnd() - 1 - discretization_->pJBegin()) = (*q_)(i,
@@ -276,7 +278,7 @@ void ConjugateGradient::setQBoundaryValuesTop() {
 /**
  * set boundary values at the left of the subdomain for the search direction
 */
-void ConjugateGradient::setQBoundaryValuesLeft() {
+void ConjugateGradientParallel::setQBoundaryValuesLeft() {
     for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
         // copy values to left boundary
         (*q_)(0, j) = (*q_)(1, j);
@@ -286,7 +288,7 @@ void ConjugateGradient::setQBoundaryValuesLeft() {
 /**
  * set boundary values at the right of the subdomain for the search direction
 */
-void ConjugateGradient::setQBoundaryValuesRight() {
+void ConjugateGradientParallel::setQBoundaryValuesRight() {
     for (int j = 0; j < discretization_->pJEnd() - discretization_->pJBegin(); j++) {
         // copy values to right boundary
         (*q_)(discretization_->pIEnd() - 1 - discretization_->pIBegin(), j) = (*q_)(

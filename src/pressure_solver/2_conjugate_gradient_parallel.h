@@ -5,7 +5,8 @@
 /**
  * Implementation of a parallelisized version of the Conjugated Gradients (CG) solver.
  */
-class ConjugateGradient : public PressureSolverParallel {
+
+class ConjugateGradientParallel : public PressureSolverParallel {
 public:
     /**
     * constructor
@@ -14,10 +15,10 @@ public:
     * @param maximumNumberOfIterations when this number is reached, the solver stops without converging
     * @param partitioning information about subdomain
     */
-    ConjugateGradient(std::shared_ptr<Discretization> discretization,
-                      double epsilon,
-                      int maximumNumberOfIterations,
-                      std::shared_ptr<Partitioning> partitioning);
+    ConjugateGradientParallel(std::shared_ptr<Discretization> discretization,
+                              double epsilon,
+                              int maximumNumberOfIterations,
+                              std::shared_ptr<Partitioning> partitioning);
 
     /**
      * solve the Poisson problem for the pressure, using the rhs and p field variables in the staggeredGrid

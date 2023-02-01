@@ -25,16 +25,17 @@ add_executable(${PROJECT_NAME}
         pressure_solver/1_pressure_solver_parallel.cpp
         pressure_solver/1_gauss_seidel.cpp
         pressure_solver/1_sor.cpp
+        pressure_solver/1_conjugate_gradient.cpp
         pressure_solver/2_red_black.cpp
         pressure_solver/2_red_black_sor.cpp
-        pressure_solver/2_conjugate_gradient.cpp
+        pressure_solver/2_conjugate_gradient_parallel.cpp
 
         output_writer/output_writer.cpp
         output_writer/output_writer_text.cpp
         output_writer/output_writer_paraview.cpp
         output_writer/output_writer_text_parallel.cpp
         output_writer/output_writer_paraview_parallel.cpp
-        storage/marker2d.cpp)
+        storage/marker2d.cpp )
 
 find_package(MPI REQUIRED)
 
@@ -80,7 +81,7 @@ if (GTest_FOUND)
             pressure_solver/1_sor.cpp
             pressure_solver/2_red_black.cpp
             pressure_solver/2_red_black_sor.cpp
-            pressure_solver/2_conjugate_gradient.cpp
+            pressure_solver/2_conjugate_gradient_parallel.cpp
 
             output_writer/output_writer.cpp
             output_writer/output_writer_text.cpp
