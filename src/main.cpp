@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
         // read in the first argument
         filename = argv[1];
     }
+
 #ifndef NPARALLEL
     // Initialize the MPI environment
     MPI_Init(NULL, NULL);

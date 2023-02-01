@@ -5,7 +5,7 @@ import math
 # Open the image
 
 # resize option
-resize = False
+scaling_factor = 1.0
 
 #boundary conditions. i = inflow, f = outflow, n = no-slip
 top = "n"
@@ -14,27 +14,14 @@ left = "i"
 right = "o"
 
 # set domain name (input and output file name)
-domainname = "newyorkbig"
+domainname = "simtech_channel"
 
-image = Image.open(f"{domainname}.jpg")
+image = Image.open(f"{domainname}.png")
 
 image_size = image.size
-if resize:
-    # Resize based on image size
-    if image_size[0] > image_size[1]:
-        if 1000 > image_size[0] >= 100:
-            new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
-        elif image_size[0] >= 1000:
-            new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
-        else: new_size = image_size
-    else:
-        if 1000 > image_size[1] >= 100:
-            new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
-        elif image_size[0] >= 1000:
-            new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
-        else: new_size = image_size
-else:
-    new_size = image_size
+
+new_size = (int(math.ceil(image_size[0]/(scaling_factor * 10.0))*10), int(math.ceil(image_size[1]/(scaling_factor * 10.0))*10))
+
 
 
 resized_image = image.resize(new_size, Image.LANCZOS)
