@@ -102,7 +102,6 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
