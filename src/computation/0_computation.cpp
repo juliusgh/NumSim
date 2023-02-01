@@ -2,7 +2,7 @@
 #include "computation/0_computation.h"
 #include "pressure_solver/1_gauss_seidel.h"
 #include "pressure_solver/1_sor.h"
-#include "pressure_solver/2_conjugate_gradient.h"
+#include "pressure_solver/1_conjugate_gradient.h"
 
 /**
  * Initialize the computation object for a sequential simulation
@@ -42,7 +42,7 @@ void Computation::initialize(string filename) {
 
     } else if (settings_.pressureSolver == "CG") {
         pressureSolver_ = std::make_unique<ConjugateGradient>(discretization_, settings_.epsilon,
-                                                              settings_.maximumNumberOfIterations, partitioning_);
+                                                                      settings_.maximumNumberOfIterations);
     } else {
         std::cout << "Solver not found!" << std::endl;
     }
