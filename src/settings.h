@@ -40,6 +40,8 @@ struct Settings {
     double heatMagnitude = 10.0;
 
     // temperature boundary conditions
+    double obstacleHot = 1.0;
+    double obstacleCold = 0.0;
     bool setFixedTempBottom = false;
     double tempBcBottom = 0.0;  //< prescribed values of tb or tn at bottom of domain
     bool setFixedTempTop = false;

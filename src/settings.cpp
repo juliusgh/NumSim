@@ -173,6 +173,14 @@ void Settings::loadFromFile(string filename) {
             initialTemp = atof(value.c_str());
             continue;
         }
+        if (parameterName == "obstacleHot") {
+            obstacleHot = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "obstacleCold") {
+            obstacleCold = atof(value.c_str());
+            continue;
+        }
         if (parameterName == "setFixedTempBottom") {
             istringstream(value.c_str()) >> boolalpha >> setFixedTempBottom;
             continue;
