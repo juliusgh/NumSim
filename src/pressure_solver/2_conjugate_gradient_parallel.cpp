@@ -254,6 +254,7 @@ void ConjugateGradientParallel::qGhostLayer() {
 /**
  * set boundary values at the bottom of the subdomain for the search direction
 */
+
 void ConjugateGradientParallel::setQBoundaryValuesBottom() {
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to bottom boundary
@@ -265,6 +266,7 @@ void ConjugateGradientParallel::setQBoundaryValuesBottom() {
  * set boundary values at the top of the subdomain for the search direction
 */
 void ConjugateGradientParallel::setQBoundaryValuesTop() {
+
     for (int i = 0; i < discretization_->pIEnd() - discretization_->pIBegin(); i++) {
         // copy values to top boundary
         (*q_)(i, discretization_->pJEnd() - 1 - discretization_->pJBegin()) = (*q_)(i,

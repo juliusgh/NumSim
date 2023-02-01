@@ -108,8 +108,8 @@ void Computation::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        cout << "time step " << setw(4) <<  t_iter << ", t: " << setw(6) << time << "/" << settings_.endTime << ", dt: " << setw(5)<< dt_ <<
-             ", res. " << setw(5) << std::scientific << pressureSolver_->residualNorm() << std::fixed <<", solver iterations: " << setw(5) << pressureSolver_->iterations()
+        cout << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << settings_.endTime << ", dt: " << setw(5)<< dt_ <<
+             ", res. " << setw(5) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
         outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);

@@ -49,4 +49,4 @@ maximumNumberOfIterations = 3e5    # maximum number of iterations in the solver
 
 
 # domain file path
-domainFile = ../../domains/z.txt
+domainFile = domains/z.txt

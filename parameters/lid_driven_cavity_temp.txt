@@ -1,9 +1,13 @@
 # Settings file for numsim program
 # Run ./numsim lid_driven_cavity.txt
 
+# Domain file location and scaling factor for physical domain - this needs to be specified first
+domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
+domainFile = domains/simtech_channel.txt
+
 # Problem description
-physicalSizeX = 4.0   # physical size of the domain
-physicalSizeY = 4.0
+# physicalSizeX = 4.0   # physical size of the domain
+# physicalSizeY = 4.0
 endTime = 20.0        # duration of the simulation
 re = 1000             # Reynolds number
 pr = 7                # Prandtl number
@@ -21,8 +25,8 @@ dirichletRightX  = 0
 dirichletRightY  = 0
 
 # Discretization parameters
-nCellsX = 100          # number of cells in x and y direction
-nCellsY = 100
+# nCellsX = 100          # number of cells in x and y direction
+# nCellsY = 100
 useDonorCell = true   # if donor cell discretization should be used, possible values: true false
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 gamma = 0.5           # factor for donor-cell for temperature
@@ -46,7 +50,3 @@ pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeid
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 1e4    # maximum number of iterations in the solver
-
-
-# domain file path
-domainFile = ../domains/

@@ -5,6 +5,7 @@
 /**
  * Implementation of a parallelisized version of the Conjugated Gradients (CG) solver.
  */
+
 class ConjugateGradientParallel : public PressureSolverParallel {
 public:
     /**

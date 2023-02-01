@@ -40,6 +40,8 @@ struct Settings {
     double heatMagnitude = 10.0;
 
     // temperature boundary conditions
+    double obstacleHot = 1.0;
+    double obstacleCold = 0.0;
     bool setFixedTempBottom = false;
     double tempBcBottom = 0.0;  //< prescribed values of tb or tn at bottom of domain
     bool setFixedTempTop = false;
@@ -55,6 +57,7 @@ struct Settings {
     int maximumNumberOfIterations = 1e5;    //< maximum number of iterations in the solver
 
     string domainfile_path;
+    double scaling_factor = 10.0;
     //! parse a text file with settings, each line contains "<parameterName> = <value>"
     void loadFromFile(string filename);
 
