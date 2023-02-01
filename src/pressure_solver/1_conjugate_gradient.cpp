@@ -44,10 +44,12 @@ void ConjugateGradient::solve() {
             if (discretization_->marker(i,j) != FLUID) {
                 continue;
             }
+
             double D2pDx2 =
                     (discretization_->p(i - 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i + 1, j)) / dx2;
             double D2pDy2 =
                     (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
+
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
 
@@ -57,9 +59,12 @@ void ConjugateGradient::solve() {
             alpha += pow(residual(i, j), 2);
         }
     }
+
     do {
+        applyBoundarySearchDirection();
+
         double lambda = 0.0;
-        // Calculate auxillary variable Aq
+        // Calculate auxillary variable As
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
                 if (discretization_->marker(i,j) != FLUID) {
@@ -78,9 +83,9 @@ void ConjugateGradient::solve() {
         lambda = alpha / lambda;
         iteration++;
 
+        // Update variables in the search direction
         double alphaold = alpha;
         alpha = 0.0;
-        // Update variables in the search direction
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
                 if (discretization_->marker(i,j) != FLUID) {
@@ -92,10 +97,13 @@ void ConjugateGradient::solve() {
                 // rₖ₊₁ = rₖ - λ Aqₖ
                 residual(i, j) -= lambda * As(i, j);
 
-                // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
                 alpha += pow(residual(i, j), 2);
+
             }
         }
+        discretization_->applyBoundaryPressure();
+        calculateResidual();
+        //TODO: the calculation of the residual can be cleverly done in the boundary residual
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
@@ -116,6 +124,27 @@ void ConjugateGradient::solve() {
 
     iterations_ = iteration;
 }
+
+void ConjugateGradient::calculateResidual() {
+    const double dx2 = pow(discretization_->dx(), 2);
+    const double dy2 = pow(discretization_->dy(), 2);
+    // Initialization Loop
+    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
+        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
+            if (discretization_->marker(i,j) != FLUID) {
+                continue;
+            }
+            double D2pDx2 =
+                    (discretization_->p(i - 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i + 1, j)) / dx2;
+            double D2pDy2 =
+                    (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
+
+            // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
+            residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
+        }
+    }
+};
+
 void ConjugateGradient::applyBoundarySearchDirection() {
     for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
         for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {

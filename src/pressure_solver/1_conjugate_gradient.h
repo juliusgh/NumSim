@@ -25,6 +25,8 @@ public:
     void solve() override;
 
 protected:
+    void calculateResidual();
+
 
     /**
       * get reference to field variable p
