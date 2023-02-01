@@ -12,8 +12,8 @@ void Settings::loadFromFile(string filename) {
 
     // check if file is open
     if (!file.is_open()) {
-        cout << "Could not open parameter file \"" << filename << "\"." << endl;
-        return;
+        cout << "Could not open parameter file \"" << filename << "\". Exiting programm!" << endl;
+        std::exit(EXIT_FAILURE);
     }
 
     // loop over lines of file
