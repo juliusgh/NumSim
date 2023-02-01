@@ -40,6 +40,35 @@ protected:
      * evaluate field variable p in an element (i,j)
     */
     double &s(int i, int j);
+    /**
+  * get reference to field variable p
+ */
+    const FieldVariable &residual() const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double residual(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double &residual(int i, int j);
+
+    /**
+  * get reference to field variable p
+ */
+    const FieldVariable &As() const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double As(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double &As(int i, int j);
 
     /**
     *  Implementation of communication of pressure values between neighbouring subdomains
@@ -48,5 +77,7 @@ protected:
 
 private:
     FieldVariable s_;
+    FieldVariable residual_;
+    FieldVariable As_;
 
 };

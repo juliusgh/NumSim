@@ -12,7 +12,9 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
                                                      double epsilon,
                                                      int maximumNumberOfIterations) :
         PressureSolver(discretization, epsilon, maximumNumberOfIterations),
-        s_(discretization_->pSize(),{0,0},{0,0})// Search direction qₖ
+        s_(discretization_->pSize(),{0,0},{0,0}),// Search direction qₖ
+        residual_(discretization_->pSize(),{0,0},{0,0}),
+        As_(discretization_->pSize(),{0,0},{0,0})
         {
 }
 
@@ -23,10 +25,6 @@ void ConjugateGradient::solve() {
     const double dx2 = pow(discretization_->dx(), 2);
     const double dy2 = pow(discretization_->dy(), 2);
     const double eps2 = pow(epsilon_, 2);
-    const int pIBegin = discretization_->pIBegin();
-    const int pJBegin = discretization_->pJBegin();
-    const int pIEnd = discretization_->pIEnd();
-    const int pJEnd = discretization_->pJEnd();
     const int pIIntBegin = discretization_->pInteriorIBegin();
     const int pJIntBegin = discretization_->pInteriorJBegin();
     const int pIIntEnd = discretization_->pInteriorIEnd();
@@ -34,9 +32,8 @@ void ConjugateGradient::solve() {
     const int N = discretization_->pSize()[0] * discretization_->pSize()[1];
 
     s_.setToZero();
-    applyBoundarySearchDirection();
-    Array2D residual_ = Array2D(discretization_->pSize());
-    Array2D Aq_ = Array2D(discretization_->pSize());
+    residual_.setToZero();
+    As_.setToZero();
 
     int iteration = 0;
 
@@ -52,24 +49,21 @@ void ConjugateGradient::solve() {
             double D2pDy2 =
                     (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
-            residual_(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
+            residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
 
             // set search direction to preconditioned defect q = z
-            s(i, j) = residual_(i , j);
+            s(i, j) = residual(i , j);
 
 
-            alpha += pow(residual_(i, j), 2);
+            alpha += pow(residual(i, j), 2);
         }
     }
 
     do {
-        //std::cout << "p" << std::endl;
-        //discretization_->p().print();
-        //std::cout << "r" << std::endl;
-        //residual_.print();
-        //std::cout << "q" << std::endl;
-        //q.print();
-
+        discretization_->p().print();
+        residual_.print();
+        s_.print();
+        std::cout << "------------------------------------------------------------------------------------------------------------------------------------------" << std::endl;
         double lambda = 0.0;
         // Calculate auxillary variable Aq
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
@@ -79,10 +73,10 @@ void ConjugateGradient::solve() {
                 }
                 double D2qDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
                 double D2qDy2 = (s(i, j - 1) - 2 * s(i, j) + s(i, j + 1)) / dy2;
-                Aq_(i, j) = D2qDx2 + D2qDy2;
+                As(i, j) = D2qDx2 + D2qDy2;
 
                 // qₖᵀAqₖ
-                lambda += s(i, j) * Aq_(i, j);
+                lambda += s(i, j) * As(i, j);
             }
         }
 
@@ -102,10 +96,10 @@ void ConjugateGradient::solve() {
                 discretization_->p(i, j) += lambda * s(i, j);
 
                 // rₖ₊₁ = rₖ - λ Aqₖ
-                residual_(i, j) -= lambda * Aq_(i, j);
+                residual(i, j) -= lambda * As(i, j);
 
                 // αₖ₊₁ = rₖ₊₁ᵀ rₖ₊₁
-                alpha += pow(residual_(i, j), 2);
+                alpha += pow(residual(i, j), 2);
             }
         }
 
@@ -117,11 +111,10 @@ void ConjugateGradient::solve() {
                 if (discretization_->marker(i,j) != FLUID) {
                     continue;
                 }
-                s(i, j) = residual_(i, j) + beta * s(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
+                s(i, j) = residual(i, j) + beta * s(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
             }
         }
         residual_norm2_ = alpha / N;
-        discretization_->applyBoundaryPressure();
 
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
 
@@ -129,29 +122,6 @@ void ConjugateGradient::solve() {
 
     iterations_ = iteration;
 }
-
-const FieldVariable &ConjugateGradient::s() const {
-    return s_;
-};
-
-
-double ConjugateGradient::s(int i, int j) const {
-#ifndef NDEBUG
-    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
-    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
-#endif
-    return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
-};
-
-
-double &ConjugateGradient::s(int i, int j) {
-#ifndef NDEBUG
-    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
-    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
-#endif
-    return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
-};
-
 void ConjugateGradient::applyBoundarySearchDirection() {
     for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
         for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
@@ -241,4 +211,70 @@ void ConjugateGradient::applyBoundarySearchDirection() {
                 break;
         }
     }
+};
+
+const FieldVariable &ConjugateGradient::s() const {
+    return s_;
+};
+
+
+double ConjugateGradient::s(int i, int j) const {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+
+double &ConjugateGradient::s(int i, int j) {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+const FieldVariable &ConjugateGradient::residual() const {
+    return residual_;
+};
+
+
+double ConjugateGradient::residual(int i, int j) const {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return residual_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+
+double &ConjugateGradient::residual(int i, int j) {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return residual_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+const FieldVariable &ConjugateGradient::As() const {
+    return As_;
+};
+
+
+double ConjugateGradient::As(int i, int j) const {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return As_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+
+double &ConjugateGradient::As(int i, int j) {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return As_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };

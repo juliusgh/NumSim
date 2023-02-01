@@ -70,7 +70,7 @@ void Array2D::print() const {
     std::cout << std::endl << "----------" << std::endl;
     for (int j = size_[1] - 1; j >= 0; j--) {
         for (int i = 0; i < size_[0]; i++) {
-            std::cout << std::setw(6) << std::setprecision(3) <<  (*this)(i, j) << " | ";
+            std::cout<< std::fixed<< std::setw(7) << std::setprecision(2) <<  (*this)(i, j) << " | ";
         }
         std::cout << std::endl;
     }
