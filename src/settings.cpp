@@ -17,7 +17,6 @@ void Settings::loadFromFile(string filename) {
     }
 
     // loop over lines of file
-    bool domainFileGiven = false;
     for (int lineNo = 0;; lineNo++) {
         // read line
         string line;
@@ -59,14 +58,21 @@ void Settings::loadFromFile(string filename) {
         }
 
         // parse actual value and set corresponding parameter
+        if (parameterName == "domain_scaling") {
+            scaling_factor = atof(value.c_str());
+        }
         if (parameterName == "domainFile") {
             std::filesystem::path path = std::filesystem::path(filename).remove_filename();
             domainfile_path = path / std::filesystem::path(value);
             ifstream domainfile(domainfile_path, ios::in);
             if (!domainfile.is_open()) {
-                    std::cout << "coud not open domain file" << std::endl;
+                std::cout << "could not open domain file. Defaulting to lid_driven_cavity" << std::endl;
+                // defaulting to lid_driven_cavity
+                nCells[1] = 20;
+                nCells[0] = 20;
+                physicalSize[0] = 2.0;
+                physicalSize[1] = 2.0;
             } else {
-                std::cout << "test" << std::endl;
                 int lineCount = 0;
                 int linesize = 0;
                 for (int j = 0;; j++) {
@@ -82,28 +88,10 @@ void Settings::loadFromFile(string filename) {
                 }
                 nCells[1] = lineCount - 2;
                 nCells[0] = linesize - 2;
-                std::cout << lineCount << " , " << line.size() << std::endl;
-                physicalSize[0] = nCells[0] / 10.0;
-                physicalSize[1] = nCells[1] / 10.0;
-                domainFileGiven = true;
+                physicalSize[0] = nCells[0] / scaling_factor;
+                physicalSize[1] = nCells[1] / scaling_factor;
             continue;
             }
-        }
-        if (parameterName == "nCellsX" && domainFileGiven == false) {
-            nCells[0] = atoi(value.c_str());
-            continue;
-        }
-        if (parameterName == "nCellsY" && domainFileGiven == false) {
-            nCells[1] = atoi(value.c_str());
-            continue;
-        }
-        if (parameterName == "physicalSizeX" && domainFileGiven == false) {
-            physicalSize[0] = atof(value.c_str());
-            continue;
-        }
-        if (parameterName == "physicalSizeY" && domainFileGiven == false) {
-            physicalSize[1] = atof(value.c_str());
-            continue;
         }
         if (parameterName == "re") {
             re = atof(value.c_str());

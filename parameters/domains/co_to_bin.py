@@ -4,6 +4,9 @@ import math
 
 # Open the image
 
+# resize option
+resize = False
+
 #boundary conditions. i = inflow, f = outflow, n = no-slip
 top = "n"
 bottom = "n"
@@ -11,25 +14,28 @@ left = "i"
 right = "o"
 
 # set domain name (input and output file name)
-domainname = "newyork"
+domainname = "newyorkbig"
 
-image = Image.open(f"{domainname}.png")
+image = Image.open(f"{domainname}.jpg")
 
 image_size = image.size
-
-# Resize based on image size
-if image_size[0] > image_size[1]:
-    if 1000 > image_size[0] >= 100:
-        new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
-    elif image_size[0] >= 1000:
-        new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
-    else: new_size = image_size
+if resize:
+    # Resize based on image size
+    if image_size[0] > image_size[1]:
+        if 1000 > image_size[0] >= 100:
+            new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
+        elif image_size[0] >= 1000:
+            new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
+        else: new_size = image_size
+    else:
+        if 1000 > image_size[1] >= 100:
+            new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
+        elif image_size[0] >= 1000:
+            new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
+        else: new_size = image_size
 else:
-    if 1000 > image_size[1] >= 100:
-        new_size = (int(math.ceil(image_size[0]/(10.0 * 10.0))*10), int(math.ceil(image_size[1]/(10.0 * 10.0))*10))
-    elif image_size[0] >= 1000:
-        new_size = (int(math.ceil(image_size[0]/(100.0 * 10.0))*10), int(math.ceil(image_size[1]/(100.0 * 10.0))*10))
-    else: new_size = image_size
+    new_size = image_size
+
 
 resized_image = image.resize(new_size, Image.LANCZOS)
 

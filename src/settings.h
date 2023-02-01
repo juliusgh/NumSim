@@ -55,6 +55,7 @@ struct Settings {
     int maximumNumberOfIterations = 1e5;    //< maximum number of iterations in the solver
 
     string domainfile_path;
+    double scaling_factor = 10.0;
     //! parse a text file with settings, each line contains "<parameterName> = <value>"
     void loadFromFile(string filename);
 
