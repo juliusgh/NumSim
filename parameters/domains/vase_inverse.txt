@@ -1,0 +1,22 @@
+nnnnnnnnnnnnnnnnnnnnnn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxx   xxxxxxxxn
+nxxxxxxxx     xxxxxxxn
+nxxxxxxx        xxxxxn
+i    xx              o
+i                    o
+i                    o
+i                    o
+i                    o
+i                    o
+nxxxxxxx             o
+nxxxxxxx       xxxxxxn
+nxxxxxxxx    xxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nxxxxxxxxxxxxxxxxxxxxn
+nnnnnnnnnnnnnnnnnnnnnn
