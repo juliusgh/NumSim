@@ -25,12 +25,13 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         uLast_(uSize(), {meshWidth[0], meshWidth[1] / 2.}, meshWidth),
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        tobs_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
 
     // set markers:
-
     marker_.setToFluid();
     q_.setToZero();
+    tobs_.setToZero();
 
     // open input file for markers
     ifstream file(settings_->domainfile_path, ios::in);
@@ -87,6 +88,14 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                         marker(mi, mj) = MARKER::OBSTACLE;
                         q(mi, mj) = settings_->heatMagnitude;
                         break;
+                    case 'h':
+                        marker(mi, mj) = MARKER::OBSTACLE;
+                        tobs(mi, mj) = settings_->obstacleHot;
+                        break;
+                    case 'c':
+                        marker(mi, mj) = MARKER::OBSTACLE;
+                        tobs(mi, mj) = settings_->obstacleCold;
+                        break;
                     default:
                         break;
                 }
@@ -136,8 +145,8 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    std::cout << "Domain with markers:";
-    marker_.print();
+    //std::cout << "Domain with markers:";
+    //marker_.print();
 };
 
 void StaggeredGrid::setObstacleValues() {
@@ -167,9 +176,6 @@ void StaggeredGrid::applyBoundaryVelocities() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
             switch (marker(i, j)) {
-                case FLUID:
-                case FREE:
-                    break;
                 case OBSTACLE:
                     f(i, j) = u(i, j) = 0.0;
                     g(i, j) = v(i, j) = 0.0;
@@ -331,12 +337,6 @@ void StaggeredGrid::applyBoundaryPressure() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             switch (marker(i, j)) {
-                case FLUID:
-                case FREE:
-                    break;
-                case OBSTACLE:
-                    //p(i, j) = p(i - 1, j);
-                    break;
                 case OBSTACLE_LEFT:
                     p(i, j) = p(i - 1, j);
                     break;
@@ -428,35 +428,34 @@ void StaggeredGrid::applyBoundaryTemperature() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             switch (marker(i, j)) {
-                case FLUID:
-                    break;
-                case FREE:
-                    break;
                 case OBSTACLE:
+                    t(i, j) = tobs(i, j);
                     break;
                 case OBSTACLE_LEFT:
-                    t(i, j) = t(i - 1, j);
+                    t(i, j) = 2.0 * tobs(i, j) - t(i - 1, j);
                     break;
                 case OBSTACLE_RIGHT:
-                    t(i, j) = t(i + 1, j);
+                    t(i, j) = 2.0 * tobs(i, j) - t(i + 1, j);
                     break;
                 case OBSTACLE_TOP:
-                    t(i, j) = t(i, j + 1);
+                    t(i, j) = 2.0 * tobs(i, j) - t(i, j + 1);
                     break;
                 case OBSTACLE_BOTTOM:
-                    t(i, j) = t(i, j - 1);
+                    t(i, j) = 2.0 * tobs(i, j) - t(i, j - 1);
                     break;
                 case OBSTACLE_LEFT_TOP:
-                    t(i, j) = (t(i - 1, j) + t(i, j + 1)) / 2.0;
+                    t(i, j) = 2.0 * tobs(i, j) - (t(i - 1, j) + t(i, j + 1)) / 2.0;
                     break;
                 case OBSTACLE_RIGHT_TOP:
-                    t(i, j) = (t(i + 1, j) + t(i, j + 1)) / 2.0;
+                    t(i, j) = 2.0 * tobs(i, j) - (t(i + 1, j) + t(i, j + 1)) / 2.0;
                     break;
                 case OBSTACLE_LEFT_BOTTOM:
-                    t(i, j) = (t(i - 1, j) + t(i, j - 1)) / 2.0;
+                    t(i, j) = 2.0 * tobs(i, j) - (t(i - 1, j) + t(i, j - 1)) / 2.0;
                     break;
                 case OBSTACLE_RIGHT_BOTTOM:
-                    t(i, j) = (t(i + 1, j) + t(i, j - 1)) / 2.0;
+                    t(i, j) = 2.0 * tobs(i, j) - (t(i + 1, j) + t(i, j - 1)) / 2.0;
+                    break;
+                default:
                     break;
             }
         }
@@ -1299,6 +1298,42 @@ double &StaggeredGrid::t(int i, int j) {
     assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed");
 #endif
     return t_(i - tIBegin(), j - tJBegin());
+};
+
+/**
+ * get reference to field variable t
+ * @return reference to field variable t
+ */
+const FieldVariable &StaggeredGrid::tobs() const {
+    return tobs_;
+};
+
+/**
+ * evaluate field variable t in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable t in an element (i,j)
+ */
+double StaggeredGrid::tobs(int i, int j) const {
+#ifndef NDEBUG
+    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed in const");
+    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed in const");
+#endif
+    return tobs_(i - tIBegin(), j - tJBegin());
+};
+
+/**
+ * evaluate field variable t in an element (i,j)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return field variable t in an element (i,j)
+ */
+double &StaggeredGrid::tobs(int i, int j) {
+#ifndef NDEBUG
+    assert((tIBegin() <= i) && (i <= tIEnd()) && "temperature i failed");
+    assert((tJBegin() <= j) && (j <= tJEnd()) && "temperature j failed");
+#endif
+    return tobs_(i - tIBegin(), j - tJBegin());
 };
 
 /**
