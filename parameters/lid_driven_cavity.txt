@@ -9,6 +9,9 @@ re = 1000             # Reynolds number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
 gY = 0.0
 
+domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
+domainFile = domains/lid_driven_cavity.txt
+
 # Dirichlet boundary conditions
 dirichletBottomX = 1
 dirichletBottomY = 0
@@ -28,7 +31,7 @@ tau = 0.5             # safety factor for time step width
 maximumDt = 0.1       # maximum values for time step width
 
 # Solver parameters
-pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
+pressureSolver = CG  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 1e4    # maximum number of iterations in the solver
