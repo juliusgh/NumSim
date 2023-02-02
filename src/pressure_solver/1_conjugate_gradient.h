@@ -25,9 +25,6 @@ public:
     void solve() override;
 
 protected:
-    void calculateResidual();
-
-
     /**
       * get reference to field variable p
      */
@@ -76,8 +73,6 @@ protected:
     *  Implementation of communication of pressure values between neighbouring subdomains
     */
     void applyBoundarySearchDirection();
-
-    void applyBoundaryResidual();
 
 private:
     FieldVariable s_;
