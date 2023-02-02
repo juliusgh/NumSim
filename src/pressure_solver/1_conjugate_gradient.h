@@ -25,59 +25,58 @@ public:
     void solve() override;
 
 protected:
-    void calculateResidual();
-
 
     /**
-      * get reference to field variable p
+      * get reference to field variable search direction
      */
     const FieldVariable &s() const;
 
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable search direction in an element (i,j)
     */
     double s(int i, int j) const;
 
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable search direction in an element (i,j)
     */
     double &s(int i, int j);
+    
     /**
-  * get reference to field variable p
- */
+    * get reference to field variable residual
+    */
     const FieldVariable &residual() const;
 
+
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable residual in an element (i,j)
     */
     double residual(int i, int j) const;
 
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable residual in an element (i,j)
     */
+    
     double &residual(int i, int j);
 
     /**
-  * get reference to field variable p
- */
+    * get reference to field variable Laplace-s
+    */
     const FieldVariable &As() const;
 
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable Laplace-s in an element (i,j)
     */
     double As(int i, int j) const;
 
     /**
-     * evaluate field variable p in an element (i,j)
+     * evaluate field variable Laplace-s in an element (i,j)
     */
     double &As(int i, int j);
 
     /**
-    *  Implementation of communication of pressure values between neighbouring subdomains
+    *  Implementation of communication of search directions values between neighbouring subdomains
     */
     void applyBoundarySearchDirection();
-
-    void applyBoundaryResidual();
 
 private:
     FieldVariable s_;

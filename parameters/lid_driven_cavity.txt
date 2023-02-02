@@ -14,6 +14,9 @@ pr = 7                # Prandtl number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
 gY = -9.81
 
+domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
+domainFile = domains/lid_driven_cavity.txt
+
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0

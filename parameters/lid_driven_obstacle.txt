@@ -46,3 +46,4 @@ pressureSolver = CG  # which pressure solver to use, possible values: GaussSeide
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 3e4    # maximum number of iterations in the solver
+

@@ -12,9 +12,9 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
                                                      double epsilon,
                                                      int maximumNumberOfIterations) :
         PressureSolver(discretization, epsilon, maximumNumberOfIterations),
-        s_(discretization_->pSize(),{0,0},{0,0}),// Search direction qₖ
-        residual_(discretization_->pSize(),{0,0},{0,0}),
-        As_(discretization_->pSize(),{0,0},{0,0})
+        s_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),// Search direction sₖ
+        residual_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),
+        As_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth())
         {
 }
 
@@ -41,7 +41,7 @@ void ConjugateGradient::solve() {
     double alpha = 0.0;
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
-            if (discretization_->marker(i,j) != FLUID) {
+            if (discretization_->marker(i, j) != FLUID) {
                 continue;
             }
 
@@ -51,10 +51,10 @@ void ConjugateGradient::solve() {
                     (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
 
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
-            residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
+            residual(i, j) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
 
-            // set search direction to preconditioned defect q = z
-            s(i, j) = residual(i , j);
+            // set search direction to preconditioned defect s = z
+            s(i, j) = residual(i, j);
 
             alpha += pow(residual(i, j), 2);
         }
@@ -64,22 +64,22 @@ void ConjugateGradient::solve() {
         applyBoundarySearchDirection();
 
         double lambda = 0.0;
-        // Calculate auxillary variable As
+        // Calculate auxiliary variable As
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (discretization_->marker(i,j) != FLUID) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
-                double D2qDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
-                double D2qDy2 = (s(i, j - 1) - 2 * s(i, j) + s(i, j + 1)) / dy2;
-                As(i, j) = D2qDx2 + D2qDy2;
+                double D2sDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
+                double D2sDy2 = (s(i, j - 1) - 2 * s(i, j) + s(i, j + 1)) / dy2;
+                As(i, j) = D2sDx2 + D2sDy2;
 
-                // qₖᵀAqₖ
+                // sₖᵀAsₖ
                 lambda += s(i, j) * As(i, j);
             }
         }
 
-        // λ = αₖ / qₖᵀAqₖ
+        // λ = αₖ / sₖᵀAsₖ
         lambda = alpha / lambda;
         iteration++;
 
@@ -88,32 +88,29 @@ void ConjugateGradient::solve() {
         alpha = 0.0;
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (discretization_->marker(i,j) != FLUID) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
-                // pₖ₊₁ = pₖ + λ qₖ
+                // pₖ₊₁ = pₖ + λ sₖ
                 discretization_->p(i, j) += lambda * s(i, j);
 
-                // rₖ₊₁ = rₖ - λ Aqₖ
+                // rₖ₊₁ = rₖ - λ Asₖ
                 residual(i, j) -= lambda * As(i, j);
 
                 alpha += pow(residual(i, j), 2);
 
             }
         }
-        discretization_->applyBoundaryPressure();
-        calculateResidual();
-        //TODO: the calculation of the residual can be cleverly done in the boundary residual
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
 
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (discretization_->marker(i,j) != FLUID) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
-                s(i, j) = residual(i, j) + beta * s(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
+                s(i, j) = residual(i, j) + beta * s(i, j);             // sₖ₊₁ = rₖ₊₁ + β sₖ
             }
         }
         residual_norm2_ = alpha / N;
@@ -123,26 +120,6 @@ void ConjugateGradient::solve() {
     discretization_->applyBoundaryPressure();
 
     iterations_ = iteration;
-}
-
-void ConjugateGradient::calculateResidual() {
-    const double dx2 = pow(discretization_->dx(), 2);
-    const double dy2 = pow(discretization_->dy(), 2);
-    // Initialization Loop
-    for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
-        for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-            if (discretization_->marker(i,j) != FLUID) {
-                continue;
-            }
-            double D2pDx2 =
-                    (discretization_->p(i - 1, j) - 2 * discretization_->p(i, j) + discretization_->p(i + 1, j)) / dx2;
-            double D2pDy2 =
-                    (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
-
-            // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
-            residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
-        }
-    }
 };
 
 void ConjugateGradient::applyBoundarySearchDirection() {
@@ -236,96 +213,6 @@ void ConjugateGradient::applyBoundarySearchDirection() {
     }
 };
 
-void ConjugateGradient::applyBoundaryResidual() {
-    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
-        for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
-            switch (discretization_->marker(i, j)) {
-                case OBSTACLE_LEFT:
-                    residual(i, j) = residual(i - 1, j);
-                    break;
-                case OBSTACLE_RIGHT:
-                    residual(i, j) = residual(i + 1, j);
-                    break;
-                case OBSTACLE_TOP:
-                    residual(i, j) = residual(i,j + 1);
-                    break;
-                case OBSTACLE_BOTTOM:
-                    residual(i, j) = residual(i, j - 1);
-                    break;
-                case OBSTACLE_LEFT_TOP:
-                    residual(i, j) = (residual(i - 1, j) + residual(i,j + 1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_TOP:
-                    residual(i, j) = (residual(i + 1, j) + residual(i,j + 1)) / 2.0;
-                    break;
-                case OBSTACLE_LEFT_BOTTOM:
-                    residual(i, j) = (residual(i - 1, j) + residual(i,j - 1)) / 2.0;
-                    break;
-                case OBSTACLE_RIGHT_BOTTOM:
-                    residual(i, j) = (residual(i + 1, j) + residual(i,j - 1)) / 2.0;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    // set boundary values for p at bottom and top side (lower priority)
-    for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
-        // set boundary values at bottom side
-        switch (discretization_->marker(i, discretization_->pJBegin())) {
-            case INFLOW:
-            case NOSLIP:
-                residual(i, discretization_->pJBegin()) = residual(i, discretization_->pInteriorJBegin());
-                break;
-            case OUTFLOW:
-                residual(i, discretization_->uJBegin()) = -residual(i, discretization_->uInteriorJBegin());
-                break;
-            default:
-                break;
-        }
-        // set boundary values for p at top side
-        switch (discretization_->marker(i, discretization_->pJEnd() - 1)) {
-            case NOSLIP:
-            case INFLOW:
-                residual(i, discretization_->pJEnd() - 1) = residual(i, discretization_->pInteriorJEnd() - 1);
-                break;
-            case OUTFLOW:
-                residual(i, discretization_->uJEnd() - 1) = -residual(i, discretization_->uInteriorJEnd() - 1);
-                break;
-            default:
-                break;
-        }
-    }
-
-    // set boundary values for p at left and right side (higher priority)
-    for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
-        // set boundary values for p at left side
-        switch (discretization_->marker(discretization_->pIBegin(), j)) {
-            case NOSLIP:
-            case INFLOW:
-                residual(discretization_->pIBegin(), j) = residual(discretization_->pInteriorIBegin(), j);
-                break;
-            case OUTFLOW:
-                residual(discretization_->pIBegin(), j) = -residual(discretization_->uInteriorIBegin(), j);
-                break;
-            default:
-                break;
-        }
-        // set boundary values for p at right side
-        switch (discretization_->marker(discretization_->pIEnd() - 1, j)) {
-            case NOSLIP:
-            case INFLOW:
-                residual(discretization_->pIEnd() - 1, j) = residual(discretization_->pInteriorIEnd() - 1, j);
-                break;
-            case OUTFLOW:
-                residual(discretization_->pIEnd() - 1, j) = -residual(discretization_->uInteriorIEnd() - 1, j);
-                break;
-            default:
-                break;
-        }
-    }
-};
 
 const FieldVariable &ConjugateGradient::s() const {
     return s_;
