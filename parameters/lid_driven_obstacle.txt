@@ -42,7 +42,8 @@ setFixedTempRight = true
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
 
 # Solver parameters
-pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
+pressureSolver = CG  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 3e4    # maximum number of iterations in the solver
+

@@ -25,30 +25,58 @@ public:
     void solve() override;
 
 protected:
-    std::shared_ptr<Array2D> q_;
+    /**
+      * get reference to field variable p
+     */
+    const FieldVariable &s() const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double s(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double &s(int i, int j);
+    /**
+  * get reference to field variable p
+ */
+    const FieldVariable &residual() const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double residual(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double &residual(int i, int j);
+
+    /**
+  * get reference to field variable p
+ */
+    const FieldVariable &As() const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double As(int i, int j) const;
+
+    /**
+     * evaluate field variable p in an element (i,j)
+    */
+    double &As(int i, int j);
 
     /**
     *  Implementation of communication of pressure values between neighbouring subdomains
     */
-    void qGhostLayer();
+    void applyBoundarySearchDirection();
 
-    /**
-    * set boundary values at the bottom of the subdomain for the search direction
-    */
-    void setQBoundaryValuesBottom();
+private:
+    FieldVariable s_;
+    FieldVariable residual_;
+    FieldVariable As_;
 
-    /**
-    * set boundary values at the top of the subdomain for the search direction
-    */
-    void setQBoundaryValuesTop();
-
-    /**
-    * set boundary values at the left of the subdomain for the search direction
-    */
-    void setQBoundaryValuesLeft();
-
-    /**
-    * set boundary values at the right of the subdomain for the search direction
-    */
-    void setQBoundaryValuesRight();
 };
