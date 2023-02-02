@@ -10,11 +10,11 @@ scaling_factor = 1.0
 #boundary conditions. i = inflow, f = outflow, n = no-slip
 top = "n"
 bottom = "n"
-left = "i"
-right = "o"
+left = "o"
+right = "i"
 
 # set domain name (input and output file name)
-domainname = "simtech_channel"
+domainname = "nozzle"
 
 image = Image.open(f"{domainname}.png")
 
@@ -40,13 +40,18 @@ bw_image_np = np.where(gray_image_np < 128, "x", " ")
 
 
 # replace all "x" with with " " where left and right neighours are " "
-for i in range(0, bw_image_np.shape[0]):
-    for j in range(1, bw_image_np.shape[1]):
-        if bw_image_np[i][j] == "x":
-            if (j != 0 and j != bw_image_np.shape[1] - 1) and bw_image_np[i][j-1] == " " and bw_image_np[i][j+1] == " ":
-                bw_image_np[i][j] = " "
-            elif (i != 0 and i != bw_image_np.shape[0] -1) and bw_image_np[i-1][j] == " " and bw_image_np[i+1][j] == " ":
-                bw_image_np[i][j] = " "
+iteration_change = True
+while iteration_change:
+    iteration_change = False
+    for i in range(0, bw_image_np.shape[0]):
+        for j in range(1, bw_image_np.shape[1]):
+            if bw_image_np[i][j] == "x":
+                if (j != 0 and j != bw_image_np.shape[1] - 1) and bw_image_np[i][j-1] == " " and bw_image_np[i][j+1] == " ":
+                    bw_image_np[i][j] = " "
+                    iteration_change = True
+                elif (i != 0 and i != bw_image_np.shape[0] -1) and bw_image_np[i-1][j] == " " and bw_image_np[i+1][j] == " ":
+                    bw_image_np[i][j] = " "
+                    iteration_change = True
 
 # Write the 2D binary array to a text file
 with open(domainname + ".txt", "w") as text_file:
