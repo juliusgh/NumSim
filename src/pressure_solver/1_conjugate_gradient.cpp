@@ -12,9 +12,9 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
                                                      double epsilon,
                                                      int maximumNumberOfIterations) :
         PressureSolver(discretization, epsilon, maximumNumberOfIterations),
-        s_(discretization_->pSize(),{0,0},{0,0}),// Search direction qₖ
-        residual_(discretization_->pSize(),{0,0},{0,0}),
-        As_(discretization_->pSize(),{0,0},{0,0})
+        s_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),// Search direction sₖ
+        residual_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),
+        As_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth())
         {
 }
 
@@ -53,7 +53,7 @@ void ConjugateGradient::solve() {
             // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
 
-            // set search direction to preconditioned defect q = z
+            // set search direction to preconditioned defect s = z
             s(i, j) = residual(i , j);
 
             alpha += pow(residual(i, j), 2);
@@ -64,22 +64,22 @@ void ConjugateGradient::solve() {
         applyBoundarySearchDirection();
 
         double lambda = 0.0;
-        // Calculate auxillary variable As
+        // Calculate auxiliary variable As
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
                 if (discretization_->marker(i,j) != FLUID) {
                     continue;
                 }
-                double D2qDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
-                double D2qDy2 = (s(i, j - 1) - 2 * s(i, j) + s(i, j + 1)) / dy2;
-                As(i, j) = D2qDx2 + D2qDy2;
+                double D2sDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
+                double D2sDy2 = (s(i, j - 1) - 2 * s(i, j) + s(i, j + 1)) / dy2;
+                As(i, j) = D2sDx2 + D2sDy2;
 
-                // qₖᵀAqₖ
+                // sₖᵀAsₖ
                 lambda += s(i, j) * As(i, j);
             }
         }
 
-        // λ = αₖ / qₖᵀAqₖ
+        // λ = αₖ / sₖᵀAsₖ
         lambda = alpha / lambda;
         iteration++;
 
@@ -91,10 +91,10 @@ void ConjugateGradient::solve() {
                 if (discretization_->marker(i,j) != FLUID) {
                     continue;
                 }
-                // pₖ₊₁ = pₖ + λ qₖ
+                // pₖ₊₁ = pₖ + λ sₖ
                 discretization_->p(i, j) += lambda * s(i, j);
 
-                // rₖ₊₁ = rₖ - λ Aqₖ
+                // rₖ₊₁ = rₖ - λ Asₖ
                 residual(i, j) -= lambda * As(i, j);
 
                 alpha += pow(residual(i, j), 2);
@@ -113,7 +113,7 @@ void ConjugateGradient::solve() {
                 if (discretization_->marker(i,j) != FLUID) {
                     continue;
                 }
-                s(i, j) = residual(i, j) + beta * s(i, j);             // qₖ₊₁ = rₖ₊₁ + β qₖ
+                s(i, j) = residual(i, j) + beta * s(i, j);             // qₖ₊₁ = rₖ₊₁ + β sₖ
             }
         }
         residual_norm2_ = alpha / N;
@@ -128,7 +128,6 @@ void ConjugateGradient::solve() {
 void ConjugateGradient::calculateResidual() {
     const double dx2 = pow(discretization_->dx(), 2);
     const double dy2 = pow(discretization_->dy(), 2);
-    // Initialization Loop
     for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
         for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
             if (discretization_->marker(i,j) != FLUID) {
@@ -139,7 +138,6 @@ void ConjugateGradient::calculateResidual() {
             double D2pDy2 =
                     (discretization_->p(i, j - 1) - 2 * discretization_->p(i, j) + discretization_->p(i, j + 1)) / dy2;
 
-            // Calculate initial residuum (r₀)(i,j) = rhs(i,j) - (Ap)(i,j)
             residual(i, j ) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
         }
     }
