@@ -101,6 +101,7 @@ void ConjugateGradient::solve() {
 
             }
         }
+
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
 
@@ -211,6 +212,7 @@ void ConjugateGradient::applyBoundarySearchDirection() {
         }
     }
 };
+
 
 const FieldVariable &ConjugateGradient::s() const {
     return s_;
