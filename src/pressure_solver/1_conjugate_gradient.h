@@ -25,30 +25,62 @@ public:
     void solve() override;
 
 protected:
-    std::shared_ptr<Array2D> q_;
 
     /**
-    *  Implementation of communication of pressure values between neighbouring subdomains
-    */
-    void qGhostLayer();
+      * get reference to field variable search direction
+     */
+    const FieldVariable &s() const;
 
     /**
-    * set boundary values at the bottom of the subdomain for the search direction
+     * evaluate field variable search direction in an element (i,j)
     */
-    void setQBoundaryValuesBottom();
+    double s(int i, int j) const;
 
     /**
-    * set boundary values at the top of the subdomain for the search direction
+     * evaluate field variable search direction in an element (i,j)
     */
-    void setQBoundaryValuesTop();
+    double &s(int i, int j);
+    
+    /**
+    * get reference to field variable residual
+    */
+    const FieldVariable &residual() const;
+
 
     /**
-    * set boundary values at the left of the subdomain for the search direction
+     * evaluate field variable residual in an element (i,j)
     */
-    void setQBoundaryValuesLeft();
+    double residual(int i, int j) const;
 
     /**
-    * set boundary values at the right of the subdomain for the search direction
+     * evaluate field variable residual in an element (i,j)
     */
-    void setQBoundaryValuesRight();
+    
+    double &residual(int i, int j);
+
+    /**
+    * get reference to field variable Laplace-s
+    */
+    const FieldVariable &As() const;
+
+    /**
+     * evaluate field variable Laplace-s in an element (i,j)
+    */
+    double As(int i, int j) const;
+
+    /**
+     * evaluate field variable Laplace-s in an element (i,j)
+    */
+    double &As(int i, int j);
+
+    /**
+    *  Implementation of communication of search directions values between neighbouring subdomains
+    */
+    void applyBoundarySearchDirection();
+
+private:
+    FieldVariable s_;
+    FieldVariable residual_;
+    FieldVariable As_;
+
 };

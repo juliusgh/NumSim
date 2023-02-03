@@ -27,9 +27,9 @@ void Computation::initialize(string filename) {
         meshWidth_[i] = settings_.physicalSize[i] / settings_.nCells[i];
 
     if (settings_.useDonorCell) {
-        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma, std::shared_ptr<Settings>(&settings_));
+        discretization_ = std::make_shared<DonorCell>(partitioning_, meshWidth_, settings_.alpha, settings_.gamma, settings_);
     } else {
-        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_, std::shared_ptr<Settings>(&settings_));
+        discretization_ = std::make_shared<CentralDifferences>(partitioning_, meshWidth_, settings_);
     }
 
     // Initialize solver
@@ -108,8 +108,8 @@ void Computation::runSimulation() {
         * 7) Output debug information and simulation results
         */
 #ifndef NDEBUG
-        cout << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << settings_.endTime << ", dt: " << setw(5)<< dt_ <<
-             ", res. " << setw(5) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
+        cout << std::fixed << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << setprecision(0) << settings_.endTime << ", dt: " << setw(5) << setprecision(4) << dt_ <<
+             ", res. " << setprecision(3) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
         outputWriterText_->writePressureFile();
         outputWriterText_->writeFile(time);

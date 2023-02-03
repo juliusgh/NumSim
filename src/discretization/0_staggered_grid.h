@@ -19,7 +19,7 @@ public:
     */
     StaggeredGrid(const std::shared_ptr<Partitioning>& partitioning,
                   std::array<double, 2> meshWidth,
-                  std::shared_ptr<Settings> settings);
+                  Settings settings);
 
     /**
      * get mesh width in x-direction
@@ -512,9 +512,9 @@ protected:
     FieldVariable v_;
     FieldVariable uLast_;
     FieldVariable vLast_;
-    FieldVariable t_;;
+    FieldVariable t_;
     FieldVariable tobs_;
     FieldVariable q_;
     Marker2D marker_;
-    shared_ptr<Settings> settings_;
+    Settings settings_;
 };
