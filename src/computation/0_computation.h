@@ -83,6 +83,8 @@ protected:
      */
     virtual void computeVelocities();
 
+
+
     /**
      * Compute new temperature t
      */
