@@ -1497,4 +1497,26 @@ void StaggeredGrid::updateCellTypes() {
         std::array<int, 2> indices = particleCell(k);
         marker(indices[0], indices[1]) = MARKER::FLUID;
     }
+
+    // Detects the Surface Cells
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) != FLUID){
+                continue;
+            }
+            if (marker(i, j +1) == FREE){
+                marker(i, j) = SURFACE;
+            }
+            else if(marker(i, j -1) == FREE){
+                marker(i, j) = SURFACE;
+            }
+            else if(marker(i +1, j) == FREE){
+                marker(i, j) = SURFACE;
+            }
+            else if(marker(i -1, j) == FREE){
+                marker(i, j) = SURFACE;
+            }
+
+        }
+    }
 };
