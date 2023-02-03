@@ -1,5 +1,5 @@
 # Settings file for numsim program
-# Run ./numsim lid_driven_cavity.txt
+# Run ./numsim lid_driven_cavity_original.txt
 
 # Problem description
 physicalSizeX = 2.0   # physical size of the domain

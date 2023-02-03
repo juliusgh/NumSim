@@ -59,6 +59,12 @@ struct Settings {
     string domainfile_path;
     double scaling_factor = 10.0;
     bool domainFileGiven = false;
+    // temporary values for physical size and number of cells.
+    // This is used when neither domain file nor information about the values is given
+    int temp_nCellsX = 20;
+    int temp_nCellsY = 20;
+    double temp_phyX = 2.0;
+    double temp_phyY = 2.0;
     //! parse a text file with settings, each line contains "<parameterName> = <value>"
     void loadFromFile(string filename);
 

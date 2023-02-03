@@ -1,5 +1,5 @@
 # Settings file for numsim program
-# Run ./numsim driven_cavity.txt
+# Run ./numsim driven_cavity_original.txt
 
 # Problem description
 physicalSizeX = 4.0   # physical size of the domain
@@ -21,7 +21,7 @@ dirichletRightY  = 0
 
 # Discretization parameters
 nCellsX = 40          # number of cells in x and y direction
-nCellsY = 30
+nCellsY = 20
 useDonorCell = true   # if donor cell discretization should be used, possible values: true false
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 tau = 0.5             # safety factor for time step width
