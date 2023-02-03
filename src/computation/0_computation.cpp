@@ -86,16 +86,20 @@ void Computation::runSimulation() {
         * 3) Compute preliminary velocities (F, G)
         */
         computePreliminaryVelocities();
+        //TODO at the surface of all inner ﬂuid cells, i.e., not directly at the free surface
 
         /*
         * 4) Compute the right hand side (rhs)
         */
         computeRightHandSide();
+        //TODO in all inner ﬂuid cells only
 
         /*
         * 5) Compute the pressure (p) by solving the Poisson equation
         */
         computePressure();
+
+        // TODO: in all inner ﬂuid cells, no update of pressure values at ,surface cells after each iteration required
 
         /*
         * 6) Update the velocities (u, v)
@@ -103,6 +107,14 @@ void Computation::runSimulation() {
         updateLastVelocities();
         computeVelocities();
         discretization_->setObstacleValues();
+
+        //TODO re-set all u, v and p values at the free surface accpording to the free surface conditions
+
+        trackParticles();
+
+        discretization_->updateCellTypes();
+
+        //TODO re-set all u, v and p values at the free surface accpording to the free surface conditions
 
         /*
         * 7) Output debug information and simulation results
@@ -495,3 +507,11 @@ void Computation::computeTemperature() {
         }
     }
 };
+
+void Computation::trackParticles() {
+    // Iterate over all particles to track their position
+    for (int k; k < discretization_->particleNumber(); k++){
+        discretization_->particelPosX(k) = discretization_->particelPosX(k) + dt_ * discretization_->u().interpolateAt(discretization_->particelPosX(k), discretization_->particelPosY(k));
+        discretization_->particelPosY(k) = discretization_->particelPosY(k) + dt_ * discretization_->v().interpolateAt(discretization_->particelPosX(k), discretization_->particelPosY(k));
+    }
+}
