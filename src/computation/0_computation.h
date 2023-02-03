@@ -83,7 +83,7 @@ protected:
      */
     virtual void computeVelocities();
 
-
+    virtual void trackParticles();
 
     /**
      * Compute new temperature t
