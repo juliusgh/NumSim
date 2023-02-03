@@ -109,6 +109,7 @@ void Computation::runSimulation() {
         discretization_->setObstacleValues();
 
         //TODO re-set all u, v and p values at the free surface accpording to the free surface conditions
+        discretization_->setSurfaceValues();
 
         trackParticles();
 
