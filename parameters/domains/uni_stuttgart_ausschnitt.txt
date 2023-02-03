@@ -1,8 +1,5 @@
 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
 i                                                                                o
-i                                                                                o
-i                                                                                o
-i                                                                                o
 i                                                 xxx                            o
 i                           xxxxx               xxxxxxx               xxxxxx     o
 i                         xxxxxxxx             xxxxxxxxx            xxxxxxxxx    o

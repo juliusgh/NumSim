@@ -1,5 +1,5 @@
 # Settings file for numsim program
-# Run ./numsim lid_driven_cavity.txt
+# Run ./numsim step.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
