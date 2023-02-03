@@ -1,0 +1,42 @@
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                               xxxx o
+i                                                                                               xxxx o
+i                                                                                xxxx                o
+i                                                                                xxxx                o
+i                                                                                xxxx                o
+i                                                                                    ########        o
+i                                                                                    ########        o
+i                                                                                    ########        o
+i                                                                                    ########        o
+i                       ####                      xxxxxxxxxx                         ########        o
+i                      ######    xx               xxxxxxxxxx                  xx                     o
+i                     ########   xx                   xx                      xx                     o
+i                    ###    ##                        xx                      xx                     o
+i                    ###              xxxxx   xxxx    xx    xxxx       xxx    xxxxxxx                o
+i                    #####       xx  xxxxxxxxxxxxxx   xx   xxxxxx     xxxxxx  xxxxxxx        xxx     o
+i                     #######    xx  xxx   xxx   xx   xx  xx    xx   xx   xx  xx    xx      xxxx     o
+i                      #######   xx  xxx   xxx   xx   xx  xx    xx  xx        xx    xx      xxxx     o
+i                          ####  xx  xxx   xxx   xx   xx  xxxxxxxx  xx        xx    xx               o
+i                    ##     ###  xx  xxx   xxx   xx   xx  xxxxxxxx  xx        xx    xx               o
+i                    ###    ###  xx  xxx   xxx   xx   xx  xx        xx        xx    xx               o
+i                    #########   xx  xxx   xxx   xx   xx  xx   xxx  xx   xx   xx    xx               o
+i                     #######    xx  xxx   xxx   xx   xx   xxxxxxx   xxxxxx   xx    xx               o
+i                       ###                                 xxxx      xxxx                           o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+i                                                                                                    o
+nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
