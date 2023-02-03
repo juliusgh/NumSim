@@ -493,6 +493,7 @@ void StaggeredGrid::applyBoundaryTemperature() {
 };
 
 void StaggeredGrid::setSurfaceValues(double dt) {
+    // TODO: check order in which values are calculated! (e.g. gray depends on green)
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             switch (marker(i, j)) {
@@ -528,7 +529,7 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     // continuity: du/dx + dv/dy = 0
                     v(i, j - 1) = v(i, j) + dy() / dx() * (u(i, j) - u(i - 1, j));
                     break;
-                // ------------------------
+                    // ------------------------
                 case SURFACE_RIGHT_TOP: // nx=1/sqrt(2), ny=1/sqrt(2), mx=1/sqrt(2), my=-1/sqrt(2)
                     // tangential:
                     u(i - 1, j + 1) = u(i - 1, j) - dy() / dx() * (v(i, j) - v(i - 1, j));
@@ -540,8 +541,9 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     u(i, j + 1) = u(i, j);
                     v(i + 1, j) = v(i, j);
                     // normal:
-                    p(i, j) = 1.0 / settings_.re * ((u(i, j) + u(i - 1, j) - u(i, j - 1) - u(i - 1, j - 1)) / (2.0 * dx()) +
-                                                    (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i - 1, j) - u(i, j - 1) - u(i - 1, j - 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
                     break;
                 case SURFACE_RIGHT_BOTTOM: // nx=1/sqrt(2), ny=-1/sqrt(2), mx=-1/sqrt(2), my=-1/sqrt(2)
                     // tangential:
@@ -553,8 +555,9 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     u(i, j - 1) = u(i, j);
                     v(i + 1, j - 1) = v(i, j - 1);
                     // normal:
-                    p(i, j) = 1.0 / settings_.re * ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
-                                                    (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
                     break;
                 case SURFACE_LEFT_BOTTOM: // nx=-1/sqrt(2), ny=-1/sqrt(2), mx=-1/sqrt(2), my=1/sqrt(2)
                     // tangential:
@@ -566,8 +569,9 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     u(i - 1, j - 1) = u(i - 1, j);
                     v(i - 1, j - 1) = v(i, j - 1);
                     // normal:
-                    p(i, j) = 1.0 / settings_.re * ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
-                                                    (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
                     break;
                 case SURFACE_LEFT_TOP: // nx=-1/sqrt(2), ny=1/sqrt(2), mx=1/sqrt(2), my=1/sqrt(2)
                     // tangential:
@@ -579,9 +583,10 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     u(i - 1, j + 1) = u(i - 1, j);
                     v(i - 1, j - 1) = v(i, j - 1);
                     // normal:
-                    p(i, j) = 1.0 / settings_.re * ((u(i, j) + u(i, j - 1) - u(i - 1, j) - u(i - 1, j - 1)) / (2.0 * dx()) +
-                                                    (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
-                // ------------------------
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j - 1) - u(i - 1, j) - u(i - 1, j - 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
+                    // ------------------------
                 case SURFACE_LEFT_RIGHT:
                     // tangential:
                     v(i - 1, j - 1) = v(i, j - 1) + dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
@@ -601,26 +606,101 @@ void StaggeredGrid::setSurfaceValues(double dt) {
                     // normal:
                     p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
                     break;
-                // ------------------------
+                    // ------------------------
                 case SURFACE_LEFT_TOP_RIGHT:
-                    //tbd
+                    // tangential:
+                    v(i - 1, j - 1) = v(i, j - 1) + dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
+                    v(i + 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i, j) - u(i, j - 1));
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    v(i, j) = v(i, j - 1) - dy() / dx() * (u(i, j) - u(i - 1, j));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((u(i, j) - u(i - 1, j)) / dx());
                     break;
                 case SURFACE_TOP_RIGHT_BOTTOM:
-                    //tbd
+                    // tangential:
+                    u(i - 1, j + 1) = u(i - 1, j) - dy() / dx() * (v(i, j) - v(i - 1, j));
+                    u(i - 1, j - 1) = u(i - 1, j) + dy() / dx() * (v(i, j - 1) - v(i - 1, j - 1));
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    u(i, j) = u(i - 1, j) - dx() / dy() + (v(i, j) - v(i, j - 1));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
                     break;
                 case SURFACE_RIGHT_BOTTOM_LEFT:
-                    //tbd
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    v(i, j - 1) = v(i, j) + dy() / dx() * (u(i, j) - u(i - 1, j));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((u(i, j) - u(i - 1, j)) / dx());
                     break;
                 case SURFACE_BOTTOM_LEFT_TOP:
-                    //tbd
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    u(i - 1, j) = u(i, j) + dx() / dy() + (v(i, j) - v(i, j - 1));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
                     break;
-                // ------------------------
+                    // ------------------------
                 case SURFACE_TOP_RIGHT_BOTTOM_LEFT:
-                    //tbd
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
                     break;
-                case default:
+                default:
                     break;
             }
+        }
+    }
 }
 
 /**
