@@ -5,30 +5,35 @@ import math
 # Open the image
 
 # free surface flow
-free_surface = True
+free_surface = False
 
 # resize option
-scaling_factor = 1.0
+scaling_factor = 0.5
 
 #boundary conditions. i = inflow, f = outflow, n = no-slip
-top = "i"
-bottom = "o"
+top = "n"
+bottom = "n"
 left = "n"
 right = "n"
 
 # set domain name (input and output file name)
-domainname = "trinity"
+domainname = "lid_driven_cavity"
 
 image = Image.open(f"{domainname}.png")
 
 image_size = image.size
 
-new_size = (int(math.ceil(image_size[0]/(scaling_factor * 10.0))*10), int(math.ceil(image_size[1]/(scaling_factor * 10.0))*10))
-
+if scaling_factor != 1.0:
+    new_size = (int(math.ceil(image_size[0]/(scaling_factor * 10.0))*10), int(math.ceil(image_size[1]/(scaling_factor * 10.0))*10))
+else:
+    new_size = image_size
 resized_image = image.resize(new_size, Image.LANCZOS)
 
 # Convert image to grayscale
 gray_image = resized_image.convert("L")
+
+obstacle = "x"
+fluid = "-"
 
 if free_surface:
     # Convert PIL image to numpy array with three values: " ", "x" and "a"
@@ -37,19 +42,17 @@ if free_surface:
     upper_threshold = 170
 
     # values assigned to the numpy array
-    obstacle = "x"
-    water = " "
-    air = "a"
+    empty = " "
 
     # Convert grayscale image to three values using numpy where function
     gray_image_np = np.array(gray_image)
-    bw_image_np = np.where(gray_image_np < lower_threshold, obstacle, np.where(gray_image_np > upper_threshold, water, air))
+    bw_image_np = np.where(gray_image_np < lower_threshold, obstacle, np.where(gray_image_np > upper_threshold, fluid, empty))
 else:
     # Convert PIL image to numpy array
     gray_image_np = np.array(gray_image)
 
     # Convert grayscale image to binary using numpy where function
-    bw_image_np = np.where(gray_image_np < 128, "x", " ")
+    bw_image_np = np.where(gray_image_np < 240, obstacle, fluid)
 
 # replace all "x" with with " " where left and right neighours are " "
 iteration_change = True
