@@ -8,16 +8,16 @@ import math
 free_surface = False
 
 # resize option
-scaling_factor = 0.5
+scaling_factor = 40.0
 
-#boundary conditions. i = inflow, f = outflow, n = no-slip
-top = "n"
-bottom = "n"
-left = "n"
-right = "n"
+#boundary conditions. i = inflow, o = outflow, n = no-slip
+top = "i"
+bottom = "i"
+left = "i"
+right = "i"
 
 # set domain name (input and output file name)
-domainname = "lid_driven_cavity"
+domainname = "catamaran_color"
 
 image = Image.open(f"{domainname}.png")
 
@@ -75,6 +75,32 @@ with open(domainname + ".txt", "w") as text_file:
         text_file.write((left if not row[0] == "x" else "n") + "".join(str(i) for i in row) + (right if not row[row.shape[0] -1] == "x" else "n") + "\n")
     text_file.write("n" + "".join((bottom if not bw_image_np[bw_image_np.shape[0] -1][i] == "x" else "n") for i in range(bw_image_np.shape[1] )) + "n" + "\n")
 
-print("File written to: \n" + domainname + ".txt")
 print("physical dimensions: \n" + str(new_size[0] / 10 ) + " x " + str(new_size[1] / 10) + " m")
 print("nCellsX = ", new_size[0], "\nnCellsY = ", new_size[1])
+
+# open parameter file template and exchange parameters
+lines = []
+with open("parameter_template.txt", "r") as template_file:
+    lines = template_file.readlines()
+for i, line in enumerate(lines):
+    if line.startswith("domainFile ="):
+        lines[i] = "domainFile = domains/" + domainname + ".txt\n"
+    if line.startswith("# ./src/numsim"):
+        lines[i] = "# ./src/numsim  ../parameters/" + domainname + "_parameterfile.txt\n"
+    if line.startswith("dirichletBottomX") and bottom == "i":
+        lines[i] = "dirichletBottomX = 0.0 # here we have inflow\n"
+        lines[i+1] = "dirichletBottomY = 0.0 # here we have inflow\n"
+    if line.startswith("dirichletTopX") and top == "i":
+        lines[i] = "dirichletTopX = 0.0 # here we have inflow\n"
+        lines[i+1] = "dirichletTopY = 0.0 # here we have inflow\n"
+    if line.startswith("dirichletLeftX") and left == "i":
+        lines[i] = "dirichletLeftX = 0.0 # here we have inflow\n"
+        lines[i+1] = "dirichletLeftY = 0.0 # here we have inflow\n"
+    if line.startswith("dirichletRightX") and right == "i":
+        lines[i] = "dirichletRightX = 0.0 # here we have inflow\n"
+        lines[i+1] = "dirichletRightY = 0.0 # here we have inflow\n"
+with open(f"{domainname}_parameterfile.txt", "w") as parameter_file:
+    parameter_file.writelines(lines)
+
+print("Domain file written to: \n" + domainname + ".txt")
+print("Parameter file written to: \n" + domainname + "_parameterfile.txt")
