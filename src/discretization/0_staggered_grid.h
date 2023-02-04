@@ -496,13 +496,13 @@ public:
 
     const Particle2D &particle() const;
 
-    double particelPosX(int k) const;
+    double particlePosX(int k) const;
 
-    double &particelPosX(int k);
+    double &particlePosX(int k);
 
-    double particelPosY(int k) const;
+    double particlePosY(int k) const;
 
-    double &particelPosY(int k);
+    double &particlePosY(int k);
 
     std::array<int, 2> particleCell(int k) const;
 
@@ -517,6 +517,8 @@ public:
     void applyBoundaryTemperature();
 
     void setObstacleValues();
+
+    void setObstacleMarkers();
 
     void setSurfaceValues(double dt);
 
@@ -541,4 +543,6 @@ protected:
     Marker2D marker_;
     Particle2D particles_;
     Settings settings_;
+
+    int countFreeNeighbors(int i, int j);
 };

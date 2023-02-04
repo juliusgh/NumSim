@@ -26,14 +26,13 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         tobs_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
+        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        particles_(0) {
 
     // set markers:
     marker_.setToFluid();
     q_.setToZero();
     tobs_.setToZero();
-
-    //TODO set particles
 
     // open input file for markers
     ifstream file(settings_.domainfile_path, ios::in);
@@ -68,6 +67,9 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                 int mj = pJEnd() - j - 1;
                 switch (line[i]) {
                     case ' ':
+                        marker(mi, mj) = MARKER::FREE;
+                        break;
+                    case '-':
                         marker(mi, mj) = MARKER::FLUID;
                         break;
                     case '*':
@@ -104,6 +106,58 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
+    setInitialParticles();
+    setInitialTemperature();
+    setObstacleMarkers();
+    updateCellTypes();
+    std::cout << "Domain with markers:";
+    marker_.print();
+};
+
+void StaggeredGrid::setInitialParticles() {
+    // Create initial particles in the fluid cells on a finer grid
+    int fluidCells = 0;
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) == FLUID) {
+                fluidCells++;
+            }
+        }
+    }
+    int particleNumber = settings_.particleRefinement * settings_.particleRefinement * fluidCells;
+    particles_ = Particle2D(particleNumber);
+    int k = 0;
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) != FLUID) {
+                continue;
+            }
+            double originX = i * dx();
+            double originY = j * dy();
+            int partNumX = settings_.particleRefinement;
+            int partNumY = settings_.particleRefinement;
+            double hx = dx() / (partNumX + 1);
+            double hy = dy() / (partNumY + 1);
+            for (int px = 0; px < partNumX; px++) {
+                for (int py = 0; py < partNumY; py++) {
+                    particlePosX(k) = originX + (px + 1) * hx;
+                    particlePosY(k) = originY + (py + 1) * hy;
+                    k++;
+                }
+            }
+        }
+    }
+};
+
+void StaggeredGrid::setInitialTemperature() {
+    for (int i = tIBegin(); i < tIEnd(); i++) {
+        for (int j = tJBegin(); j < tJEnd(); j++) {
+            t(i, j) = settings_.initialTemp;
+        }
+    }
+};
+
+void StaggeredGrid::setObstacleMarkers() {
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -146,51 +200,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    //std::cout << "Domain with markers:";
-    //marker_.print();
-    setInitialParticles();
-    particles_.print();
-    setInitialTemperature();
-};
-
-void StaggeredGrid::setInitialParticles() {
-    // Create initial particles in the fluid cells on a finer grid
-    int fluidCells = 0;
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            if (marker(i, j) == FLUID) {
-                fluidCells++;
-            }
-        }
-    }
-    int particleNumber = settings_.particleRefinement * settings_.particleRefinement * fluidCells;
-    particles_ = Particle2D(particleNumber);
-    int k = 0;
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            if (marker(i, j) != FLUID) {
-                continue;
-            }
-            double originX = i * dx();
-            double originY = j * dy();
-            int partNumX = settings_.particleRefinement;
-            int partNumY = settings_.particleRefinement;
-            double hx = dx() / (partNumX + 1);
-            double hy = dy() / (partNumY + 1);
-            for (int px = 0; px < partNumX; px++) {
-                for (int py = 0; py < partNumY; py++) {
-                    particelPosX(k) = originX + (px + 1) * hx;
-                    particelPosY(k) = originY + (py + 1) * hy;
-                    k++;
-                }
-            }
-        }
-    }
-};
-
-void StaggeredGrid::setInitialTemperature() {
-
-};
+}
 
 void StaggeredGrid::setObstacleValues() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
@@ -1416,8 +1426,6 @@ double StaggeredGrid::g(int i, int j) const {
 #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    }
-};
 #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
@@ -1713,24 +1721,24 @@ const Particle2D &StaggeredGrid::particle() const {
     return particles_;
 }
 
-double StaggeredGrid::particelPosX(int k) const{
+double StaggeredGrid::particlePosX(int k) const{
 
     return particles_(k,0);
 };
 
 
-double &StaggeredGrid::particelPosX(int k){
+double &StaggeredGrid::particlePosX(int k){
     return particles_(k,0);
 };
 
 
-double StaggeredGrid::particelPosY(int k) const{
+double StaggeredGrid::particlePosY(int k) const{
 
     return particles_(k,1);
 };
 
 
-double &StaggeredGrid::particelPosY(int k) {
+double &StaggeredGrid::particlePosY(int k) {
 
     return particles_(k, 1);
 };
@@ -1739,8 +1747,8 @@ std::array<int, 2> StaggeredGrid::particleCell(int k) const {
 #ifndef NDEBUG
     assert((0 <= k) && (k <= particleNumber()) && "particle i failed in const");
 #endif
-    int i = (int) (particles_(k,0) / meshWidth_[0] + 1);
-    int j = (int) ((particles_(k, 1)+0.5) / meshWidth_[0] + 1);
+    int i = (int) (particlePosX(k) / dx());
+    int j = (int) (particlePosY(k) / dy());
 
     return {i, j};
 }
@@ -1751,25 +1759,77 @@ void StaggeredGrid::updateCellTypes() {
         marker(indices[0], indices[1]) = MARKER::FLUID;
     }
 
-    // Detects the Surface Cells
+    // Detect and classify the Surface Cells
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             if (marker(i, j) != FLUID){
                 continue;
             }
-            if (marker(i, j +1) == FREE){
-                marker(i, j) = SURFACE;
+            int emptyCells = countFreeNeighbors(i, j);
+            switch (emptyCells) {
+                case 0:
+                    marker(i, j) = FLUID;
+                    break;
+                case 1:
+                    if (marker(i, j + 1) == FREE)
+                        marker(i, j) = SURFACE_TOP;
+                    else if (marker(i, j - 1) == FREE)
+                        marker(i, j) = SURFACE_BOTTOM;
+                    else if (marker(i + 1, j) == FREE)
+                        marker(i, j) = SURFACE_RIGHT;
+                    else if (marker(i - 1, j) == FREE)
+                        marker(i, j) = SURFACE_LEFT;
+                    break;
+                case 2:
+                    if (marker(i, j + 1) == FREE) {
+                        if (marker(i + 1, j) == FREE) {
+                            marker(i, j) = SURFACE_RIGHT_TOP;
+                        }
+                        else if (marker(i - 1, j) == FREE) {
+                            marker(i, j) = SURFACE_LEFT_TOP;
+                        }
+                        else
+                            marker(i, j) = SURFACE_TOP_BOTTOM;
+                    }
+                    else if (marker(i, j - 1) == FREE) {
+                        if (marker(i + 1, j) == FREE) {
+                            marker(i, j) = SURFACE_RIGHT_BOTTOM;
+                        }
+                        else if (marker(i - 1, j) == FREE) {
+                            marker(i, j) = SURFACE_LEFT_BOTTOM;
+                        }
+                    }
+                    else {
+                        marker(i, j) = SURFACE_LEFT_RIGHT;
+                    }
+                    break;
+                case 3:
+                    if (marker(i, j + 1) == FLUID)
+                        marker(i, j) = SURFACE_RIGHT_BOTTOM_LEFT;
+                    else if (marker(i, j - 1) == FLUID)
+                        marker(i, j) = SURFACE_LEFT_TOP_RIGHT;
+                    else if (marker(i + 1, j) == FLUID)
+                        marker(i, j) = SURFACE_TOP_RIGHT_BOTTOM;
+                    else
+                        marker(i, j) = SURFACE_BOTTOM_LEFT_TOP;
+                    break;
+                default: // 4
+                    marker(i, j) = SURFACE_TOP_RIGHT_BOTTOM_LEFT;
+                    break;
             }
-            else if(marker(i, j -1) == FREE){
-                marker(i, j) = SURFACE;
-            }
-            else if(marker(i +1, j) == FREE){
-                marker(i, j) = SURFACE;
-            }
-            else if(marker(i -1, j) == FREE){
-                marker(i, j) = SURFACE;
-            }
-
         }
     }
+};
+
+int StaggeredGrid::countFreeNeighbors(int i, int j) {
+    int count = 0;
+    if (marker(i, j + 1) == FREE)
+        count++;
+    if (marker(i, j - 1) == FREE)
+        count++;
+    if (marker(i + 1, j) == FREE)
+        count++;
+    if (marker(i - 1, j) == FREE)
+        count++;
+    return count;
 };

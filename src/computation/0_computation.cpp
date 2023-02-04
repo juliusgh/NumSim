@@ -504,7 +504,9 @@ void Computation::computeTemperature() {
 void Computation::trackParticles() {
     // Iterate over all particles to track their position
     for (int k = 0; k < discretization_->particleNumber(); k++){
-        discretization_->particelPosX(k) = discretization_->particelPosX(k) + dt_ * discretization_->u().interpolateAt(discretization_->particelPosX(k), discretization_->particelPosY(k));
-        discretization_->particelPosY(k) = discretization_->particelPosY(k) + dt_ * discretization_->v().interpolateAt(discretization_->particelPosX(k), discretization_->particelPosY(k));
+        double uInterp = discretization_->u().interpolateAt(discretization_->particlePosX(k), discretization_->particlePosY(k));
+        double vInterp = discretization_->v().interpolateAt(discretization_->particlePosX(k), discretization_->particlePosY(k));
+        discretization_->particlePosX(k) = discretization_->particlePosX(k) + dt_ * uInterp;
+        discretization_->particlePosY(k) = discretization_->particlePosY(k) + dt_ * vInterp;
     }
 }
