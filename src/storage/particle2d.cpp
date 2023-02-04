@@ -24,9 +24,10 @@ int Particle2D::number() const {
 }
 
 /**
-* access the position of the i-th particle, declared const, i.e. it is not possible to change the value
-* @param i: index of the particle
-* @return position in the grid
+* access the position of the k-th particle as reference
+* @param k: index of the particle
+* @param axis: axis (0 for x, 1 for y)
+* @return coordinate in the grid along given axis (0 for x, 1 for y)
 */
 double &Particle2D::operator()(int k, int axis) {
 #ifndef NDEBUG
@@ -44,9 +45,10 @@ double &Particle2D::operator()(int k, int axis) {
 }
 
 /**
-* get the position of the i-th particle, declared const, i.e. it is not possible to change the value
-* @param i: index of the particle
-* @return position in the grid
+* get the position of the k-th particle, declared const, i.e. it is not possible to change the value
+* @param k: index of the particle
+* @param axis: axis (0 for x, 1 for y)
+* @return coordinate in the grid along given axis (0 for x, 1 for y)
 */
 double Particle2D::operator()(int k, int axis) const {
 #ifndef NDEBUG

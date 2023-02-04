@@ -506,6 +506,10 @@ public:
 
     std::array<int, 2> particleCell(int k) const;
 
+    void setInitialParticles();
+
+    void setInitialTemperature();
+
     void applyBoundaryVelocities();
 
     void applyBoundaryPressure();
@@ -535,6 +539,6 @@ protected:
     FieldVariable tobs_;
     FieldVariable q_;
     Marker2D marker_;
-    Particle2D particle_;
+    Particle2D particles_;
     Settings settings_;
 };
