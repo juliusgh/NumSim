@@ -34,8 +34,6 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
     q_.setToZero();
     tobs_.setToZero();
 
-    //TODO set particles
-
     // open input file for markers
     ifstream file(settings_.domainfile_path, ios::in);
     if (!file.is_open()) {
