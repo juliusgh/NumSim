@@ -4,7 +4,6 @@
 #include <memory>
 #include "storage/field_variable.h"
 #include "storage/marker2d.h"
-#include "storage/particle2d.h"
 #include "partitioning/partitioning.h"
 #include "settings.h"
 
@@ -492,20 +491,6 @@ public:
     */
     int qInteriorJEnd() const;
 
-    int particleNumber() const;
-
-    const Particle2D &particle() const;
-
-    double particelPosX(int k) const;
-
-    double &particelPosX(int k);
-
-    double particelPosY(int k) const;
-
-    double &particelPosY(int k);
-
-    std::array<int, 2> particleCell(int k) const;
-
     void applyBoundaryVelocities();
 
     void applyBoundaryPressure();
@@ -513,8 +498,6 @@ public:
     void applyBoundaryTemperature();
 
     void setObstacleValues();
-
-    void updateCellTypes();
 
 
 protected:
@@ -533,6 +516,5 @@ protected:
     FieldVariable tobs_;
     FieldVariable q_;
     Marker2D marker_;
-    Particle2D particle_;
     Settings settings_;
 };
