@@ -1754,12 +1754,21 @@ std::array<int, 2> StaggeredGrid::particleCell(int k) const {
 }
 
 void StaggeredGrid::updateCellTypes() {
+    // Reset all fluid cells to free
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) == FLUID){
+                marker(i, j) = FREE;
+            }
+        }
+    }
+    // Detect all cells containing any particles and define them as fluid
     for (int k = 0; k < particleNumber(); k++){
         std::array<int, 2> indices = particleCell(k);
         marker(indices[0], indices[1]) = MARKER::FLUID;
     }
 
-    // Detect and classify the Surface Cells
+    // Detect and mark the surface cells
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
             if (marker(i, j) != FLUID){
@@ -1832,4 +1841,8 @@ int StaggeredGrid::countFreeNeighbors(int i, int j) {
     if (marker(i - 1, j) == FREE)
         count++;
     return count;
+};
+
+bool StaggeredGrid::isInnerFluid(int i, int j) {
+    return (marker(i, j) == FLUID && countFreeNeighbors(i, j) == 0);
 };
