@@ -514,7 +514,7 @@ public:
 
     void setObstacleValues();
 
-    void setSurfaceValues(double dt);
+    void setSurfaceValues();
 
     void updateCellTypes();
 
