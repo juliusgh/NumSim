@@ -389,9 +389,6 @@ void Computation::computePreliminaryVelocities() {
     // Compute F in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
-            if (!discretization_->isInnerFluid(i, j)) {
-                continue;
-            }
             double lap_u = discretization_->computeD2uDx2(i, j) + discretization_->computeD2uDy2(i, j);
             double conv_u = discretization_->computeDu2Dx(i, j) + discretization_->computeDuvDy(i, j);
             double f_tilde = discretization_->u(i, j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
@@ -403,9 +400,6 @@ void Computation::computePreliminaryVelocities() {
     // Compute G in the interior of the domain
     for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
-            if (!discretization_->isInnerFluid(i, j)) {
-                continue;
-            }
             double lap_v = discretization_->computeD2vDx2(i, j) + discretization_->computeD2vDy2(i, j);
             double conv_v = discretization_->computeDv2Dy(i, j) + discretization_->computeDuvDx(i, j);
             double g_tilde = discretization_->v(i, j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
@@ -429,9 +423,6 @@ void Computation::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
     for (int i = discretization_->rhsInteriorIBegin(); i < discretization_->rhsInteriorIEnd(); i++) {
         for (int j = discretization_->rhsInteriorJBegin(); j < discretization_->rhsInteriorJEnd(); j++) {
-            if (!discretization_->isInnerFluid(i, j)) {
-                continue;
-            }
             double fx = (discretization_->f(i, j) - discretization_->f(i - 1, j)) / discretization_->dx();
             double gy = (discretization_->g(i, j) - discretization_->g(i, j - 1)) / discretization_->dy();
             discretization_->rhs(i, j) = (fx + gy) / dt_;
@@ -519,4 +510,3 @@ void Computation::trackParticles() {
         discretization_->particlePosY(k) = discretization_->particlePosY(k) + dt_ * vInterp;
     }
 }
-
