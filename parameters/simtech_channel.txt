@@ -3,7 +3,7 @@
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
-domainFile = domains/simtech_channel.txt
+domainFile = domains/simtech_big.txt
 
 # Problem description
 endTime = 20.0        # duration of the simulation
@@ -42,7 +42,7 @@ setFixedTempRight = false
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
 
 # Solver parameters
-pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
+pressureSolver = CG  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 1e5    # maximum number of iterations in the solver
