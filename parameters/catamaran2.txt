@@ -1,24 +1,25 @@
 # Settings file for numsim program
-# Run ./numsim lid_driven_cavity.txt
+# Run from build directory:
+# ./src/numsim  ../parameters/catamaran_color_narrow_parameterfile.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
-domainFile = domains/convection.txt
+domainFile = domains/catamaran2.txt
 
 # Problem description
 endTime = 20.0        # duration of the simulation
 re = 1000             # Reynolds number
-pr = 7                # Prandtl number
+pr = 1                # Prandtl number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
-gY = -9.81
+gY = 0.0
 
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
 dirichletTopY    = 0
-dirichletLeftX   = 0
-dirichletLeftY   = 0
+dirichletLeftX = 1.0 # here we have inflow
+dirichletLeftY = 0.0 # here we have inflow
 dirichletRightX  = 0
 dirichletRightY  = 0
 
@@ -27,14 +28,14 @@ useDonorCell = true   # if donor cell discretization should be used, possible va
 alpha = 0.5           # factor for donor-cell scheme, 0 is equivalent to central differences
 gamma = 0.5           # factor for donor-cell for temperature
 tau = 0.5             # safety factor for time step width
-maximumDt = 0.1       # maximum values for time step width
+maximumDt = 0.5       # maximum values for time step width
 
 # Temperature parameters
 beta = 0.2            # volume expansion coefficient
-initialTemp = 0   # in Kelvin, 293K = 20°C
-setFixedTempBottom = true
-tempBcBottom = 10    # prescribed values of tb or tn at bottom of domain
-setFixedTempTop = true
+initialTemp = 0    # initial temperature
+setFixedTempBottom = false
+tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
+setFixedTempTop = false
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
 setFixedTempLeft = false
 tempBcLeft = 0     # prescribed values of tb or tn at left of domain
@@ -42,7 +43,7 @@ setFixedTempRight = false
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
 
 # Solver parameters
-pressureSolver = CG   # which pressure solver to use, possible values: GaussSeidel SOR CG
+pressureSolver = CG  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
 maximumNumberOfIterations = 1e5    # maximum number of iterations in the solver
