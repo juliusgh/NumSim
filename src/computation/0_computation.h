@@ -47,6 +47,8 @@ protected:
 
     void applyBoundaryValuesRight();
 
+    void setInitialValues();
+
     /**
      * Set the boundary values of the preliminary velocities (u, v)
      * 

@@ -26,7 +26,8 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         tobs_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
+        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        particle_(particleNumber()){
 
     // set markers:
     marker_.setToFluid();
@@ -148,48 +149,6 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
     }
     //std::cout << "Domain with markers:";
     //marker_.print();
-    setInitialParticles();
-    particles_.print();
-    setInitialTemperature();
-};
-
-void StaggeredGrid::setInitialParticles() {
-    // Create initial particles in the fluid cells on a finer grid
-    int fluidCells = 0;
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            if (marker(i, j) == FLUID) {
-                fluidCells++;
-            }
-        }
-    }
-    int particleNumber = settings_.particleRefinement * settings_.particleRefinement * fluidCells;
-    particles_ = Particle2D(particleNumber);
-    int k = 0;
-    for (int i = pIBegin(); i < pIEnd(); i++) {
-        for (int j = pJBegin(); j < pJEnd(); j++) {
-            if (marker(i, j) != FLUID) {
-                continue;
-            }
-            double originX = i * dx();
-            double originY = j * dy();
-            int partNumX = settings_.particleRefinement;
-            int partNumY = settings_.particleRefinement;
-            double hx = dx() / (partNumX + 1);
-            double hy = dy() / (partNumY + 1);
-            for (int px = 0; px < partNumX; px++) {
-                for (int py = 0; py < partNumY; py++) {
-                    particelPosX(k) = originX + (px + 1) * hx;
-                    particelPosY(k) = originY + (py + 1) * hy;
-                    k++;
-                }
-            }
-        }
-    }
-};
-
-void StaggeredGrid::setInitialTemperature() {
-
 };
 
 void StaggeredGrid::setObstacleValues() {
@@ -1416,8 +1375,6 @@ double StaggeredGrid::g(int i, int j) const {
 #ifndef NDEBUG
     assert((vIBegin() <= i) && (i <= vIEnd()));
     assert((vJBegin() <= j) && (j <= vJEnd()));
-    }
-};
 #endif
     return g_(i - vIBegin(), j - vJBegin());
 };
@@ -1705,42 +1662,43 @@ double &StaggeredGrid::q(int i, int j) {
 };
 
 int StaggeredGrid::particleNumber() const {
-    return particles_.number();
+    // TODO meaningful number of particles, from settings file
+    return 10;
 };
 
 const Particle2D &StaggeredGrid::particle() const {
 
-    return particles_;
+    return particle_;
 }
 
 double StaggeredGrid::particelPosX(int k) const{
 
-    return particles_(k,0);
+    return particle_(k,0);
 };
 
 
 double &StaggeredGrid::particelPosX(int k){
-    return particles_(k,0);
+    return particle_(k,0);
 };
 
 
 double StaggeredGrid::particelPosY(int k) const{
 
-    return particles_(k,1);
+    return particle_(k,1);
 };
 
 
 double &StaggeredGrid::particelPosY(int k) {
 
-    return particles_(k, 1);
+    return particle_(k, 1);
 };
 
 std::array<int, 2> StaggeredGrid::particleCell(int k) const {
 #ifndef NDEBUG
     assert((0 <= k) && (k <= particleNumber()) && "particle i failed in const");
 #endif
-    int i = (int) (particles_(k,0) / meshWidth_[0] + 1);
-    int j = (int) ((particles_(k, 1)+0.5) / meshWidth_[0] + 1);
+    int i = (int) (particle_(k,0) / meshWidth_[0] + 1);
+    int j = (int) ((particle_(k, 1)+0.5) / meshWidth_[0] + 1);
 
     return {i, j};
 }
