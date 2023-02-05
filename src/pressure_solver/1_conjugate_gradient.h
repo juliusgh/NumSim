@@ -74,6 +74,21 @@ protected:
     double &As(int i, int j);
 
     /**
+    * get reference to field variable preconditioned variable
+    */
+    const FieldVariable &z() const;
+
+    /**
+     * evaluate field variable preconditioned variable in an element (i,j)
+    */
+    double z(int i, int j) const;
+
+    /**
+     * evaluate field variable preconditioned variable in an element (i,j)
+    */
+    double &z(int i, int j);
+
+    /**
     *  Implementation of communication of search directions values between neighbouring subdomains
     */
     void applyBoundarySearchDirection();
@@ -82,5 +97,6 @@ private:
     FieldVariable s_;
     FieldVariable residual_;
     FieldVariable As_;
+    FieldVariable z_;
 
 };

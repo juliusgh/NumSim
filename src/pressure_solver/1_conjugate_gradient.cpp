@@ -14,7 +14,8 @@ ConjugateGradient::ConjugateGradient(std::shared_ptr<Discretization> discretizat
         PressureSolver(discretization, epsilon, maximumNumberOfIterations),
         s_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),// Search direction sₖ
         residual_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),
-        As_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth())
+        As_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth()),
+        z_(discretization_->pSize(), {discretization_->dx() / 2.0, discretization_->dy() / 2.0}, discretization_->meshWidth())
         {
 }
 
@@ -34,11 +35,13 @@ void ConjugateGradient::solve() {
     s_.setToZero();
     residual_.setToZero();
     As_.setToZero();
+    z_.setToZero();
 
     int iteration = 0;
 
     // Initialization Loop
     double alpha = 0.0;
+    double residual_norm = 0.0;
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
             if (discretization_->marker(i, j) != FLUID) {
@@ -54,11 +57,16 @@ void ConjugateGradient::solve() {
             residual(i, j) = discretization_->rhs(i, j) - (D2pDx2 + D2pDy2);
 
             // set search direction to preconditioned defect s = z
+            //TODO: Preconditioning with s= P^{-1} residual
             s(i, j) = residual(i, j);
 
-            alpha += pow(residual(i, j), 2);
+            alpha += residual(i, j) * s(i, j);
+
+            residual_norm += pow(residual(i, j), 2);
         }
     }
+    residual_norm2_ = residual_norm;
+
 
     do {
         applyBoundarySearchDirection();
@@ -85,6 +93,7 @@ void ConjugateGradient::solve() {
 
         // Update variables in the search direction
         double alphaold = alpha;
+        residual_norm = 0.0;
         alpha = 0.0;
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
@@ -97,10 +106,15 @@ void ConjugateGradient::solve() {
                 // rₖ₊₁ = rₖ - λ Asₖ
                 residual(i, j) -= lambda * As(i, j);
 
-                alpha += pow(residual(i, j), 2);
+                residual_norm += pow(residual(i, j), 2);
 
+                //TODO: Implement the preconditioning z = p^{-1} residual
+                z(i, j) = residual(i, j);
+
+                alpha += residual(i, j) * z (i, j);
             }
         }
+        residual_norm2_ = residual_norm;
 
         // βₖ₊₁ = αₖ₊₁ / αₖ
         double beta = alpha / alphaold;
@@ -110,10 +124,9 @@ void ConjugateGradient::solve() {
                 if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
-                s(i, j) = residual(i, j) + beta * s(i, j);             // sₖ₊₁ = rₖ₊₁ + β sₖ
+                s(i, j) = z(i, j) + beta * s(i, j);             // sₖ₊₁ = zₖ₊₁ + β sₖ
             }
         }
-        residual_norm2_ = alpha / N;
 
     } while (residualNorm() > eps2 && iteration < maximumNumberOfIterations_);
 
@@ -278,4 +291,26 @@ double &ConjugateGradient::As(int i, int j) {
     assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
 #endif
     return As_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+const FieldVariable &ConjugateGradient::z() const {
+    return z_;
+};
+
+
+double ConjugateGradient::z(int i, int j) const {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return z_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
+};
+
+
+double &ConjugateGradient::z(int i, int j) {
+#ifndef NDEBUG
+    assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
+    assert((discretization_->pJBegin() <= j) && (j <= discretization_->pJEnd()));
+#endif
+    return z_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
