@@ -41,7 +41,7 @@ void ConjugateGradient::solve() {
     double alpha = 0.0;
     for (int i = pIIntBegin; i < pIIntEnd; i++) {
         for (int j = pJIntBegin; j < pJIntEnd; j++) {
-            if (!discretization_->isInnerFluid(i, j)) {
+            if (discretization_->marker(i, j) != FLUID) {
                 continue;
             }
 
@@ -67,7 +67,7 @@ void ConjugateGradient::solve() {
         // Calculate auxiliary variable As
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (!discretization_->isInnerFluid(i, j)) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
                 double D2sDx2 = (s(i - 1, j) - 2 * s(i, j) + s(i + 1, j)) / dx2;
@@ -88,7 +88,7 @@ void ConjugateGradient::solve() {
         alpha = 0.0;
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (!discretization_->isInnerFluid(i, j)) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
                 // pₖ₊₁ = pₖ + λ sₖ
@@ -107,7 +107,7 @@ void ConjugateGradient::solve() {
 
         for (int i = pIIntBegin; i < pIIntEnd; i++) {
             for (int j = pJIntBegin; j < pJIntEnd; j++) {
-                if (!discretization_->isInnerFluid(i, j)) {
+                if (discretization_->marker(i, j) != FLUID) {
                     continue;
                 }
                 s(i, j) = residual(i, j) + beta * s(i, j);             // sₖ₊₁ = rₖ₊₁ + β sₖ

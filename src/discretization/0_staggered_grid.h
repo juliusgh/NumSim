@@ -524,8 +524,6 @@ public:
 
     void updateCellTypes();
 
-    bool isInnerFluid(int i,int j);
-
 
 protected:
     const std::array<double, 2> meshWidth_;
