@@ -26,8 +26,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         tobs_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-        particle_(particleNumber()){
+        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
 
     // set markers:
     marker_.setToFluid();
@@ -1446,53 +1445,4 @@ double &StaggeredGrid::q(int i, int j) {
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
-};
-
-int StaggeredGrid::particleNumber() const {
-    // TODO meaningful number of particles, from settings file
-    return 10;
-};
-
-const Particle2D &StaggeredGrid::particle() const {
-
-    return particle_;
-}
-
-double StaggeredGrid::particelPosX(int k) const{
-
-    return particle_(k,0);
-};
-
-
-double &StaggeredGrid::particelPosX(int k){
-    return particle_(k,0);
-};
-
-
-double StaggeredGrid::particelPosY(int k) const{
-
-    return particle_(k,1);
-};
-
-
-double &StaggeredGrid::particelPosY(int k) {
-
-    return particle_(k, 1);
-};
-
-std::array<int, 2> StaggeredGrid::particleCell(int k) const {
-#ifndef NDEBUG
-    assert((0 <= k) && (k <= particleNumber()) && "particle i failed in const");
-#endif
-    int i = (int) (particle_(k,0) / meshWidth_[0] + 1);
-    int j = (int) ((particle_(k, 1)+0.5) / meshWidth_[0] + 1);
-
-    return {i, j};
-}
-
-void StaggeredGrid::updateCellTypes() {
-    for (int k = 0; k < particleNumber(); k++){
-        std::array<int, 2> indices = particleCell(k);
-        marker(indices[0], indices[1]) = MARKER::FLUID;
-    }
 };
