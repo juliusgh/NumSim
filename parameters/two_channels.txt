@@ -17,7 +17,7 @@ dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
 dirichletTopY    = -1
-dirichletLeftX   = 1
+dirichletLeftX   = 5
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
@@ -33,7 +33,7 @@ maximumDt = 0.5       # maximum values for time step width
 beta = 0.2            # volume expansion coefficient
 initialTemp = 0   # in Kelvin, 293K = 20°C
 setFixedTempBottom = true
-tempBcBottom = 1    # prescribed values of tb or tn at bottom of domain
+tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
 setFixedTempTop = true
 tempBcTop = 1       # prescribed values of tb or tn at top of domain
 setFixedTempLeft = true

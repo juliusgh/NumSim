@@ -3,7 +3,7 @@
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
-domainFile = domains/channel_obstacle.txt
+domainFile = domains/kvs.txt
 
 # Problem description
 endTime = 20.0        # duration of the simulation
