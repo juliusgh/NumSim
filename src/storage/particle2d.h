@@ -46,5 +46,5 @@ public:
 
 protected:
     std::vector<double> data_;      //< storage array values, in row-major order
-    int number_; //< width, height of the domain
+    const int number_; //< width, height of the domain
 };
