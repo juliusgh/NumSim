@@ -1,10 +1,10 @@
 # Settings file for numsim program
 # Run from build directory:
-# ./src/numsim  ../parameters/catamaran_color_narrow_parameterfile.txt
+# ./src/numsim  ../parameters/two_channels_parameterfile.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
-domainFile = domains/catamaran2.txt
+domainFile = domains/two_channels.txt
 
 # Problem description
 endTime = 20.0        # duration of the simulation
@@ -16,9 +16,9 @@ gY = 0.0
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
-dirichletTopX    = 0
-dirichletTopY    = 0
-dirichletLeftX = 1.0 # here we have inflow
+dirichletTopX = 1.0 # here we have inflow
+dirichletTopY = -1.0 # here we have inflow
+dirichletLeftX = 0.0 # here we have inflow
 dirichletLeftY = 0.0 # here we have inflow
 dirichletRightX  = 0
 dirichletRightY  = 0

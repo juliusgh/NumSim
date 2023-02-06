@@ -1,23 +1,24 @@
 # Settings file for numsim program
-# Run ./numsim channel_obstacle.txt
+# Run from build directory:
+# ./src/numsim {specify}
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
-domain_scaling = 10.0 # pixels per 1 physical size un10.0it. physicalsize = nCells / domain_scaling
-domainFile = domains/kvs.txt
+domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
+domainFile = {specify} # add path to domain file here
 
 # Problem description
 endTime = 20.0        # duration of the simulation
 re = 1000             # Reynolds number
 pr = 1                # Prandtl number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
-gY = 0.0 #-9.81
+gY = 0.0
 
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
 dirichletTopY    = 0
-dirichletLeftX   = 1
+dirichletLeftX   = 0
 dirichletLeftY   = 0
 dirichletRightX  = 0
 dirichletRightY  = 0
@@ -31,19 +32,18 @@ maximumDt = 0.5       # maximum values for time step width
 
 # Temperature parameters
 beta = 0.2            # volume expansion coefficient
-initialTemp = 0   # in Kelvin, 293K = 20°C
+initialTemp = 0    # initial temperature
 setFixedTempBottom = false
 tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
 setFixedTempTop = false
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
-setFixedTempLeft = true
-tempBcLeft = 1     # prescribed values of tb or tn at left of domain
-setFixedTempRight = true
+setFixedTempLeft = false
+tempBcLeft = 0     # prescribed values of tb or tn at left of domain
+setFixedTempRight = false
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
-obstacleHot = 1
 
 # Solver parameters
-pressureSolver = SOR  # which pressure solver to use, possible values: GaussSeidel SOR CG
+pressureSolver = CG  # which pressure solver to use, possible values: GaussSeidel SOR CG
 omega = 1.6           # overrelaxation factor, only for SOR solver
 epsilon = 1e-5        # tolerance for 2-norm of residual
-maximumNumberOfIterations = 3e4    # maximum number of iterations in the solver
+maximumNumberOfIterations = 1e5    # maximum number of iterations in the solver
