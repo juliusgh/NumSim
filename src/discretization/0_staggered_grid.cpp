@@ -66,6 +66,9 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                 int mj = pJEnd() - j - 1;
                 switch (line[i]) {
                     case ' ':
+                        marker(mi, mj) = MARKER::FREE;
+                        break;
+                    case '-':
                         marker(mi, mj) = MARKER::FLUID;
                         break;
                     case '*':
