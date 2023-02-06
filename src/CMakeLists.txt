@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 # Define the project name.
 project(numsim)
+set(CMAKE_CXX_STANDARD 17)
 
 # Files for the project
 set(PROJECT_FILES
@@ -33,14 +34,13 @@ set(PROJECT_FILES
         output_writer/output_writer_paraview.cpp
         output_writer/output_writer_text_parallel.cpp
         output_writer/output_writer_paraview_parallel.cpp
-        storage/marker2d.cpp
-        storage/particle2d.cpp
-        )
+        storage/marker2d.cpp)
 
 # Executable for serial version
 set(TARGET_SERIAL ${PROJECT_NAME})
 add_executable(${TARGET_SERIAL} main.cpp ${PROJECT_FILES})
 target_compile_definitions(${TARGET_SERIAL} PRIVATE -DNPARALLEL)
+target_link_libraries(${TARGET_SERIAL} stdc++fs)
 # Add the project directory to include directories, to be able to include all project header files from anywhere
 target_include_directories(${TARGET_SERIAL} PUBLIC ${PROJECT_SOURCE_DIR})
 
@@ -51,14 +51,16 @@ if (MPI_FOUND)
     add_executable(${TARGET_PARALLEL} main.cpp ${PROJECT_FILES})
     include_directories(${MPI_INCLUDE_PATH})
     target_link_libraries(${TARGET_PARALLEL} ${MPI_LIBRARIES})
+    target_link_libraries(${TARGET_SERIAL} ${MPI_LIBRARIES})
     if (MPI_COMPILE_FLAGS)
-        set_target_properties(${TARGET_PARALLEL} PROPERTIES
-                COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+        set_target_properties(${TARGET_PARALLEL} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+        set_target_properties(${TARGET_SERIAL} PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
     endif (MPI_COMPILE_FLAGS)
     if (MPI_LINK_FLAGS)
-        set_target_properties(${TARGET_PARALLEL} PROPERTIES
-                LINK_FLAGS "${MPI_LINK_FLAGS}")
+        set_target_properties(${TARGET_PARALLEL} PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
+        set_target_properties(${TARGET_SERIAL} PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
     endif (MPI_LINK_FLAGS)
+    target_link_libraries(${TARGET_SERIAL} stdc++fs)
     # Add the project directory to include directories, to be able to include all project header files from anywhere
     target_include_directories(${TARGET_PARALLEL} PUBLIC ${PROJECT_SOURCE_DIR})
     # install executable in build directory
