@@ -58,6 +58,8 @@ void Computation::initialize(string filename) {
 void Computation::runSimulation() {
     int t_iter = 0;
     double time = 0.0;
+    double outputInterval = 1.0 / 50;
+    double lastOutput = -outputInterval;
     setInitialValues();
     while (time < settings_.endTime) {
         t_iter++;
@@ -111,10 +113,13 @@ void Computation::runSimulation() {
         cout << std::fixed << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << setprecision(0) << settings_.endTime << ", dt: " << setw(5) << setprecision(4) << dt_ <<
              ", res. " << setprecision(3) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
-        outputWriterText_->writePressureFile();
-        outputWriterText_->writeFile(time);
+        //outputWriterText_->writePressureFile();
+        //outputWriterText_->writeFile(time);
 #endif
-        outputWriterParaview_->writeFile(time);
+        if (time - lastOutput >= outputInterval) {
+            outputWriterParaview_->writeFile(time);
+            lastOutput = time;
+        }
     }
 };
 
