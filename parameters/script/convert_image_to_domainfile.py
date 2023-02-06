@@ -8,16 +8,16 @@ import math
 free_surface = False
 
 # resize option
-scaling_factor = 40.0
+scaling_factor = 1.0
 
 #boundary conditions. i = inflow, o = outflow, n = no-slip
-top = "i"
-bottom = "i"
-left = "i"
-right = "i"
+top = "n"
+bottom = "n"
+left = "n"
+right = "n"
 
 # set domain name (input and output file name)
-domainname = "catamaran_color"
+domainname = "lid_driven_cavity"
 
 image = Image.open(f"{domainname}.png")
 
@@ -104,3 +104,4 @@ with open(f"{domainname}_parameterfile.txt", "w") as parameter_file:
 
 print("Domain file written to: \n" + domainname + ".txt")
 print("Parameter file written to: \n" + domainname + "_parameterfile.txt")
+print("Remember to temperature and velocity values in the parameter file before running the simulation!")
