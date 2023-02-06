@@ -51,6 +51,9 @@ struct Settings {
     bool setFixedTempRight = false;
     double tempBcRight = 0.0;  //< prescribed values of tb or tn at right of domain
 
+    // free surface parameters
+    int particleRefinement = 3; //< inital number of particles in every fluid cell in each direction
+
     string pressureSolver = "SOR";      //< which pressure solver to use, "GaussSeidel" or "SOR"
     double omega = 1.0;                //< overrelaxation factor
     double epsilon = 1e-5;             //< tolerance for the residual in the pressure solver
