@@ -18,7 +18,7 @@ domainFile = domains/lid_driven_cavity.txt
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
-dirichletTopX    = 0
+dirichletTopX    = 1
 dirichletTopY    = 0
 dirichletLeftX   = 0
 dirichletLeftY   = 0
