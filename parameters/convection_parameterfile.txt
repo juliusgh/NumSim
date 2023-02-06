@@ -7,7 +7,7 @@ domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells /
 domainFile = domains/lid_driven_cavity.txt
 
 # Problem description
-endTime = 20.0        # duration of the simulation
+endTime = 100.0        # duration of the simulation
 re = 1000             # Reynolds number
 pr = 1                # Prandtl number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
