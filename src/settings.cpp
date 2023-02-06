@@ -66,12 +66,9 @@ void Settings::loadFromFile(string filename) {
             domainfile_path = path / std::filesystem::path(value);
             ifstream domainfile(domainfile_path, ios::in);
             if (!domainfile.is_open()) {
-                std::cout << "could not open domain file. Defaulting to lid_driven_cavity" << std::endl;
+                std::cout << "could not open domain file. Looking for nCells and pyhsicalsize in parameterfile" << std::endl;
+                continue;
                 // defaulting to lid_driven_cavity
-                nCells[1] = 20;
-                nCells[0] = 20;
-                physicalSize[0] = 2.0;
-                physicalSize[1] = 2.0;
             } else {
                 domainFileGiven = true;
                 std::cout << "wrong loop" << std::endl;
@@ -251,14 +248,30 @@ void Settings::loadFromFile(string filename) {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
             continue;
         }
+        if (parameterName == "nCellsX") {
+            temp_nCellsX = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "nCellsY") {
+            temp_nCellsY = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "physicalSizeX") {
+            temp_phyX = atof(value.c_str());
+            continue;
+        }
+        if (parameterName == "physicalSizeY") {
+            temp_phyY = atof(value.c_str());
+            continue;
+        }
     }
     if (domainFileGiven == false) {
         // Setting lid driven cavity as default
         std::cout << "test" << std::endl;
-        nCells[1] = 20;
-        nCells[0] = 20;
-        physicalSize[0] = nCells[0] / 10.0;
-        physicalSize[1] = nCells[1] / 10.0;
+        nCells[0] = temp_nCellsX;
+        nCells[1] = temp_nCellsY;
+        physicalSize[0] = temp_phyX;
+        physicalSize[1] = temp_phyY;
     }
 }
 
