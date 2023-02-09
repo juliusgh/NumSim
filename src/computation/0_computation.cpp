@@ -110,22 +110,22 @@ void Computation::runSimulation() {
         computeVelocities();
 
         // 7) Re-set all u, v and p values at the free surface according to the free surface conditions
-        discretization_->setSurfaceValues(dt_);
+        //discretization_->setSurfaceValues(dt_);
 
         // 8) Re-set all u, v and p at obstacles according to no-slip boundary condition
         discretization_->setObstacleValues();
 
         // 9) Move particles
-        trackParticles();
+        //trackParticles();
 
         // 10) Update cell markers/types
-        discretization_->updateCellTypes();
+        //discretization_->updateCellTypes();
 
         // 11) Re-set all u, v and p values at the free surface according to the free surface conditions
-        discretization_->setSurfaceValues(dt_);
+        //discretization_->setSurfaceValues(dt_);
 
         // 12) Re-set all u, v and p at obstacles according to no-slip boundary condition
-        discretization_->setObstacleValues();
+        //discretization_->setObstacleValues();
 
         // 13) Output debug information and simulation results
 #ifndef NDEBUG
