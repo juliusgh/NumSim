@@ -34,8 +34,7 @@ set(PROJECT_FILES
         output_writer/output_writer_paraview.cpp
         output_writer/output_writer_text_parallel.cpp
         output_writer/output_writer_paraview_parallel.cpp
-        storage/marker2d.cpp
-        storage/particle2d.cpp)
+        storage/marker2d.cpp)
 
 # Executable for serial version
 set(TARGET_SERIAL ${PROJECT_NAME})

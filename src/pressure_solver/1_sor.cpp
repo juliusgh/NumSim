@@ -34,7 +34,7 @@ void SOR::solve() {
 
         for (int i = discretization_->pInteriorIBegin(); i < discretization_->pInteriorIEnd(); i++) {
             for (int j = discretization_->pInteriorJBegin(); j < discretization_->pInteriorJEnd(); j++) {
-                if (discretization_->marker(i, j) != FLUID) {
+                if (!discretization_->isInnerFluid(i, j)) {
                     continue;
                 }
                 double px = (discretization_->p(i - 1, j) + discretization_->p(i + 1, j)) / dx2;

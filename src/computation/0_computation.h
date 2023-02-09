@@ -47,8 +47,6 @@ protected:
 
     void applyBoundaryValuesRight();
 
-    void setInitialValues();
-
     /**
      * Set the boundary values of the preliminary velocities (u, v)
      * 
@@ -82,6 +80,8 @@ protected:
      * Compute the new velocities (u, v) based on the preliminary velocities (F, G) and the pressure (p)
      */
     virtual void computeVelocities();
+
+    virtual void trackParticles();
 
     /**
      * Compute new temperature t
