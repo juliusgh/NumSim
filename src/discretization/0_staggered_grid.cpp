@@ -52,6 +52,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             // right
             marker(pIEnd() - 1, j) = MARKER::NOSLIP;
         }
+        marker_.print();
     } else {
         // read markers from file{
         cout << "Reading domain file \"" << settings_.domainfile_path << "\"." << endl;
@@ -106,12 +107,26 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    setInitialParticles();
+    // check two cell criterion
+    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
+        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
+            if (marker(i,j) == MARKER::OBSTACLE){
+                if ((j != pInteriorJBegin() and j != pInteriorJEnd()) and marker(i,j - 1) == MARKER::FLUID and marker(i,j + 1) == MARKER::FLUID){
+                    throw std::domain_error("Given domain does not fulfill two cell criterion. Exiting programm:(");
+                }
+                if ((i != pInteriorIBegin() and i != pInteriorIEnd()) and marker(i - 1,j) == MARKER::FLUID and marker(i + 1,j) == MARKER::FLUID){
+                    throw std::domain_error("Given domain does not fulfill two cell criterion. Exiting programm:(");
+                }
+            }
+        }
+    }               
+    
+    //setInitialParticles();
     setInitialTemperature();
     setObstacleMarkers();
-    updateCellTypes();
-    std::cout << "Domain with markers:";
-    marker_.print();
+    //updateCellTypes();
+    //std::cout << "Domain with markers:";
+    //marker_.print();
 };
 
 void StaggeredGrid::setInitialParticles() {

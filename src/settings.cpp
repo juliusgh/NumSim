@@ -12,8 +12,7 @@ void Settings::loadFromFile(string filename) {
 
     // check if file is open
     if (!file.is_open()) {
-        cout << "Could not open parameter file \"" << filename << "\". Exiting programm!" << endl;
-        std::exit(EXIT_FAILURE);
+        throw std::invalid_argument("Could not open parameter file. Exiting simulation:(");
     }
 
     // loop over lines of file
@@ -66,14 +65,8 @@ void Settings::loadFromFile(string filename) {
             domainfile_path = path / std::filesystem::path(value);
             ifstream domainfile(domainfile_path, ios::in);
             if (!domainfile.is_open()) {
-                std::cout << "could not open domain file. Defaulting to lid_driven_cavity" << std::endl;
-                // defaulting to lid_driven_cavity
-                nCells[1] = 20;
-                nCells[0] = 20;
-                physicalSize[0] = 2.0;
-                physicalSize[1] = 2.0;
+                throw std::domain_error("could not open domain file. Exiting simulation:(");
             } else {
-                domainFileGiven = true;
                 std::cout << "wrong loop" << std::endl;
                 int lineCount = 0;
                 int linesize = 0;
@@ -251,14 +244,6 @@ void Settings::loadFromFile(string filename) {
             maximumNumberOfIterations = static_cast<int>(atof(value.c_str()));
             continue;
         }
-    }
-    if (domainFileGiven == false) {
-        // Setting lid driven cavity as default
-        std::cout << "test" << std::endl;
-        nCells[1] = 20;
-        nCells[0] = 20;
-        physicalSize[0] = nCells[0] / 10.0;
-        physicalSize[1] = nCells[1] / 10.0;
     }
 }
 
