@@ -60,7 +60,7 @@ void Computation::runSimulation() {
     double time = 0.0;
     double outputInterval = 1.0 / 50;
     double lastOutput = -outputInterval;
-    setInitialValues();
+    //setInitialValues();
     while (time < settings_.endTime) {
         t_iter++;
 
