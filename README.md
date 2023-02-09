@@ -130,4 +130,4 @@ By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?cur
 
 ![meme3](/fig/meme3.jpeg)
 
-![meme4](/fig/meme4.png)lid_driven_cavity
+![meme4](/fig/meme4.png)
