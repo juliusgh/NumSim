@@ -105,6 +105,21 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
+    // check two cell criterion
+    for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
+        for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
+            if (marker(i,j) == MARKER::OBSTACLE){
+                if ((j != pInteriorJBegin() and j != pInteriorJEnd()) and marker(i,j - 1) == MARKER::FLUID and marker(i,j + 1) == MARKER::FLUID){
+                    std::cout << "Given domain does not fulfill two cell criterion. Exiting programm!" << endl;
+                    std::exit(EXIT_FAILURE);
+                }
+                if ((i != pInteriorIBegin() and i != pInteriorIEnd()) and marker(i - 1,j) == MARKER::FLUID and marker(i + 1,j) == MARKER::FLUID){
+                    std::cout << "Given domain does not fulfill two cell criterion. Exiting programm!" << endl;
+                    std::exit(EXIT_FAILURE);
+                }
+            }
+        }
+    }
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
