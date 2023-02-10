@@ -108,6 +108,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
+
     // check two-cell criterion. If not fulfilled end simulation
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
@@ -120,7 +121,8 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                 }
             }
         }
-    }               
+    }
+
     // TODO: activate commented out code when free surface is completed
     //setInitialParticles();
     setInitialTemperature();

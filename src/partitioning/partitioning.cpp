@@ -29,15 +29,6 @@ Partitioning::Partitioning(std::array<int, 2> nCellsGlobal)
     MPI_Dims_create(nRanks_, 2, nDomains_.data());
     // partitionDomainEqual(nRanks_);
 
-
-
-#ifndef NDEBUG
-    if (ownRankNo() == 0) {
-        std::cout << "RANK " << ownRankNo() << " | nDomains[0]: " << nDomains_[0] << ", nDomains[1]: " << nDomains_[1]
-                  << std::endl;
-        std::cout << "RANK " << ownRankNo() << " | number of processes: " << nRanks_ << std::endl;
-    }
-#endif
 #else
     nRanks_ = 1;
     ownRankNo_ = 0;

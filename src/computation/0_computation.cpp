@@ -11,7 +11,6 @@
  * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
  */
 void Computation::initialize(string filename) {
-    std::cout << "I am not parallel" << std::endl;
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);
@@ -60,7 +59,6 @@ void Computation::runSimulation() {
     double time = 0.0;
     double outputInterval = 1.0 / 50;
     double lastOutput = -outputInterval;
-    //setInitialValues();
     while (time < settings_.endTime) {
         t_iter++;
 
