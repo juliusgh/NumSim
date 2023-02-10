@@ -12,8 +12,15 @@ in our presentation of the our project.
 
 ## Build the code
 
-To run the simulation, the project must be build first. We provided a debug
+To run the simulation, the project must be built first. We provided a debug
 and a release version for your simulation.
+
+The following targets are built:
+
+- `numsim`: **contains the code of the project and runs in serial**
+- `numsim_parallel`: contains only the basic functionality of the second submission and runs in parallel
+- `tests`: contains test cases, which can be uncommented (only built if GTest installed)
+- `compare_output`: compare vtk files against a reference solution
 
 ### Release
 
@@ -35,8 +42,8 @@ make -j
 
 We provided multiple example applications for our project. The following sections
 provide instructions on how to run them. New domains can be created using the
-convert_image_to_domain.py script. The script is located in `parameters/script`.
-It takes images as inputs. Some lines have to be adapted accordingly to the situation
+`convert_image_to_domain.py` script. The script is located in `parameters/script`.
+It takes images as inputs. Some lines have to be adapted accordingly to the situation.
 
 All simulations must be run from within the `build` directory.
 
