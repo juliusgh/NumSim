@@ -50,7 +50,7 @@ All simulations must be run from within the `build` directory.
 ### Convection
 
 ```shell
-./scr/numsim ../parameters/convection.txt
+./src/numsim ../parameters/convection.txt
 ```
 
 ### Lid driven Cavity
@@ -58,7 +58,7 @@ All simulations must be run from within the `build` directory.
 ![ldc](/fig/lid_driven_cavity.png)
 
 ```shell
-./scr/numsim ../parameters/lid_driven_cavity.txt
+./src/numsim ../parameters/lid_driven_cavity.txt
 ```
 
 ### Karman Vortex Street
@@ -66,7 +66,7 @@ All simulations must be run from within the `build` directory.
 ![kvs](/fig/kvs_long.png)
 
 ```shell
-./scr/numsim ../parameters/kvs.txt
+./src/numsim ../parameters/kvs.txt
 ```
 
 ### Karman Vortex Street with Heat
@@ -74,7 +74,7 @@ All simulations must be run from within the `build` directory.
 ![kvsh](/fig/kvs_long.png)
 
 ```shell
-./scr/numsim ../parameters/kvs_heat.txt
+./src/numsim ../parameters/kvs_heat.txt
 ```
 
 ### Catamaran
@@ -85,7 +85,7 @@ Image:
 By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?curid=75764398.>
 
 ```shell
-./scr/numsim ../parameters/catamaran.txt
+./src/numsim ../parameters/catamaran.txt
 ```
 
 ### Catamaran with heat
@@ -96,7 +96,7 @@ Image:
 By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?curid=75764398>.
 
 ```shell
-./scr/numsim ../parameters/catamaran_heat.txt
+./src/numsim ../parameters/catamaran_heat.txt
 ```
 
 ### Channel with Step
@@ -104,7 +104,7 @@ By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?cur
 ![cws](/fig/channel_with_step.png)
 
 ```shell
-./scr/numsim ../parameters/channel_with_step.txt
+./src/numsim ../parameters/channel_with_step.txt
 ```
 
 ### Nozzle
@@ -112,23 +112,7 @@ By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?cur
 ![nozzle](/fig/nozzle.png)
 
 ```shell
-./scr/numsim ../parameters/nozzle.txt
-```
-
-### NumSim Obstacle
-
-![numsimobstacle](/fig/numsim_obstacle.png)
-
-```shell
-./scr/numsim ../parameters/numsim_obstacle.txt
-```
-
-### SimTech Obstacle
-
-![simtechobstacle](/fig/simtech_obstacle.png)
-
-```shell
-./scr/numsim ../parameters/numsim_obstacle.txt
+./src/numsim ../parameters/nozzle.txt
 ```
 
 ### Two Inflows
@@ -136,7 +120,7 @@ By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?cur
 ![twochannels](/fig/two_channels.png)
 
 ```shell
-./scr/numsim ../parameters/two_channels.txt
+./src/numsim ../parameters/two_channels.txt
 ```
 
 ### Z Channel
@@ -144,7 +128,23 @@ By Obsidian Soul - Own work, CC0, <https://commons.wikimedia.org/w/index.php?cur
 ![z](/fig/z.png)
 
 ```shell
-./scr/numsim ../parameters/z.txt
+./src/numsim ../parameters/z.txt
+```
+
+### NumSim Obstacle
+
+![numsimobstacle](/fig/numsim_obstacle.png)
+
+```shell
+./src/numsim ../parameters/numsim_obstacle.txt
+```
+
+### SimTech Obstacle
+
+![simtechobstacle](/fig/simtech_obstacle.png)
+
+```shell
+./src/numsim ../parameters/numsim_obstacle.txt
 ```
 
 ## Memes
