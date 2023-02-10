@@ -3,9 +3,11 @@
 
 /**
  * calculate derivatives needed for pressure calculations using the donor cell approach
- * @param nCells: number of inner cells
+ * @param partitioning: encapsulate functionality corresponding to subdomain handling
  * @param meshWidth: width of a cell in both directions
  * @param alpha: donor cell weight parameter
+ * @param gamma: donor cell weight parameter for temperature
+ * @param settings: information about the settings received from parameter file
  */
 
 DonorCell::DonorCell(std::shared_ptr<Partitioning> partitioning,
@@ -21,8 +23,8 @@ DonorCell::DonorCell(std::shared_ptr<Partitioning> partitioning,
 
 /**
  * compute the 1st derivative ∂ u^2 / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDu2Dx(int i, int j) const {
@@ -40,8 +42,8 @@ double DonorCell::computeDu2Dx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ v^2 / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDv2Dy(int i, int j) const {
@@ -59,8 +61,8 @@ double DonorCell::computeDv2Dy(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (uv) / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDuvDx(int i, int j) const {
@@ -81,8 +83,8 @@ double DonorCell::computeDuvDx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (uv) / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDuvDy(int i, int j) const {
@@ -103,9 +105,9 @@ double DonorCell::computeDuvDy(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (ut) / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
- * @return central differences derivative approximation of the derivative stated above
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDutDx(int i, int j) const {
     const double t_interp_right = (t(i + 1, j) + t(i, j)) / 2.0;
@@ -122,9 +124,9 @@ double DonorCell::computeDutDx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (vt) / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
- * @return central differences derivative approximation of the derivative stated above
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
+ * @return donor cell derivative approximation of the derivative stated above
  */
 double DonorCell::computeDvtDy(int i, int j) const {
     const double t_interp_up = (t(i, j + 1) + t(i, j)) / 2.0;

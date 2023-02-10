@@ -40,10 +40,14 @@ public:
 
     void print() const;
 
-    //! set all data of 2D array to zero
+    /**
+     * set all data of 2D array to zero
+     */
     void setToZero();
 
-    //! return data vector
+    /**
+     * return data vector
+     */
     void *data();
 
 protected:

@@ -6,9 +6,8 @@
  * This class represents a 2D array of double values.
  *  Internally they are stored consecutively in memory.
  *  The entries can be accessed by two indices i,j.
- * @param size: number of cells
+ * @param number: number of particles
  */
-
 Particle2D::Particle2D(int number) :
         number_(number) {
     // allocate data, initialize to FLUID
@@ -16,7 +15,7 @@ Particle2D::Particle2D(int number) :
 }
 
 /**
- * get number of cells
+ * get number of particles
  * @return number of cells
  */
 int Particle2D::number() const {
@@ -68,7 +67,6 @@ double Particle2D::operator()(int k, int axis) const {
 /**
  * print out grid in two dimensions
  */
-
 void Particle2D::print() const {
     std::cout << std::endl;
     for (int k = 0; k < number_; k++) {
@@ -76,10 +74,16 @@ void Particle2D::print() const {
     }
 }
 
+/**
+ * get vector with particle information stored in the data vector
+ */
 void Particle2D::setToZero() {
     data_.resize(number_ * 2, 0.0);
 }
 
+/**
+ * set particle vector values to zero
+ */
 void *Particle2D::data() {
     return data_.data();
 }

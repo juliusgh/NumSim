@@ -16,8 +16,9 @@ public:
 
     /**
      * construct the object with given number of cells in x and y direction
-     * @param nCells: number of inner cells
-     * @param meshWidth: width of grid cell in one direction
+     * @param partitioning: encapsulate functionality corresponding to subdomain handling
+     * @param meshWidth: width of a cell in both directions
+     * @param settings: information about the settings received from parameter file
      */
     Discretization(std::shared_ptr<Partitioning> partitioning,
                    std::array<double, 2> meshWidth,

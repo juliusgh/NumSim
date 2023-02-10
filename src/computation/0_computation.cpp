@@ -109,6 +109,7 @@ void Computation::runSimulation() {
         updateLastVelocities();
         computeVelocities();
 
+        // TODO: in all following steps activate the free surface components, when it is completed
         // 7) Re-set all u, v and p values at the free surface according to the free surface conditions
         //discretization_->setSurfaceValues(dt_);
 
@@ -132,8 +133,6 @@ void Computation::runSimulation() {
         cout << std::fixed << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << setprecision(0) << settings_.endTime << ", dt: " << setw(5) << setprecision(4) << dt_ <<
              ", res. " << setprecision(3) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
-        //outputWriterText_->writePressureFile();
-        //outputWriterText_->writeFile(time);
 #endif
         if (time - lastOutput >= outputInterval) {
             outputWriterParaview_->writeFile(time);
@@ -143,13 +142,16 @@ void Computation::runSimulation() {
 };
 
 /**
- * Set the initial values of the temperature t
+ * Set boundary values for velocity and temperature.
  */
 void Computation::applyBoundaryValues() {
     discretization_->applyBoundaryVelocities();
     discretization_->applyBoundaryTemperature();
 };
 
+/**
+ * Set velocity and temperature values for the top boundaries.
+ */
 void Computation::applyBoundaryValuesTop() {
     // set boundary values for u at top side
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -187,6 +189,9 @@ void Computation::applyBoundaryValuesTop() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the bottom boundaries.
+ */
 void Computation::applyBoundaryValuesBottom() {
     // set boundary values for u at bottom side
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -224,6 +229,9 @@ void Computation::applyBoundaryValuesBottom() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the left boundaries.
+ */
 void Computation::applyBoundaryValuesLeft() {
     // set boundary values for u at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
@@ -264,6 +272,9 @@ void Computation::applyBoundaryValuesLeft() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the right boundaries.
+ */
 void Computation::applyBoundaryValuesRight() {
     // set boundary values for u at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
@@ -305,7 +316,7 @@ void Computation::applyBoundaryValuesRight() {
 };
 
 /**
- * Set the boundary values of the preliminary velocities (u, v)
+ * Set the boundary values of the preliminary velocities (F, G)
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
@@ -422,14 +433,14 @@ void Computation::computePreliminaryVelocities() {
 };
 
 /**
- * Compute the pressure p by solving the Poisson equation
+ * Compute the pressure p by solving the Poisson equation using a pressure solver
  */
 void Computation::computePressure() {
     pressureSolver_->solve();
 };
 
 /**
- * Compute the right hand side rhs of the pressure Poisson equation
+ * Compute the right hand side (rhs) of the pressure Poisson equation
  */
 void Computation::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
@@ -503,6 +514,9 @@ void Computation::computeVelocities() {
     }
 };
 
+/**
+ * compute new temperature values (t)
+ */
 void Computation::computeTemperature() {
     for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
         for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
@@ -515,7 +529,9 @@ void Computation::computeTemperature() {
         }
     }
 };
-
+/**
+ * update all particle positions using interpolation
+ */
 void Computation::trackParticles() {
     // Iterate over all particles to track their position
     for (int k = 0; k < discretization_->particleNumber(); k++){

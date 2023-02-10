@@ -5,8 +5,9 @@
 
 /**
  * Implement staggered grid, providing a variety of parameters
- * @param nCells: number of cells
+ * @param partitioning: encapsulate functionality corresponding to subdomain handling
  * @param meshWidth: cell width in all directions
+ * @param settings: information about the settings received from parameter file
  */
 StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                              std::array<double, 2> meshWidth,
@@ -62,7 +63,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
 
             if (file.eof())
                 break;
-
+            // set general marker
             for (int i = 0; i < line.size(); ++i) {
                 int mi = i + pIBegin();
                 int mj = pJEnd() - j - 1;
@@ -107,7 +108,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    // check two cell criterion
+    // check two-cell criterion. If not fulfilled end simulation
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
             if (marker(i,j) == MARKER::OBSTACLE){
@@ -120,17 +121,22 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }               
-    
+    // TODO: activate commented out code when free surface is completed
     //setInitialParticles();
     setInitialTemperature();
     setObstacleMarkers();
     //updateCellTypes();
-    //std::cout << "Domain with markers:";
-    //marker_.print();
 };
 
+/**
+ * miscellaneous
+ */
+
+/**
+ * create and set particles uniformly distributed in fluid cells for free surface on a finer grid
+ */
 void StaggeredGrid::setInitialParticles() {
-    // Create initial particles in the fluid cells on a finer grid
+    // count fluid cells
     int fluidCells = 0;
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -139,6 +145,7 @@ void StaggeredGrid::setInitialParticles() {
             }
         }
     }
+    // place particle in fluid cell
     int particleNumber = settings_.particleRefinement * settings_.particleRefinement * fluidCells;
     particles_ = Particle2D(particleNumber);
     int k = 0;
@@ -164,6 +171,9 @@ void StaggeredGrid::setInitialParticles() {
     }
 };
 
+/**
+ * set temperature everywhere to an initial value (same value everywhere)
+ */
 void StaggeredGrid::setInitialTemperature() {
     for (int i = tIBegin(); i < tIEnd(); i++) {
         for (int j = tJBegin(); j < tJEnd(); j++) {
@@ -172,6 +182,13 @@ void StaggeredGrid::setInitialTemperature() {
     }
 };
 
+/**
+ * Obstacles and boundary conditions
+ */
+
+/**
+ * specify obstacle states within an obstacle, because different positions require different calculations
+ */
 void StaggeredGrid::setObstacleMarkers() {
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
@@ -217,6 +234,9 @@ void StaggeredGrid::setObstacleMarkers() {
     }
 }
 
+/**
+ * set (preliminary) velocities v, u, F and G to zero in obstacles
+ */
 void StaggeredGrid::setObstacleValues() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
@@ -240,6 +260,10 @@ void StaggeredGrid::setObstacleValues() {
     }
 }
 
+/**
+ * set (preliminary) velocities v, u, F and G at obstacle boundaries according to derivation extended from the lecture
+ * as well as conditions at the domains boundary values according to specified boundary conditions
+ */
 void StaggeredGrid::applyBoundaryVelocities() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
@@ -401,6 +425,9 @@ void StaggeredGrid::applyBoundaryVelocities() {
     }
 };
 
+/**
+ * Set pressure values at obstacle boundaries as well as at the domain boundaries according to specified boundary conditions
+ */
 void StaggeredGrid::applyBoundaryPressure() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -492,6 +519,9 @@ void StaggeredGrid::applyBoundaryPressure() {
     }
 };
 
+/**
+ * set temperature at obstacle boundaries as well as at domain boundaries
+ */
 void StaggeredGrid::applyBoundaryTemperature() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -558,6 +588,15 @@ void StaggeredGrid::applyBoundaryTemperature() {
     }
 };
 
+/**
+ * free surface
+ */
+
+/**
+ * set velocites (u, v) and pressure p at surface between fluid and free cells
+ * must differentiate between many cases which require different handling
+ * @param dt: time step width
+ */
 void StaggeredGrid::setSurfaceValues(double dt) {
     // TODO: check order in which values are calculated! (e.g. gray depends on green)
     for (int i = pIBegin(); i < pIEnd(); i++) {
@@ -1692,15 +1731,15 @@ int StaggeredGrid::qInteriorJEnd() const {
 };
 
 /**
- * get reference to field variable t
- * @return reference to field variable t
+ * get reference to field variable q
+ * @return reference to field variable q
  */
 const FieldVariable &StaggeredGrid::q() const {
     return q_;
 };
 
 /**
- * evaluate field variable q in an element (i,j)
+ * evaluate field variable temperature souce term q in an element (i,j)
  * @param i: position in x direction in discretized grid
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
@@ -1714,7 +1753,7 @@ double StaggeredGrid::q(int i, int j) const {
 };
 
 /**
- * evaluate field variable q in an element (i,j)
+ * evaluate field variable temperature souce term q in an element (i,j)
  * @param i: position in x direction in discretized grid
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
@@ -1727,37 +1766,71 @@ double &StaggeredGrid::q(int i, int j) {
     return q_(i - qIBegin(), j - qJBegin());
 };
 
+/**
+ * free surface
+ */
+
+/**
+ * get number of particles
+ * @return number of particles
+ */
 int StaggeredGrid::particleNumber() const {
     return particles_.number();
 };
-
+/**
+ * get list of particles
+ * @return particles
+ */
 const Particle2D &StaggeredGrid::particle() const {
 
     return particles_;
 }
+
+/**
+ * get particle position in x direction
+ * @param k: index of the particle
+ * @return particle position in x direction
+ */
 
 double StaggeredGrid::particlePosX(int k) const{
 
     return particles_(k,0);
 };
 
-
+/**
+ * get particle position in x direction
+ * @param k: index of the particle
+ * @return particle position in x direction
+ */
 double &StaggeredGrid::particlePosX(int k){
     return particles_(k,0);
 };
 
-
+/**
+ * get particle position in y direction
+ * @param k: index of the particle
+ * @return particle position in y direction
+ */
 double StaggeredGrid::particlePosY(int k) const{
 
     return particles_(k,1);
 };
 
-
+/**
+ * get particle position in y direction
+ * @param k: index of the particle
+ * @return particle position in y direction
+ */
 double &StaggeredGrid::particlePosY(int k) {
 
     return particles_(k, 1);
 };
 
+/**
+ * split particle index k into indices i and j for x and y direction, respectively.
+ * @param k: index of the particle
+ * @return tuple of i and j for the particle position on a two dimensional grid
+ */
 std::array<int, 2> StaggeredGrid::particleCell(int k) const {
 #ifndef NDEBUG
     assert((0 <= k) && (k <= particleNumber()) && "particle i failed in const");
@@ -1768,6 +1841,9 @@ std::array<int, 2> StaggeredGrid::particleCell(int k) const {
     return {i, j};
 }
 
+/**
+ * set fluid, free and surface cells accordingly. See lecture notes for a detailed description of the surface cases.
+ */
 void StaggeredGrid::updateCellTypes() {
     // Reset all fluid cells to free
     for (int i = pIBegin(); i < pIEnd(); i++) {
@@ -1845,6 +1921,12 @@ void StaggeredGrid::updateCellTypes() {
     }
 };
 
+/**
+ * gets number of free neighbors a cell has. Diagonal neighbours are irrelevant.
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return number of free neighbor cells
+ */
 int StaggeredGrid::countFreeNeighbors(int i, int j) {
     int count = 0;
     if (marker(i, j + 1) == FREE)
@@ -1858,6 +1940,12 @@ int StaggeredGrid::countFreeNeighbors(int i, int j) {
     return count;
 };
 
+/**
+ * check if cell is inner fluid cell (has no free neighbor cell)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return boolean: true - is inner fluid cell or false (is not inner fluid cell)
+ */
 bool StaggeredGrid::isInnerFluid(int i, int j) {
     return (marker(i, j) == FLUID && countFreeNeighbors(i, j) == 0);
 };
