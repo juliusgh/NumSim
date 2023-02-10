@@ -122,6 +122,9 @@ void ConjugateGradient::solve() {
     iterations_ = iteration;
 };
 
+/**
+ * set search directions at obstacle and domain boundaries
+ */
 void ConjugateGradient::applyBoundarySearchDirection() {
     for (int i = discretization_->pIBegin(); i < discretization_->pIEnd(); i++) {
         for (int j = discretization_->pJBegin(); j < discretization_->pJEnd(); j++) {
@@ -213,12 +216,20 @@ void ConjugateGradient::applyBoundarySearchDirection() {
     }
 };
 
-
+/**
+ * get search direction
+ * @return search direction
+ */
 const FieldVariable &ConjugateGradient::s() const {
     return s_;
 };
 
-
+/**
+ * set search direction with off-set at (i,j)
+ * @param i same as everywhere
+ * @param j same as everywhere
+ * @return search direction
+ */
 double ConjugateGradient::s(int i, int j) const {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
@@ -227,7 +238,12 @@ double ConjugateGradient::s(int i, int j) const {
     return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
 
-
+/**
+ * get search direction with off-set at (i,j)
+ * @param i same as everywhere
+ * @param j same as everywhere
+ * @return search direction
+ */
 double &ConjugateGradient::s(int i, int j) {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
@@ -236,11 +252,16 @@ double &ConjugateGradient::s(int i, int j) {
     return s_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
 
+/**
+ * get residual
+ */
 const FieldVariable &ConjugateGradient::residual() const {
     return residual_;
 };
 
-
+/**
+ * set residual with off-set
+ */
 double ConjugateGradient::residual(int i, int j) const {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
@@ -249,7 +270,9 @@ double ConjugateGradient::residual(int i, int j) const {
     return residual_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
 
-
+/**
+ * get residual with off-set
+ */
 double &ConjugateGradient::residual(int i, int j) {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
@@ -258,11 +281,16 @@ double &ConjugateGradient::residual(int i, int j) {
     return residual_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
 
+/**
+ * get Laplace-s in (i,j)
+ */
 const FieldVariable &ConjugateGradient::As() const {
     return As_;
 };
 
-
+/**
+ * get Laplace-s in (i,j)
+ */
 double ConjugateGradient::As(int i, int j) const {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));
@@ -271,7 +299,9 @@ double ConjugateGradient::As(int i, int j) const {
     return As_(i - discretization_->pIBegin(), j - discretization_->pJBegin());
 };
 
-
+/**
+ * get Laplace-s in (i,j)
+ */
 double &ConjugateGradient::As(int i, int j) {
 #ifndef NDEBUG
     assert((discretization_->pIBegin() <= i) && (i <= discretization_->pIEnd()));

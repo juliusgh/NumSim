@@ -72,10 +72,14 @@ public:
 
     void print() const;
 
-    //! set all data of 2D array to FLUID cells
+    /**
+     * set all data of 2D array to FLUID cells
+     */
     void setToFluid();
 
-    //! return data vector
+    /**
+     * return data vector
+     */
     void *data();
 
 protected:

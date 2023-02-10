@@ -492,38 +492,90 @@ public:
     */
     int qInteriorJEnd() const;
 
+    /**
+     * get number of particles
+     */
     int particleNumber() const;
 
+    /**
+    * get list of particles
+    */
     const Particle2D &particle() const;
 
+    /**
+     * get particle position in x direction
+     */
     double particlePosX(int k) const;
-
+    /**
+     * get particle position in x direction
+     */
     double &particlePosX(int k);
 
+    /**
+     * get particle position in y direction
+     */
     double particlePosY(int k) const;
 
+    /**
+     * get particle position in y direction
+     */
     double &particlePosY(int k);
 
+    /**
+     * get particle position in y direction
+     */
     std::array<int, 2> particleCell(int k) const;
 
+    /**
+     * create and set particles uniformly distributed in fluid cells for free surface on a finer grid
+     */
     void setInitialParticles();
 
+    /**
+     * set temperature everywhere to an initial value (same value everywhere)
+     */
     void setInitialTemperature();
 
+    /**
+     * set (preliminary) velocities v, u, F and G at obstacle boundaries according to derivation extended from the lecture
+     * as well as conditions at the domains boundary values according to specified boundary conditions
+     */
     void applyBoundaryVelocities();
 
+    /**
+     * Set pressure values at obstacle boundaries as well as at the domain boundaries according to specified boundary conditions
+     */
     void applyBoundaryPressure();
 
+    /**
+     * set temperature at obstacle boundaries as well as at domain boundaries
+     */
     void applyBoundaryTemperature();
 
+    /**
+     * set (preliminary) velocities v, u, F and G to zero in obstacles
+     */
     void setObstacleValues();
 
+    /**
+     * specify obstacle states within an obstacle, because different positions require different calculations
+     */
     void setObstacleMarkers();
 
+    /**
+     * set velocites (u, v) and pressure p at surface between fluid and free cells
+     * must differentiate between many cases which require different handling
+     */
     void setSurfaceValues(double dt);
 
+    /**
+     * set fluid, free and surface cells accordingly. See lecture notes for a detailed description of the surface cases.
+     */
     void updateCellTypes();
 
+    /**
+     * check if cell is inner fluid cell (has no free neighbor cell)
+     */
     bool isInnerFluid(int i,int j);
 
 

@@ -59,15 +59,9 @@ struct Settings {
     double epsilon = 1e-5;             //< tolerance for the residual in the pressure solver
     int maximumNumberOfIterations = 1e5;    //< maximum number of iterations in the solver
 
-    string domainfile_path;
-    double scaling_factor = 10.0;
-    bool domainFileGiven = false;
-    // temporary values for physical size and number of cells.
-    // This is used when neither domain file nor information about the values is given
-    int temp_nCellsX = 20;
-    int temp_nCellsY = 20;
-    double temp_phyX = 2.0;
-    double temp_phyY = 2.0;
+    string domainfile_path; //< location of domain file relative to the corresponding parameter file
+    double scaling_factor = 10.0; //< physical_size = nCell / scaling_factor
+
     //! parse a text file with settings, each line contains "<parameterName> = <value>"
     void loadFromFile(string filename);
 

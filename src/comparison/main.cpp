@@ -45,12 +45,6 @@ void parseData(std::string filename, MeshData &meshData, double &t) {
     vtkSmartPointer <vtkDataSet> dataSet = reader->GetOutputAsDataSet(0);
     vtkSmartPointer <vtkFieldData> fieldData = dataSet->GetFieldData();
 
-    /*
-    std::cout << "file \"" << filename << "\" contains " << reader->GetNumberOfPointArrays() << " point arrays, "
-      << reader->GetNumberOfCellArrays() << "," << reader->GetNumberOfColumnArrays() << std::endl;
-    std::cout << " field has " << fieldData->GetNumberOfArrays() << " arrays.";
-    */
-
     // get stored time
     if (fieldData->GetNumberOfArrays() > 0) {
         vtkSmartPointer <vtkDataArray> array = fieldData->GetArray(0);
@@ -65,8 +59,6 @@ void parseData(std::string filename, MeshData &meshData, double &t) {
     for (int arrayNo = 0; arrayNo < pointData->GetNumberOfArrays(); arrayNo++) {
         vtkSmartPointer <vtkDoubleArray> array = vtkDoubleArray::SafeDownCast(pointData->GetAbstractArray(arrayNo));
         int nEntries = array->GetNumberOfTuples();
-        //int nComponents = array->GetNumberOfComponents();
-        //std::cout << "  " << array->GetName() << ", nEntries: " << nEntries << ", nComponents: " << nComponents << std::endl;
 
         if (std::string(array->GetName()) != "velocity")
             continue;
@@ -105,12 +97,9 @@ void parseDirectory(std::string directory, SimulationData &simulationData) {
     // sort files by filename
     std::sort(filenames.begin(), filenames.end());
 
-    //std::cout << "Parse data in \"" << directory << "\"." << std::endl;
-
     // loop over filenames and parse files
     for (std::vector<std::string>::iterator iter = filenames.begin(); iter != filenames.end(); iter++) {
         std::string filename = *iter;
-        //std::cout << "  File " << filename << std::endl;
         double t;
         simulationData.values.emplace_back();
         parseData(filename, simulationData.values.back(), t);
@@ -119,7 +108,6 @@ void parseDirectory(std::string directory, SimulationData &simulationData) {
 }
 
 double compareData(SimulationData &testData, SimulationData &referenceData) {
-    const bool output = false;
 
     // loop over entries in test data
     double differenceNormData = 0;
@@ -127,9 +115,6 @@ double compareData(SimulationData &testData, SimulationData &referenceData) {
     for (int i = 0; i < nFiles; i++) {
         double t = testData.times[i];
         MeshData &testMeshData = testData.values[i];
-
-        if (output)
-            std::cout << "test t = " << t << std::endl;
 
         // get corresponding data sets of reference Data
         int firstReferenceIndex = 0;
@@ -151,13 +136,6 @@ double compareData(SimulationData &testData, SimulationData &referenceData) {
                     (referenceData.times[secondReferenceIndex] - referenceData.times[firstReferenceIndex]);
         }
 
-        if (output) {
-            std::cout << "   corresponding reference datasets: " << std::endl
-                      << "     t=" << referenceData.times[firstReferenceIndex] << " at index " << firstReferenceIndex
-                      << std::endl
-                      << "     t=" << referenceData.times[secondReferenceIndex] << " at index " << secondReferenceIndex
-                      << ", alpha: " << alpha << std::endl;
-        }
 
         // loop over values
         double differenceNormDataset = 0;
@@ -174,7 +152,6 @@ double compareData(SimulationData &testData, SimulationData &referenceData) {
             double differenceNorm = sqrt(
                     (referenceU - testU) * (referenceU - testU) + (referenceV - testV) * (referenceV - testV));
 
-            //std::cout << "      j=" << j << "/" << nPoints << ", error: " << differenceNorm << std::endl;
             differenceNormDataset += differenceNorm;
         }
         differenceNormDataset /= nPoints;

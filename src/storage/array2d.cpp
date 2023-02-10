@@ -77,10 +77,16 @@ void Array2D::print() const {
     std::cout << "----------" << std::endl;
 }
 
+/**
+ * set all data of 2D array to zero
+ */
 void Array2D::setToZero() {
     data_.resize(size_[0] * size_[1], 0.0);
 }
 
+/**
+ * return data vector
+ */
 void *Array2D::data() {
     return data_.data();
 }

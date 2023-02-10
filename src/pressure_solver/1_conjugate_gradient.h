@@ -74,7 +74,7 @@ protected:
     double &As(int i, int j);
 
     /**
-    *  Implementation of communication of search directions values between neighbouring subdomains
+    * set search directions at obstacle and domain boundaries
     */
     void applyBoundarySearchDirection();
 
