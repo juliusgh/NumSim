@@ -3,8 +3,9 @@
 
 /**
  *  calculate derivatives needed for pressure calculations using the central differences approach
- * @param nCells: number of inner cells
+ *  @param partitioning: encapsulate functionality corresponding to subdomain handling
  * @param meshWidth: width of cells in all directions
+ * @param settings: information about the settings received from parameter file
  */
 
 CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitioning,
@@ -16,8 +17,8 @@ CentralDifferences::CentralDifferences(std::shared_ptr<Partitioning> partitionin
 
 /**
  * compute the 1st derivative ∂ u^2 / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDu2Dx(int i, int j) const {
@@ -29,8 +30,8 @@ double CentralDifferences::computeDu2Dx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ v^2 / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDv2Dy(int i, int j) const {
@@ -42,8 +43,8 @@ double CentralDifferences::computeDv2Dy(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (uv) / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDuvDx(int i, int j) const {
@@ -58,9 +59,9 @@ double CentralDifferences::computeDuvDx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (uv) / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
- * @return donor cell derivative approximation of the derivative stated above
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
+ * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDuvDy(int i, int j) const {
     const double u_interp_up = (u(i, j + 1) + u(i, j)) / 2.0;
@@ -74,8 +75,8 @@ double CentralDifferences::computeDuvDy(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (ut) / ∂x
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDutDx(int i, int j) const {
@@ -87,8 +88,8 @@ double CentralDifferences::computeDutDx(int i, int j) const {
 
 /**
  * compute the 1st derivative ∂ (vt) / ∂y
- * @param i: discretized position in x direcetion
- * @param j: discretiszed position in y direction
+ * @param i: discretized position in x direction
+ * @param j: discretized position in y direction
  * @return central differences derivative approximation of the derivative stated above
  */
 double CentralDifferences::computeDvtDy(int i, int j) const {

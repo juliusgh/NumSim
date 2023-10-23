@@ -6,7 +6,7 @@
  * This class represents a 2D array of double values.
  *  Internally they are stored consecutively in memory.
  *  The entries can be accessed by two indices i,j.
- * @param size: number of cells
+ * @param size: number of markers
  */
 
 Marker2D::Marker2D(std::array<int, 2> size) :
@@ -24,10 +24,10 @@ std::array<int, 2> Marker2D::size() const {
 }
 
 /**
- * access the value at coordinate (i,j), declared not const, i.e. the value can be changed
+ * access the marker value at coordinate (i,j), declared not const, i.e. the value can be changed
  * @param i: discretized position in x direction
  * @param j: discretized position in y direction
- * @return reference to value at the grid cell (i,j)
+ * @return reference to marker value at the grid cell (i,j)
  */
 MARKER &Marker2D::operator()(int i, int j) {
     const int index = j * size_[0] + i;
@@ -43,10 +43,10 @@ MARKER &Marker2D::operator()(int i, int j) {
 }
 
 /**
- * get the value at coordinate (i,j), declared const, i.e. it is not possible to change the value
+ * get the marker value at coordinate (i,j), declared const, i.e. it is not possible to change the value
  * @param i: discretized position in x direction
  * @param j: discretized position in y direction
- * @return value at the grid cell (i,j)
+ * @return marker value at the grid cell (i,j)
  */
 MARKER Marker2D::operator()(int i, int j) const {
     const int index = j * size_[0] + i;
@@ -75,10 +75,16 @@ void Marker2D::print() const {
     }
 }
 
+/**
+ * set all data of 2D array to FLUID cells
+ */
 void Marker2D::setToFluid() {
     data_.resize(size_[0] * size_[1], MARKER::FLUID);
 }
 
+/**
+ * return data vector
+ */
 void *Marker2D::data() {
     return data_.data();
 }

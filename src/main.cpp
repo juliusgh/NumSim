@@ -1,7 +1,5 @@
 #ifndef NPARALLEL
-
 #include "computation/1_computation_parallel.h"
-
 #else
 #include "computation/0_computation.h"
 #endif

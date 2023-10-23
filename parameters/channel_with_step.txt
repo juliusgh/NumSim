@@ -1,10 +1,10 @@
 # Settings file for numsim program
 # Run from build directory:
-# ./src/numsim  ../parameters/kvs_parameterfile.txt
+# ./src/numsim  ../parameters/channel_with_step_parameterfile.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
-domainFile = domains/kvs_heat_long.txt
+domainFile = domains/channel_with_step.txt
 
 # Problem description
 endTime = 100.0        # duration of the simulation
@@ -16,7 +16,7 @@ gY = 0.0
 # Dirichlet boundary conditions
 dirichletBottomX = 0
 dirichletBottomY = 0
-dirichletTopX    = 1
+dirichletTopX    = 0
 dirichletTopY    = 0
 dirichletLeftX = 1.0 # here we have inflow
 dirichletLeftY = 0.0 # here we have inflow

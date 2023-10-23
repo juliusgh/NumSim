@@ -5,8 +5,9 @@
 
 /**
  * Implement staggered grid, providing a variety of parameters
- * @param nCells: number of cells
+ * @param partitioning: encapsulate functionality corresponding to subdomain handling
  * @param meshWidth: cell width in all directions
+ * @param settings: information about the settings received from parameter file
  */
 StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
                              std::array<double, 2> meshWidth,
@@ -26,7 +27,8 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
         vLast_(vSize(), {meshWidth[0] / 2., meshWidth[1]}, meshWidth),
         t_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
         tobs_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
-        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth) {
+        q_(tSize(), {meshWidth[0] / 2., meshWidth[1] / 2.}, meshWidth),
+        particles_(0) {
 
     // set markers:
     marker_.setToFluid();
@@ -61,7 +63,7 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
 
             if (file.eof())
                 break;
-
+            // set general marker
             for (int i = 0; i < line.size(); ++i) {
                 int mi = i + pIBegin();
                 int mj = pJEnd() - j - 1;
@@ -106,7 +108,8 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    // check two cell criterion
+
+    // check two-cell criterion. If not fulfilled end simulation
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
             if (marker(i,j) == MARKER::OBSTACLE){
@@ -119,6 +122,76 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
+
+    // TODO: activate commented out code when free surface is completed
+    //setInitialParticles();
+    setInitialTemperature();
+    setObstacleMarkers();
+    //updateCellTypes();
+};
+
+/**
+ * miscellaneous
+ */
+
+/**
+ * create and set particles uniformly distributed in fluid cells for free surface on a finer grid
+ */
+void StaggeredGrid::setInitialParticles() {
+    // count fluid cells
+    int fluidCells = 0;
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) == FLUID) {
+                fluidCells++;
+            }
+        }
+    }
+    // place particle in fluid cell
+    int particleNumber = settings_.particleRefinement * settings_.particleRefinement * fluidCells;
+    particles_ = Particle2D(particleNumber);
+    int k = 0;
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) != FLUID) {
+                continue;
+            }
+            double originX = i * dx();
+            double originY = j * dy();
+            int partNumX = settings_.particleRefinement;
+            int partNumY = settings_.particleRefinement;
+            double hx = dx() / (partNumX + 1);
+            double hy = dy() / (partNumY + 1);
+            for (int px = 0; px < partNumX; px++) {
+                for (int py = 0; py < partNumY; py++) {
+                    particlePosX(k) = originX + (px + 1) * hx;
+                    particlePosY(k) = originY + (py + 1) * hy;
+                    k++;
+                }
+            }
+        }
+    }
+};
+
+/**
+ * set temperature everywhere to an initial value (same value everywhere)
+ */
+void StaggeredGrid::setInitialTemperature() {
+    for (int i = tIBegin(); i < tIEnd(); i++) {
+        for (int j = tJBegin(); j < tJEnd(); j++) {
+            t(i, j) = settings_.initialTemp;
+        }
+    }
+};
+
+/**
+ * Obstacles and boundary conditions
+ */
+
+/**
+ * specify obstacle states within an obstacle, because different positions require different calculations
+ */
+void StaggeredGrid::setObstacleMarkers() {
     // set obstacle markers
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -161,10 +234,11 @@ StaggeredGrid::StaggeredGrid(const std::shared_ptr<Partitioning> &partitioning,
             }
         }
     }
-    //std::cout << "Domain with markers:";
-    //marker_.print();
-};
+}
 
+/**
+ * set (preliminary) velocities v, u, F and G to zero in obstacles
+ */
 void StaggeredGrid::setObstacleValues() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
@@ -188,6 +262,10 @@ void StaggeredGrid::setObstacleValues() {
     }
 }
 
+/**
+ * set (preliminary) velocities v, u, F and G at obstacle boundaries according to derivation extended from the lecture
+ * as well as conditions at the domains boundary values according to specified boundary conditions
+ */
 void StaggeredGrid::applyBoundaryVelocities() {
     for (int i = pInteriorIBegin(); i < pInteriorIEnd(); i++) {
         for (int j = pInteriorJBegin(); j < pInteriorJEnd(); j++) {
@@ -349,6 +427,9 @@ void StaggeredGrid::applyBoundaryVelocities() {
     }
 };
 
+/**
+ * Set pressure values at obstacle boundaries as well as at the domain boundaries according to specified boundary conditions
+ */
 void StaggeredGrid::applyBoundaryPressure() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -440,6 +521,9 @@ void StaggeredGrid::applyBoundaryPressure() {
     }
 };
 
+/**
+ * set temperature at obstacle boundaries as well as at domain boundaries
+ */
 void StaggeredGrid::applyBoundaryTemperature() {
     for (int i = pIBegin(); i < pIEnd(); i++) {
         for (int j = pJBegin(); j < pJEnd(); j++) {
@@ -505,6 +589,226 @@ void StaggeredGrid::applyBoundaryTemperature() {
         }
     }
 };
+
+/**
+ * free surface
+ */
+
+/**
+ * set velocites (u, v) and pressure p at surface between fluid and free cells
+ * must differentiate between many cases which require different handling
+ * @param dt: time step width
+ */
+void StaggeredGrid::setSurfaceValues(double dt) {
+    // TODO: check order in which values are calculated! (e.g. gray depends on green)
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            switch (marker(i, j)) {
+                case SURFACE_RIGHT: // nx=1, ny=0, mx=0, my=-1
+                    // tangential: du/dy + dv/dx = 0
+                    v(i + 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i, j) - u(i, j - 1));
+                    // normal: p - 2/Re * du/dx = 0
+                    p(i, j) = 2.0 / settings_.re * (u(i, j) - u(i - 1, j)) / dx();
+                    // continuity: du/dx + dv/dy = 0
+                    u(i, j) = u(i - 1, j) - dx() / dy() * (v(i, j) - v(i, j - 1));
+                    break;
+                case SURFACE_LEFT: // nx=-1, ny=0, mx=0, my=1
+                    // tangential: du/dy + dv/dx = 0
+                    v(i - 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
+                    // normal: p - 2/Re * du/dx = 0
+                    p(i, j) = 2.0 / settings_.re * (u(i, j) - u(i - 1, j)) / dx();
+                    // continuity: du/dx + dv/dy = 0
+                    u(i - 1, j) = u(i, j) + dx() / dy() * (v(i, j) - v(i, j - 1));
+                    break;
+                case SURFACE_TOP: // nx=0, ny=1, mx=1, my=0
+                    // tangential: du/dy + dv/dx = 0
+                    u(i - 1, j) = u(i - 1, j - 1) - dy() / dx() * (v(i, j) - v(i - 1, j));
+                    // normal: p - 2/Re * dv/dy = 0
+                    p(i, j) = 2.0 / settings_.re * (v(i, j) - v(i, j - 1)) / dy();
+                    // continuity: du/dx + dv/dy = 0
+                    v(i, j) = v(i - 1, j) - dy() / dx() * (u(i, j) - u(i, j - 1));
+                    break;
+                case SURFACE_BOTTOM: // nx=0, ny=-1, mx=-1, my=0
+                    // tangential: du/dy + dv/dx = 0
+                    u(i - 1, j - 1) = u(i - 1, j) + dy() / dx() * (v(i, j - 1) - v(i - 1, j - 1));
+                    // normal: p - 2/Re * dv/dy = 0
+                    p(i, j) = 2.0 / settings_.re * (v(i, j) - v(i, j - 1)) / dy();
+                    // continuity: du/dx + dv/dy = 0
+                    v(i, j - 1) = v(i, j) + dy() / dx() * (u(i, j) - u(i - 1, j));
+                    break;
+                    // ------------------------
+                case SURFACE_RIGHT_TOP: // nx=1/sqrt(2), ny=1/sqrt(2), mx=1/sqrt(2), my=-1/sqrt(2)
+                    // tangential:
+                    u(i - 1, j + 1) = u(i - 1, j) - dy() / dx() * (v(i, j) - v(i - 1, j));
+                    v(i + 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i, j) - u(i, j - 1));
+                    // continuity + tangential (first, red):
+                    u(i, j) = u(i - 1, j);
+                    v(i, j) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // normal:
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i - 1, j) - u(i, j - 1) - u(i - 1, j - 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
+                    break;
+                case SURFACE_RIGHT_BOTTOM: // nx=1/sqrt(2), ny=-1/sqrt(2), mx=-1/sqrt(2), my=-1/sqrt(2)
+                    // tangential:
+                    u(i - 1, j - 1) = u(i - 1, j) - dy() / dx() * (v(i, j - 1) - v(i - 1, j - 1));
+                    // continuity + tangential (first, red):
+                    u(i, j) = u(i - 1, j);
+                    v(i, j - 1) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // normal:
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i, j - 1) - v(i - 1, j) - v(i - 1, j - 1)) / (2.0 * dy()));
+                    break;
+                case SURFACE_LEFT_BOTTOM: // nx=-1/sqrt(2), ny=-1/sqrt(2), mx=-1/sqrt(2), my=1/sqrt(2)
+                    // tangential:
+                    // nothing :)
+                    // continuity + tangential (first, red):
+                    u(i - 1, j) = u(i, j);
+                    v(i, j - 1) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // normal:
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j + 1) - u(i - 1, j) - u(i - 1, j + 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
+                    break;
+                case SURFACE_LEFT_TOP: // nx=-1/sqrt(2), ny=1/sqrt(2), mx=1/sqrt(2), my=1/sqrt(2)
+                    // tangential:
+                    v(i - 1, j - 1) = v(i, j - 1) + dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
+                    // continuity + tangential (first, red):
+                    u(i - 1, j) = u(i, j);
+                    v(i, j) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // normal:
+                    p(i, j) = 1.0 / settings_.re *
+                              ((u(i, j) + u(i, j - 1) - u(i - 1, j) - u(i - 1, j - 1)) / (2.0 * dx()) +
+                               (v(i, j) + v(i + 1, j) - v(i, j - 1) - v(i + 1, j - 1)) / (2.0 * dy()));
+                    // ------------------------
+                case SURFACE_LEFT_RIGHT:
+                    // tangential:
+                    v(i - 1, j - 1) = v(i, j - 1) + dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
+                    v(i + 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i, j) - u(i, j - 1));
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((u(i, j) - u(i - 1, j)) / dx());
+                case SURFACE_TOP_BOTTOM:
+                    // tangential:
+                    u(i - 1, j + 1) = u(i - 1, j) - dy() / dx() * (v(i, j) - v(i - 1, j));
+                    u(i - 1, j - 1) = u(i - 1, j) + dy() / dx() * (v(i, j - 1) - v(i - 1, j - 1));
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
+                    break;
+                    // ------------------------
+                case SURFACE_LEFT_TOP_RIGHT:
+                    // tangential:
+                    v(i - 1, j - 1) = v(i, j - 1) + dx() / dy() * (u(i - 1, j) - u(i - 1, j - 1));
+                    v(i + 1, j - 1) = v(i, j - 1) - dx() / dy() * (u(i, j) - u(i, j - 1));
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    v(i, j) = v(i, j - 1) - dy() / dx() * (u(i, j) - u(i - 1, j));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((u(i, j) - u(i - 1, j)) / dx());
+                    break;
+                case SURFACE_TOP_RIGHT_BOTTOM:
+                    // tangential:
+                    u(i - 1, j + 1) = u(i - 1, j) - dy() / dx() * (v(i, j) - v(i - 1, j));
+                    u(i - 1, j - 1) = u(i - 1, j) + dy() / dx() * (v(i, j - 1) - v(i - 1, j - 1));
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    u(i, j) = u(i - 1, j) - dx() / dy() + (v(i, j) - v(i, j - 1));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
+                    break;
+                case SURFACE_RIGHT_BOTTOM_LEFT:
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    v(i, j - 1) = v(i, j) + dy() / dx() * (u(i, j) - u(i - 1, j));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((u(i, j) - u(i - 1, j)) / dx());
+                    break;
+                case SURFACE_BOTTOM_LEFT_TOP:
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity (blue)
+                    u(i - 1, j) = u(i, j) + dx() / dy() + (v(i, j) - v(i, j - 1));
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
+                    break;
+                    // ------------------------
+                case SURFACE_TOP_RIGHT_BOTTOM_LEFT:
+                    // driven by gravity:
+                    u(i, j) = u(i, j) + dt * settings_.g[0];
+                    u(i - 1, j) = u(i - 1, j) + dt * settings_.g[0];
+                    // driven by gravity:
+                    v(i, j) = v(i, j) + dt * settings_.g[1];
+                    v(i, j - 1) = v(i, j - 1) + dt * settings_.g[1];
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j + 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i - 1, j - 1) = u(i - 1, j);
+                    v(i - 1, j - 1) = v(i, j - 1);
+                    // continuity + tangential (second, gray):
+                    u(i, j + 1) = u(i, j);
+                    v(i + 1, j) = v(i, j);
+                    // continuity + tangential (second, gray):
+                    u(i, j - 1) = u(i, j);
+                    v(i + 1, j - 1) = v(i, j - 1);
+                    // normal:
+                    p(i, j) = 2.0 / settings_.re * ((v(i, j) - v(i, j - 1)) / dy());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
 
 /**
  * mesh information
@@ -1429,15 +1733,15 @@ int StaggeredGrid::qInteriorJEnd() const {
 };
 
 /**
- * get reference to field variable t
- * @return reference to field variable t
+ * get reference to field variable q
+ * @return reference to field variable q
  */
 const FieldVariable &StaggeredGrid::q() const {
     return q_;
 };
 
 /**
- * evaluate field variable q in an element (i,j)
+ * evaluate field variable temperature souce term q in an element (i,j)
  * @param i: position in x direction in discretized grid
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
@@ -1451,7 +1755,7 @@ double StaggeredGrid::q(int i, int j) const {
 };
 
 /**
- * evaluate field variable q in an element (i,j)
+ * evaluate field variable temperature souce term q in an element (i,j)
  * @param i: position in x direction in discretized grid
  * @param j: position in y direction in discretized grid
  * @return field variable q in an element (i,j)
@@ -1462,4 +1766,188 @@ double &StaggeredGrid::q(int i, int j) {
     assert((qJBegin() <= j) && (j <= qJEnd()) && "Q j failed");
 #endif
     return q_(i - qIBegin(), j - qJBegin());
+};
+
+/**
+ * free surface
+ */
+
+/**
+ * get number of particles
+ * @return number of particles
+ */
+int StaggeredGrid::particleNumber() const {
+    return particles_.number();
+};
+/**
+ * get list of particles
+ * @return particles
+ */
+const Particle2D &StaggeredGrid::particle() const {
+
+    return particles_;
+}
+
+/**
+ * get particle position in x direction
+ * @param k: index of the particle
+ * @return particle position in x direction
+ */
+
+double StaggeredGrid::particlePosX(int k) const{
+
+    return particles_(k,0);
+};
+
+/**
+ * get particle position in x direction
+ * @param k: index of the particle
+ * @return particle position in x direction
+ */
+double &StaggeredGrid::particlePosX(int k){
+    return particles_(k,0);
+};
+
+/**
+ * get particle position in y direction
+ * @param k: index of the particle
+ * @return particle position in y direction
+ */
+double StaggeredGrid::particlePosY(int k) const{
+
+    return particles_(k,1);
+};
+
+/**
+ * get particle position in y direction
+ * @param k: index of the particle
+ * @return particle position in y direction
+ */
+double &StaggeredGrid::particlePosY(int k) {
+
+    return particles_(k, 1);
+};
+
+/**
+ * split particle index k into indices i and j for x and y direction, respectively.
+ * @param k: index of the particle
+ * @return tuple of i and j for the particle position on a two dimensional grid
+ */
+std::array<int, 2> StaggeredGrid::particleCell(int k) const {
+#ifndef NDEBUG
+    assert((0 <= k) && (k <= particleNumber()) && "particle i failed in const");
+#endif
+    int i = (int) (particlePosX(k) / dx());
+    int j = (int) (particlePosY(k) / dy());
+
+    return {i, j};
+}
+
+/**
+ * set fluid, free and surface cells accordingly. See lecture notes for a detailed description of the surface cases.
+ */
+void StaggeredGrid::updateCellTypes() {
+    // Reset all fluid cells to free
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) == FLUID){
+                marker(i, j) = FREE;
+            }
+        }
+    }
+    // Detect all cells containing any particles and define them as fluid
+    for (int k = 0; k < particleNumber(); k++){
+        std::array<int, 2> indices = particleCell(k);
+        marker(indices[0], indices[1]) = MARKER::FLUID;
+    }
+
+    // Detect and mark the surface cells
+    for (int i = pIBegin(); i < pIEnd(); i++) {
+        for (int j = pJBegin(); j < pJEnd(); j++) {
+            if (marker(i, j) != FLUID){
+                continue;
+            }
+            int emptyCells = countFreeNeighbors(i, j);
+            switch (emptyCells) {
+                case 0:
+                    marker(i, j) = FLUID;
+                    break;
+                case 1:
+                    if (marker(i, j + 1) == FREE)
+                        marker(i, j) = SURFACE_TOP;
+                    else if (marker(i, j - 1) == FREE)
+                        marker(i, j) = SURFACE_BOTTOM;
+                    else if (marker(i + 1, j) == FREE)
+                        marker(i, j) = SURFACE_RIGHT;
+                    else if (marker(i - 1, j) == FREE)
+                        marker(i, j) = SURFACE_LEFT;
+                    break;
+                case 2:
+                    if (marker(i, j + 1) == FREE) {
+                        if (marker(i + 1, j) == FREE) {
+                            marker(i, j) = SURFACE_RIGHT_TOP;
+                        }
+                        else if (marker(i - 1, j) == FREE) {
+                            marker(i, j) = SURFACE_LEFT_TOP;
+                        }
+                        else
+                            marker(i, j) = SURFACE_TOP_BOTTOM;
+                    }
+                    else if (marker(i, j - 1) == FREE) {
+                        if (marker(i + 1, j) == FREE) {
+                            marker(i, j) = SURFACE_RIGHT_BOTTOM;
+                        }
+                        else if (marker(i - 1, j) == FREE) {
+                            marker(i, j) = SURFACE_LEFT_BOTTOM;
+                        }
+                    }
+                    else {
+                        marker(i, j) = SURFACE_LEFT_RIGHT;
+                    }
+                    break;
+                case 3:
+                    if (marker(i, j + 1) == FLUID)
+                        marker(i, j) = SURFACE_RIGHT_BOTTOM_LEFT;
+                    else if (marker(i, j - 1) == FLUID)
+                        marker(i, j) = SURFACE_LEFT_TOP_RIGHT;
+                    else if (marker(i + 1, j) == FLUID)
+                        marker(i, j) = SURFACE_TOP_RIGHT_BOTTOM;
+                    else
+                        marker(i, j) = SURFACE_BOTTOM_LEFT_TOP;
+                    break;
+                default: // 4
+                    marker(i, j) = SURFACE_TOP_RIGHT_BOTTOM_LEFT;
+                    break;
+            }
+        }
+    }
+};
+
+/**
+ * gets number of free neighbors a cell has. Diagonal neighbours are irrelevant.
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return number of free neighbor cells
+ */
+int StaggeredGrid::countFreeNeighbors(int i, int j) {
+    int count = 0;
+    if (marker(i, j + 1) == FREE)
+        count++;
+    if (marker(i, j - 1) == FREE)
+        count++;
+    if (marker(i + 1, j) == FREE)
+        count++;
+    if (marker(i - 1, j) == FREE)
+        count++;
+    return count;
+};
+
+/**
+ * check if cell is inner fluid cell (has no free neighbor cell)
+ * @param i: position in x direction in discretized grid
+ * @param j: position in y direction in discretized grid
+ * @return boolean: true - is inner fluid cell or false (is not inner fluid cell)
+ */
+bool StaggeredGrid::isInnerFluid(int i, int j) {
+    return (marker(i, j) == FLUID && countFreeNeighbors(i, j) == 0);
 };

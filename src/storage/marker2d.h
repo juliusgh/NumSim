@@ -17,7 +17,22 @@ enum MARKER {
     OBSTACLE_LEFT_TOP, // 10
     OBSTACLE_RIGHT_TOP, // 11
     OBSTACLE_LEFT_BOTTOM, // 12
-    OBSTACLE_RIGHT_BOTTOM // 13
+    OBSTACLE_RIGHT_BOTTOM, // 13
+    SURFACE_LEFT, // 14
+    SURFACE_RIGHT, // 15
+    SURFACE_TOP, // 16
+    SURFACE_BOTTOM, // 17
+    SURFACE_LEFT_TOP, // 18
+    SURFACE_RIGHT_TOP, // 19
+    SURFACE_LEFT_BOTTOM, // 20
+    SURFACE_RIGHT_BOTTOM, // 21
+    SURFACE_TOP_BOTTOM, // 22
+    SURFACE_LEFT_RIGHT, // 23
+    SURFACE_LEFT_TOP_RIGHT, // 24
+    SURFACE_TOP_RIGHT_BOTTOM, // 25
+    SURFACE_RIGHT_BOTTOM_LEFT, // 26
+    SURFACE_BOTTOM_LEFT_TOP, // 27
+    SURFACE_TOP_RIGHT_BOTTOM_LEFT // 28
 };
 
 /**
@@ -57,10 +72,14 @@ public:
 
     void print() const;
 
-    //! set all data of 2D array to FLUID cells
+    /**
+     * set all data of 2D array to FLUID cells
+     */
     void setToFluid();
 
-    //! return data vector
+    /**
+     * return data vector
+     */
     void *data();
 
 protected:

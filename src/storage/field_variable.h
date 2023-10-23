@@ -14,8 +14,11 @@
 
 class FieldVariable : public Array2D {
 public:
-    /*
+    /**
      * constructor
+     * @param size: size of field variable
+     * @param origin: origin of the coordinate system
+     * @param meshWidth: width of cells in both directions
      */
     FieldVariable(std::array<int, 2> size,
                   std::array<double, 2> origin,

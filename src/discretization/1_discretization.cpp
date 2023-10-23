@@ -2,8 +2,9 @@
 
 /**
  * Calculate derivatives needed for velocity calculations
- * @param nCells: number of inner cells
+ * @param partitioning: encapsulate functionality corresponding to subdomain handling
  * @param meshWidth: width of grid cell in one direction
+ * @param settings: information about the settings received from parameter file
  */
 
 Discretization::Discretization(std::shared_ptr<Partitioning> partitioning,

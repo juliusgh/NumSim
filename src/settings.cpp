@@ -67,7 +67,6 @@ void Settings::loadFromFile(string filename) {
             if (!domainfile.is_open()) {
                 throw std::domain_error("could not open domain file. Exiting simulation:(");
             } else {
-                std::cout << "wrong loop" << std::endl;
                 int lineCount = 0;
                 int linesize = 0;
                 for (int j = 0;; j++) {

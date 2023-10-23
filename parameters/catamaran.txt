@@ -1,10 +1,10 @@
 # Settings file for numsim program
 # Run from build directory:
-# ./src/numsim  ../parameters/lid_driven_cavity_parameterfile.txt
+# ./src/numsim  ../parameters/catamaran_color_narrow_parameterfile.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
-domainFile = domains/lid_driven_cavity.txt
+domainFile = domains/catamaran_color_narrow.txt
 
 # Problem description
 endTime = 100.0        # duration of the simulation
@@ -18,8 +18,8 @@ dirichletBottomX = 0
 dirichletBottomY = 0
 dirichletTopX    = 0
 dirichletTopY    = 0
-dirichletLeftX   = 0
-dirichletLeftY   = 0
+dirichletLeftX = 1.0 # here we have inflow
+dirichletLeftY = 0.0 # here we have inflow
 dirichletRightX  = 0
 dirichletRightY  = 0
 
@@ -33,13 +33,13 @@ maximumDt = 0.5       # maximum values for time step width
 # Temperature parameters
 beta = 0.2            # volume expansion coefficient
 initialTemp = 0    # initial temperature
-setFixedTempBottom = true
-tempBcBottom = 10    # prescribed values of tb or tn at bottom of domain
+setFixedTempBottom = false
+tempBcBottom = 0    # prescribed values of tb or tn at bottom of domain
 setFixedTempTop = false
 tempBcTop = 0       # prescribed values of tb or tn at top of domain
-setFixedTempLeft = true
+setFixedTempLeft = false
 tempBcLeft = 0     # prescribed values of tb or tn at left of domain
-setFixedTempRight = true
+setFixedTempRight = false
 tempBcRight = 0     # prescribed values of tb or tn at right of domain
 
 # Solver parameters

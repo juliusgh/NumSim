@@ -1,15 +1,15 @@
 # Settings file for numsim program
 # Run from build directory:
-# ./src/numsim  ../parameters/heart_parameterfile.txt
+# ./src/numsim  ../parameters/simtech_obstacle_parameterfile.txt
 
 # Domain file location and scaling factor for physical domain - this needs to be specified first
 domain_scaling = 10.0 # pixels per 1 physical size unit. physicalsize = nCells / domain_scaling
-domainFile = domains/heart.txt
+domainFile = domains/simtech_obstacle.txt
 
 # Problem description
-endTime = 100.0        # duration of the simulation
+endTime = 20.0        # duration of the simulation
 re = 1000             # Reynolds number
-pr = 1                # Prandtl number
+pr = 7                # Prandtl number
 gX = 0.0              # external forces, set to (gX,gY) = (0,-9.81) to account for gravity
 gY = 0.0
 

@@ -47,8 +47,6 @@ protected:
 
     void applyBoundaryValuesRight();
 
-    void setInitialValues();
-
     /**
      * Set the boundary values of the preliminary velocities (u, v)
      * 
@@ -83,10 +81,14 @@ protected:
      */
     virtual void computeVelocities();
 
+    virtual void trackParticles();
+
     /**
      * Compute new temperature t
      */
     virtual void computeTemperature();
+
+
 
     Settings settings_;
     std::shared_ptr<Discretization> discretization_;

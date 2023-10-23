@@ -11,7 +11,6 @@
  * It implements the time stepping scheme, computes all the terms and calls the pressure solver.
  */
 void Computation::initialize(string filename) {
-    std::cout << "I am not parallel" << std::endl;
     settings_ = Settings();
     // Load settings from file
     settings_.loadFromFile(filename);
@@ -60,17 +59,16 @@ void Computation::runSimulation() {
     double time = 0.0;
     double outputInterval = 1.0 / 50;
     double lastOutput = -outputInterval;
-    setInitialValues();
     while (time < settings_.endTime) {
         t_iter++;
 
         /*
-        * 1) Apply boundary values (for u, v, F, G)
+        * 0) Apply boundary values (for u, v, F, G)
         */
         applyBoundaryValues();
 
         /*
-        * 2) Compute the next time step width
+        * 1) Compute the next time step width dt
         */
         computeTimeStepWidth();
         // endTime should be reached exactly:
@@ -80,41 +78,59 @@ void Computation::runSimulation() {
         time += dt_;
 
         /*
-         * 2.5) Compute Temperature t
+         * 2) Compute Temperature t
          */
         computeTemperature();
 
         /*
-        * 3) Compute preliminary velocities (F, G)
+        * 3) Compute preliminary velocities F, G
         */
         computePreliminaryVelocities();
+        //TODO at the surface of all inner ﬂuid cells, i.e., not directly at the free surface
 
         /*
         * 4) Compute the right hand side (rhs)
         */
         computeRightHandSide();
+        //TODO in all inner ﬂuid cells only
 
         /*
-        * 5) Compute the pressure (p) by solving the Poisson equation
+        * 5) Compute the pressure p by solving the Poisson equation
         */
         computePressure();
 
+        // TODO: in all inner ﬂuid cells, no update of pressure values at ,surface cells after each iteration required
+
         /*
-        * 6) Update the velocities (u, v)
+        * 6) Update the velocities u, v
         */
         updateLastVelocities();
         computeVelocities();
+
+        // TODO: in all following steps activate the free surface components, when it is completed
+        // 7) Re-set all u, v and p values at the free surface according to the free surface conditions
+        //discretization_->setSurfaceValues(dt_);
+
+        // 8) Re-set all u, v and p at obstacles according to no-slip boundary condition
         discretization_->setObstacleValues();
 
-        /*
-        * 7) Output debug information and simulation results
-        */
+        // 9) Move particles
+        //trackParticles();
+
+        // 10) Update cell markers/types
+        //discretization_->updateCellTypes();
+
+        // 11) Re-set all u, v and p values at the free surface according to the free surface conditions
+        //discretization_->setSurfaceValues(dt_);
+
+        // 12) Re-set all u, v and p at obstacles according to no-slip boundary condition
+        //discretization_->setObstacleValues();
+
+        // 13) Output debug information and simulation results
 #ifndef NDEBUG
         cout << std::fixed << "time step " << setw(4) <<  t_iter << ", t: " << setw(7) << setprecision(4) << time << "/" << setw(2) << setprecision(0) << settings_.endTime << ", dt: " << setw(5) << setprecision(4) << dt_ <<
              ", res. " << setprecision(3) << std::scientific << sqrt(pressureSolver_->residualNorm()) << std::fixed <<", solver iterations: " << setw(6) << pressureSolver_->iterations()
              << endl;
-        //outputWriterText_->writePressureFile();
-        //outputWriterText_->writeFile(time);
 #endif
         if (time - lastOutput >= outputInterval) {
             outputWriterParaview_->writeFile(time);
@@ -124,7 +140,7 @@ void Computation::runSimulation() {
 };
 
 /**
- * Set the initial values of the temperature t
+ * Set boundary values for velocity and temperature.
  */
 void Computation::applyBoundaryValues() {
     discretization_->applyBoundaryVelocities();
@@ -132,18 +148,8 @@ void Computation::applyBoundaryValues() {
 };
 
 /**
- * Set the boundary values of the velocities (u, v)
- * 
- * Left and right boundaries should overwrite bottom and top boundaries
+ * Set velocity and temperature values for the top boundaries.
  */
-void Computation::setInitialValues() {
-    for (int i = discretization_->tIBegin(); i < discretization_->tIEnd(); i++) {
-        for (int j = discretization_->tJBegin(); j < discretization_->tJEnd(); j++) {
-            discretization_->t(i, j) = settings_.initialTemp;
-        }
-    }
-};
-
 void Computation::applyBoundaryValuesTop() {
     // set boundary values for u at top side
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -181,6 +187,9 @@ void Computation::applyBoundaryValuesTop() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the bottom boundaries.
+ */
 void Computation::applyBoundaryValuesBottom() {
     // set boundary values for u at bottom side
     for (int i = discretization_->uIBegin(); i < discretization_->uIEnd(); i++) {
@@ -218,6 +227,9 @@ void Computation::applyBoundaryValuesBottom() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the left boundaries.
+ */
 void Computation::applyBoundaryValuesLeft() {
     // set boundary values for u at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
@@ -258,6 +270,9 @@ void Computation::applyBoundaryValuesLeft() {
     }
 };
 
+/**
+ * Set temperature and velocity values for the right boundaries.
+ */
 void Computation::applyBoundaryValuesRight() {
     // set boundary values for u at left and right side (higher priority)
     for (int j = discretization_->uJBegin(); j < discretization_->uJEnd(); j++) {
@@ -299,7 +314,7 @@ void Computation::applyBoundaryValuesRight() {
 };
 
 /**
- * Set the boundary values of the preliminary velocities (u, v)
+ * Set the boundary values of the preliminary velocities (F, G)
  * 
  * Left and right boundaries should overwrite bottom and top boundaries
  */
@@ -389,6 +404,9 @@ void Computation::computePreliminaryVelocities() {
     // Compute F in the interior of the domain
     for (int i = discretization_->uInteriorIBegin(); i < discretization_->uInteriorIEnd(); i++) {
         for (int j = discretization_->uInteriorJBegin(); j < discretization_->uInteriorJEnd(); j++) {
+            if (!discretization_->isInnerFluid(i, j)) {
+                continue;
+            }
             double lap_u = discretization_->computeD2uDx2(i, j) + discretization_->computeD2uDy2(i, j);
             double conv_u = discretization_->computeDu2Dx(i, j) + discretization_->computeDuvDy(i, j);
             double f_tilde = discretization_->u(i, j) + dt_ * (lap_u / settings_.re - conv_u + settings_.g[0]);
@@ -400,6 +418,9 @@ void Computation::computePreliminaryVelocities() {
     // Compute G in the interior of the domain
     for (int i = discretization_->vInteriorIBegin(); i < discretization_->vInteriorIEnd(); i++) {
         for (int j = discretization_->vInteriorJBegin(); j < discretization_->vInteriorJEnd(); j++) {
+            if (!discretization_->isInnerFluid(i, j)) {
+                continue;
+            }
             double lap_v = discretization_->computeD2vDx2(i, j) + discretization_->computeD2vDy2(i, j);
             double conv_v = discretization_->computeDv2Dy(i, j) + discretization_->computeDuvDx(i, j);
             double g_tilde = discretization_->v(i, j) + dt_ * (lap_v / settings_.re - conv_v + settings_.g[1]);
@@ -410,19 +431,22 @@ void Computation::computePreliminaryVelocities() {
 };
 
 /**
- * Compute the pressure p by solving the Poisson equation
+ * Compute the pressure p by solving the Poisson equation using a pressure solver
  */
 void Computation::computePressure() {
     pressureSolver_->solve();
 };
 
 /**
- * Compute the right hand side rhs of the pressure Poisson equation
+ * Compute the right hand side (rhs) of the pressure Poisson equation
  */
 void Computation::computeRightHandSide() {
     // Compute rhs in the interior of the domain using finite differences
     for (int i = discretization_->rhsInteriorIBegin(); i < discretization_->rhsInteriorIEnd(); i++) {
         for (int j = discretization_->rhsInteriorJBegin(); j < discretization_->rhsInteriorJEnd(); j++) {
+            if (!discretization_->isInnerFluid(i, j)) {
+                continue;
+            }
             double fx = (discretization_->f(i, j) - discretization_->f(i - 1, j)) / discretization_->dx();
             double gy = (discretization_->g(i, j) - discretization_->g(i, j - 1)) / discretization_->dy();
             discretization_->rhs(i, j) = (fx + gy) / dt_;
@@ -488,6 +512,9 @@ void Computation::computeVelocities() {
     }
 };
 
+/**
+ * compute new temperature values (t)
+ */
 void Computation::computeTemperature() {
     for (int i = discretization_->tInteriorIBegin(); i < discretization_->tInteriorIEnd(); i++) {
         for (int j = discretization_->tInteriorJBegin(); j < discretization_->tInteriorJEnd(); j++) {
@@ -500,3 +527,16 @@ void Computation::computeTemperature() {
         }
     }
 };
+/**
+ * update all particle positions using interpolation
+ */
+void Computation::trackParticles() {
+    // Iterate over all particles to track their position
+    for (int k = 0; k < discretization_->particleNumber(); k++){
+        double uInterp = discretization_->u().interpolateAt(discretization_->particlePosX(k), discretization_->particlePosY(k));
+        double vInterp = discretization_->v().interpolateAt(discretization_->particlePosX(k), discretization_->particlePosY(k));
+        discretization_->particlePosX(k) = discretization_->particlePosX(k) + dt_ * uInterp;
+        discretization_->particlePosY(k) = discretization_->particlePosY(k) + dt_ * vInterp;
+    }
+}
+
